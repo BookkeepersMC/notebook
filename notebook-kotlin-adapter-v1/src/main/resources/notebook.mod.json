@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-kotlin-adapter-v1",
+  "name": "Notebook Kotlin Adapter (v1)",
+  "version": "${version}",
+  "languageAdapters": {
+    "kotlin": "com.bookkeepersmc.notebook.kotlin.adapter.KotlinAdapter"
+  },
+  "depends": {
+    "notebookloader": ">=0.3.0"
+  },
+  "custom": {
+    "notebook-api:module-lifecycle": "stable"
+  }
+}

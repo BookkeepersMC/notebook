@@ -1,0 +1,44 @@
+version = getSubprojectVersion(project)
+
+moduleDependencies(project, [
+    'notebook-api-base',
+	'notebook-lifecycle-events-v1'
+])
+
+sourceSets {
+	main {
+		resources {
+			srcDirs += [
+			    'src/generated/resources'
+			]
+		}
+	}
+	datagen {
+		compileClasspath += main.compileClasspath
+		runtimeClasspath += main.runtimeClasspath
+		compileClasspath += main.output
+		runtimeClasspath += main.output
+	}
+}
+
+dependencies {
+	datagenImplementation project(path: ":notebook-datagen-api-v1", configuration: "namedElements")
+}
+
+loom {
+	runs {
+		datagen {
+			inherit server
+			name "Common Tags Data Generation"
+			vmArg "-Dnotebook.datagen"
+			vmArg "-Dnotebook.datagen.output-dir=${file("src/generated/resources")}"
+			vmArg "-Dnotebook.datagen.strict-validation"
+
+			ideConfigGenerated = true
+			runDir "build/datagen"
+			source sourceSets.datagen
+		}
+	}
+}
+
+generateResources.dependsOn runDatagen

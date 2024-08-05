@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-common-tags-v1-datagen",
+  "name": "Notebook Common Tags Datagen",
+  "version": "1.0.0",
+  "environment": "*",
+  "depends": {
+    "notebookloader": ">=0.3.0",
+    "minecraft": ">=1.18.2"
+  },
+  "custom": {
+    "notebook-api:module-lifecycle": "stable"
+  },
+  "entrypoints": {
+    "datagen": [
+      "com.bookkeepersmc.notebook.impl.tag.common.datagen.DatagenEntrypoint"
+    ]
+  }
+}

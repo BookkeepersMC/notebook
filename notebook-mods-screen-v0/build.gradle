@@ -1,0 +1,9 @@
+version = getSubprojectVersion(project)
+
+moduleDependencies(project, [
+    'notebook-api-base',
+    'notebook-resource-loader-v0',
+    'notebook-screen-api-v1',
+    'notebook-keybind-api-v1',
+    'notebook-lifecycle-events-v1'
+])

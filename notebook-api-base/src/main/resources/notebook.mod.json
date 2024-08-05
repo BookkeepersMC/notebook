@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-api-base",
+  "name": "Notebook API Base",
+  "version": "${version}",
+  "environment": "*",
+  "depends": {
+    "notebookloader": ">=0.3.0"
+  },
+  "custom": {
+    "notebook-api:module-lifecycle": "stable"
+  }
+}

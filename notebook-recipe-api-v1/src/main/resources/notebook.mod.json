@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-recipe-api-v1",
+  "name": "notebook Recipe API (v1)",
+  "version": "${version}",
+  "environment": "*",
+  "mixins": [
+    "notebook-recipe-api-v1.mixins.json"
+  ],
+  "accessWidener": "notebook-recipe-api-v1.accesswidener",
+  "depends": {
+    "notebookloader": ">=0.3.0",
+    "notebook-networking-api-v1": "*"
+  },
+  "entrypoints": {
+    "main": [
+      "com.bookkeepersmc.notebook.impl.recipe.CustomIngredientInit",
+      "com.bookkeepersmc.notebook.impl.recipe.CustomIngredientSync"
+    ],
+    "client": [
+      "com.bookkeepersmc.notebook.impl.recipe.client.CustomIngredientSyncClient"
+    ]
+  },
+  "custom": {
+    "notebook-api:module-lifecycle": "stable",
+    "loom:injected_interfaces": {
+      "net/minecraft/class_1856": [
+        "com/bookkeepersmc/notebook/api/recipe/v1/NotebookIngredient"
+      ]
+    }
+  }
+}

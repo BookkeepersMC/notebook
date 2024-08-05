@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-lifecycle-events-v1",
+  "name": "Notebook Lifecycle Events (v1)",
+  "version": "${version}",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.bookkeepersmc.notebook.impl.event.lifecycle.LifecycleEventsImpl"
+    ],
+    "client": [
+      "com.bookkeepersmc.notebook.impl.client.event.lifecycle.ClientLifecycleEventsImpl"
+    ]
+  },
+  "mixins": [
+    "notebook-lifecycle-events-v1.mixins.json",
+    {
+      "config": "notebook-lifecycle-events-v1.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "notebookloader": ">=0.3.0",
+    "notebook-api-base": "*"
+  },
+  "custom": {
+    "notebook-api:module-lifecycle": "stable"
+  },
+  "accessWidener": "notebook-lifecycle-events-v1.accesswidener"
+}

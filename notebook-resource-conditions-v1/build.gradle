@@ -1,0 +1,5 @@
+version = getSubprojectVersion(project)
+
+loom {
+	accessWidenerPath = file("src/main/resources/notebook-resource-conditions-v1.accesswidener")
+}

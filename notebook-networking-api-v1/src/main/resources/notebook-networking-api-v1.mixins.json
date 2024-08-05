@@ -1,0 +1,25 @@
+{
+  "required": true,
+  "package": "com.bookkeepersmc.notebook.mixin.networking",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "PacketCodecDispatcherMixin",
+    "ClientConnectionMixin",
+    "CommandManagerMixin",
+    "CustomPayloadC2SPacketMixin",
+    "CustomPayloadS2CPacketMixin",
+    "CustomPayloadPacketCodecMixin",
+    "EntityTrackerEntryMixin",
+    "ServerCommonNetworkHandlerMixin",
+    "ServerConfigurationNetworkHandlerMixin",
+    "ServerLoginNetworkHandlerMixin",
+    "ServerPlayNetworkHandlerMixin",
+    "accessor.EntityTrackerAccessor",
+    "accessor.ServerCommonNetworkHandlerAccessor",
+    "accessor.ServerLoginNetworkHandlerAccessor",
+    "accessor.ServerChunkLoadingManagerAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

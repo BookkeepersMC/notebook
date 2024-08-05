@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-networking-api-v1",
+  "name": "Notebook Networking API (v1)",
+  "version": "${version}",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.bookkeepersmc.notebook.impl.networking.CommonPacketsImpl::init",
+      "com.bookkeepersmc.notebook.impl.networking.NetworkingImpl::init"
+    ],
+    "client": [
+      "com.bookkeepersmc.notebook.impl.networking.client.ClientNetworkingImpl::clientInit"
+    ]
+  },
+  "depends": {
+    "notebookloader": ">=0.3.0",
+    "notebook-api-base": "*"
+  },
+  "mixins": [
+    "notebook-networking-api-v1.mixins.json",
+    {
+      "config": "notebook-networking-api-v1.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "custom": {
+    "notebook-api:module-lifecycle": "stable",
+    "loom:injected_interfaces": {
+      "net/minecraft/class_8610": [
+        "com/bookkeepersmc/notebook/api/networking/v1/NotebookServerConfigurationNetworkHandler"
+      ]
+    }
+  }
+}

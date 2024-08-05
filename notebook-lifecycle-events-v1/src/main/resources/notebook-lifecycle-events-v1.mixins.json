@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "package": "com.bookkeepersmc.notebook.mixin.event.lifecycle",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "ChunkStatusTasksMixin",
+    "ServerLevelEntityCallbacksMixin",
+    "ReloadableServerResourcesMixin",
+    "LivingEntityMixin",
+    "MinecraftServerMixin",
+    "PlayerListMixin",
+    "ServerLevelMixin",
+    "ChunkMapMixin",
+    "LevelMixin"
+  ],
+  "server": [
+    "server.LevelChunkMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1,
+    "maxShiftBy": 3
+  }
+}

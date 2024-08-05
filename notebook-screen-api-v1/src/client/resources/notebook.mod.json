@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-screen-api-v1",
+  "name": "Notebook Screen API (v1)",
+  "version": "${version}",
+  "environment": "client",
+  "depends": {
+    "notebookloader": ">=0.3.0",
+    "notebook-api-base": "*"
+  },
+  "mixins": [
+    "notebook-screen-api-v1.mixins.json"
+  ],
+  "custom": {
+    "notebook-api:module-lifecycle": "stable"
+  }
+}

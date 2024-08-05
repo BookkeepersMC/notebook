@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "com.bookkeepersmc.notebook.mixin.mod.screen",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "AccessorGridWidget",
+    "MixinTitleScreen",
+    "MixinGameMenu"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

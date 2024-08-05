@@ -1,0 +1,11 @@
+version = getSubprojectVersion(project)
+
+loom {
+	accessWidenerPath = file("src/main/resources/notebook-resource-loader-v0.accesswidener")
+}
+
+testDependencies(project, [
+    ':notebook-lifecycle-events-v1',
+	':notebook-api-base',
+	':notebook-resource-loader-v0'
+])

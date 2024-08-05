@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-resource-loader-v0",
+  "name": "Notebook Resource Loader (v0)",
+  "version": "${version}",
+  "environment": "*",
+  "depends": {
+    "notebookloader": ">=0.3.0"
+  },
+  "mixins": [
+    "notebook-resource-loader-v0.mixins.json",
+    {
+      "config": "notebook-resource-loader-v0.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "accessWidener": "notebook-resource-loader-v0.accesswidener",
+  "custom": {
+    "notebook-api:module-lifecycle": "stable"
+  }
+}

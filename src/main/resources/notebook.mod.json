@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-api",
+  "name": "Notebook API",
+  "version": "${version}",
+  "environment": "*",
+  "authors": [
+    "CrypticVerse"
+  ]
+}

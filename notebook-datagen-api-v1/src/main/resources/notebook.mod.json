@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-data-generation-api-v1",
+  "name": "Notebook Data Generation API (v1)",
+  "version": "${version}",
+  "environment": "*",
+  "depends": {
+    "notebookloader": ">=0.3.0"
+  },
+  "mixins": [
+    "notebook-data-generation-api-v1.mixins.json",
+    {
+      "config": "notebook-data-generation-api-v1.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "accessWidener": "notebook-data-generation-api-v1.accesswidener",
+  "custom": {
+    "notebook-api:module-lifecycle": "stable",
+    "loom:injected_interfaces": {
+      "net/minecraft/class_7788": [
+        "com/bookkeepersmc/notebook/api/datagen/v1/loot/NotebookBlockLootTableGenerator"
+      ]
+    }
+  }
+}

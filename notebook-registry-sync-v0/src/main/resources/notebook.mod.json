@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-registry-sync-v0",
+  "name": "Notebook Registry Sync (v0)",
+  "version": "${version}",
+  "environment": "*",
+  "depends": {
+    "notebookloader": ">=0.3.0"
+  },
+  "mixins": [
+    "notebook-registry-sync-v0.mixins.json",
+    {
+      "config": "notebook-registry-sync-v0.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "entrypoints": {
+    "main": [
+      "com.bookkeepersmc.notebook.impl.registry.sync.RegistrySyncInit"
+    ],
+    "client": [
+      "com.bookkeepersmc.notebook.impl.client.registry.sync.RegistrySyncClientInit"
+    ]
+  },
+  "accessWidener": "notebook-registry-sync-v0.accesswidener",
+  "custom": {
+    "notebook-api:module-lifecycle": "stable"
+  }
+}

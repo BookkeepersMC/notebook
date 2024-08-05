@@ -1,0 +1,10 @@
+version = getSubprojectVersion(project)
+
+loom {
+	accessWidenerPath = file("src/main/resources/notebook-registry-sync-v0.accesswidener")
+}
+
+moduleDependencies(project, [
+    'notebook-api-base',
+	'notebook-networking-api-v1'
+])

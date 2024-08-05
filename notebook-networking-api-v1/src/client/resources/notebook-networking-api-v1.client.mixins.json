@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "package": "com.bookkeepersmc.notebook.mixin.networking.client",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "accessor.ClientCommonNetworkHandlerAccessor",
+    "accessor.ClientConfigurationNetworkHandlerAccessor",
+    "accessor.ClientLoginNetworkHandlerAccessor",
+    "accessor.ConnectScreenAccessor",
+    "accessor.MinecraftClientAccessor",
+    "ClientCommonNetworkHandlerMixin",
+    "ClientConfigurationNetworkHandlerMixin",
+    "ClientLoginNetworkHandlerMixin",
+    "ClientPlayNetworkHandlerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

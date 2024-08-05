@@ -1,0 +1,5 @@
+version = getSubprojectVersion(project)
+
+moduleDependencies(project, [
+    'notebook-api-base'
+])

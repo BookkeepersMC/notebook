@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "package": "com.bookkeepersmc.notebook.mixin.datagen",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "DataProviderMixin",
+    "ModelProviderMixin",
+    "TagBuilderMixin",
+    "TagsProviderMixin",
+    "loot.BlockLootTableGeneratorAccessor",
+    "loot.BlockLootSubProviderMixin"
+  ],
+  "server": [
+    "server.MainMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

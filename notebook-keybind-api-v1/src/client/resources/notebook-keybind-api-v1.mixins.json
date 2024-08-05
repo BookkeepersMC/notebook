@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "com.bookkeepersmc.notebook.mixin.client.keybind",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "KeyMappingAccessor",
+    "OptionsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

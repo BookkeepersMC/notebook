@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "package": "com.bookkeepersmc.notebook.mixin.registry.sync",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "BootstrapMixin",
+    "BuiltInRegistriesMixin",
+    "ChunkSerializerMixin",
+    "DebugChunkGeneratorAccessor",
+    "IdMapperMixin",
+    "MainMixin",
+    "MappedRegistryMixin",
+    "RegistriesAccessor",
+    "RegistriesMixin",
+    "RegistryDataLoaderMixin",
+    "RegistryPatchGeneratorMixin",
+    "RegistrySynchronizationMixin",
+    "WorldLoaderMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

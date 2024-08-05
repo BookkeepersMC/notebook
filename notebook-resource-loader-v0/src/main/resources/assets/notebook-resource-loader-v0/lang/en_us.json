@@ -1,0 +1,9 @@
+{
+  "pack.description.modResources": "Mod resources.",
+  "pack.source.notebookmod": "Notebook mod",
+  "pack.source.builtinMod": "built-in: %s",
+  "pack.name.notebookMod": "Notebook Mod \"%s\"",
+  "pack.name.notebookMods": "Notebook Mods",
+  "pack.name.notebookMod.subPack": "Notebook Mod \"%s\" (%s)",
+  "commands.datapack.notebook.internal": "Cannot enable or disable Notebook internal pack \"%s\"."
+}

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-keybind-api-v1",
+  "name": "Notebook Keybnd API (v1)",
+  "version": "${version}",
+  "environment": "client",
+  "depends": {
+    "notebookloader": ">=0.3.0"
+  },
+  "mixins": [
+    "notebook-keybind-api-v1.mixins.json"
+  ],
+  "custom": {
+    "notebook-api:module-lifecycle": "stable"
+  }
+}

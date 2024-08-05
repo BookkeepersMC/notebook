@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "package": "com.bookkeepersmc.notebook.mixin.event.lifecycle.client",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "ClientChunkCacheMixin",
+    "ClientLevelEntityCallbacksMixin",
+    "TagCollectorMixin",
+    "ClientPacketListenerMixin",
+    "ClientLevelMixin",
+    "MinecraftMixin",
+    "TagCollectorMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1,
+    "maxShiftBy": 3
+  }
+}

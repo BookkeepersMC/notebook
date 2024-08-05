@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-resource-conditions-api-v1",
+  "name": "Notebook Resource Conditions API (v1)",
+  "version": "${version}",
+  "environment": "*",
+  "depends": {
+    "notebookloader": ">=0.3.0"
+  },
+  "entrypoints": {
+    "main": [
+      "com.bookkeepersmc.notebook.impl.resource.conditions.ResourceConditionsImpl"
+    ]
+  },
+  "mixins": [
+    "notebook-resource-conditions-api-v1.mixins.json"
+  ],
+  "accessWidener": "notebook-resource-conditions-v1.accesswidener",
+  "custom": {
+    "notebook-api:module-lifecycle": "stable"
+  }
+}

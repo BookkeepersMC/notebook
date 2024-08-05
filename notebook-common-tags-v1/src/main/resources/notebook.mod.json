@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-common-tags-v1",
+  "name": "Notebook Common Tags (v1)",
+  "version": "${version}",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.bookkeepersmc.notebook.impl.tag.common.v1.TranslationConventionLogWarnings"
+    ]
+  },
+  "depends": {
+    "notebookloader": ">=0.3.0",
+    "minecraft": ">=1.21",
+    "notebook-lifecycle-events-v1": "*"
+  },
+  "mixins": [
+    "notebook-common-tags-v1.mixins.json"
+  ],
+  "custom": {
+    "notebook-api:module-lifecycle": "stable",
+    "loom:injected_interfaces": {
+      "net/minecraft/class_6862": [
+        "com/bookkeepersmc/notebook/api/tag/NotebookTagExtensions"
+      ]
+    }
+  }
+}

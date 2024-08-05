@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-mods-screen-v0",
+  "name": "Notebook Mod Screen (v0)",
+  "version": "${version}",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.bookkeepersmc.notebook.impl.mod.screen.NotebookModScreen"
+    ],
+    "modscreen": [
+      "com.bookkeepersmc.notebook.impl.mod.screen.NotebookModScreenMenuCompat"
+    ]
+  },
+  "depends": {
+    "notebookloader": ">=0.3.0",
+    "notebook-screen-api-v1": "*",
+    "notebook-lifecycle-events-v1": "*",
+    "notebook-keybind-api-v1": "*"
+  },
+  "mixins": [
+    "notebook-mod-screen-v0.mixins.json"
+  ],
+  "custom": {
+    "notebook-api:module-lifecycle": "stable"
+  },
+  "breaks": {
+    "modmenu": "*"
+  }
+}
