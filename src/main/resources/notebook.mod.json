@@ -6,5 +6,10 @@
   "environment": "*",
   "authors": [
     "CrypticVerse"
-  ]
+  ],
+  "depends": {
+    "notebookloader": ">=0.3.0",
+    "java": ">=21",
+    "minecraft": ">=1.21.1- <1.21.2-"
+  }
 }

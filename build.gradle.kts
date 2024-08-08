@@ -17,9 +17,12 @@ plugins {
 }
 
 val env: Map<String, String> = System.getenv()
+val checkIfLocal = if (env["GITHUB_RUN_NUMBER"].isNullOrBlank()) "" else "local-"
 
-val projectVersion = version
-version = "$projectVersion+${if (env["GITHUB_RUN_NUMBER"].isNullOrBlank()) "local-" else ""}" + getBranch()
+val mcVersion: String by project
+val loaderVersion: String by project
+
+version = "${project.version}+$checkIfLocal" + getBranch()
 logger.lifecycle("Building: $version")
 
 val META_PROJECTS: List<String> = listOf(
@@ -57,11 +60,7 @@ val debugArgs = listOf(
 )
 
 fun getSubprojectVersion(project: Project): String {
-    val version = project.properties["${project.name}-version"]
-
-    if (version == null) {
-        throw NullPointerException("Could not find version for ${project.name}")
-    }
+    val version = project.properties["${project.name}-version"] ?: throw NullPointerException("Could not find version for ${project.name}")
 
     if (grgit == null) {
         return "$version+nogit"
@@ -73,7 +72,7 @@ fun getSubprojectVersion(project: Project): String {
         return "$version+uncommited"
     }
 
-    return "$version+${latestCommits[0].id.substring(0, 8)}${DigestUtils.sha256Hex("1.21").substring(0, 2)}"
+    return "$version+${latestCommits[0].id.substring(0, 8)}${DigestUtils.sha256Hex(mcVersion).substring(0, 2)}"
 }
 
 val grgit = Grgit.open(mapOf("currentDir" to project.rootDir))
@@ -213,16 +212,16 @@ allprojects {
     }
 
     dependencies {
-        minecraft("com.mojang:minecraft:1.21")
+        minecraft("com.mojang:minecraft:$mcVersion")
         mappings(loom.officialMojangMappings())
-        modApi("com.bookkeepersmc:notebook-loader:0.3.0")
+        modApi("com.bookkeepersmc:notebook-loader:$loaderVersion")
 
         "testmodImplementation"(sourceSets.named("main").get().output)
         "testmodClientImplementation"(sourceSets.named("main").get().output)
         "testmodClientImplementation"(sourceSets.named("client").get().output)
         "testmodClientImplementation"(sourceSets.named("testmod").get().output)
 
-        testImplementation("com.bookkeepersmc:notebook-loader-junit:0.3.0")
+        testImplementation("com.bookkeepersmc:notebook-loader-junit:$loaderVersion")
         testImplementation(sourceSets.named("testmodClient").get().output)
         testImplementation("org.mockito:mockito-core:5.4.0")
     }
@@ -403,6 +402,7 @@ loom {
         }
     }
 }
+tasks.test.get().dependsOn(tasks.getByName("runGametest"))
 
 spotless {
     kotlinGradle {

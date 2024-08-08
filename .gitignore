@@ -17,6 +17,7 @@
 .factorypath
 .idea
 *.iml
+.kotlin/
 *.ipr
 *.iws
 
