@@ -456,6 +456,52 @@ tasks.register('coverage', JacocoReport) {
 	}))
 }
 
+configurations {
+	productionRuntime {
+		extendsFrom configurations.minecraftLibraries
+		extendsFrom configurations.loaderLibraries
+		extendsFrom configurations.minecraftRuntimeLibraries
+	}
+}
+
+dependencies {
+	productionRuntime "com.bookkeepersmc:notebook-loader:${project.loader_version}"
+	productionRuntime "net.fabricmc:intermediary:${project.minecraft_version}"
+}
+
+import net.fabricmc.loom.util.Platform
+
+tasks.register("runProductionAutoTestClient", JavaExec) {
+	dependsOn remapJar, remapTestmodJar, downloadAssets
+	classpath.from configurations.productionRuntime
+	mainClass = "com.bookkeepersmc.loader.impl.launch.knot.KnotClient"
+	workingDir = file("run")
+
+	doFirst {
+		classpath.from loom.minecraftProvider.minecraftClientJar
+		workingDir.mkdirs()
+
+		args(
+			"--assetIndex", loom.minecraftProvider.versionInfo.assetIndex().fabricId(loom.minecraftProvider.minecraftVersion()),
+			"--assetsDir", new File(loom.files.userCache, "assets").absolutePath,
+			"--gameDir", workingDir.absolutePath
+		)
+
+		if (Platform.CURRENT.operatingSystem.isMacOS()) {
+			jvmArgs(
+				"-XstartOnFirstThread"
+			)
+		}
+
+		jvmArgs(
+			"-Dnotebook.addMods=${remapJar.archiveFile.get().asFile.absolutePath}${File.pathSeparator}${remapTestmodJar.archiveFile.get().asFile.absolutePath}",
+			"-Dnotebook.autoTest",
+			"-Dnotebook-tag-conventions-v2.missingTagTranslationWarning=fail"
+		)
+		jvmArgs(debugArgs)
+	}
+}
+
 // Format all the gradle files
 spotless {
 	groovyGradle {
