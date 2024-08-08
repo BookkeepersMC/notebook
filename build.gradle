@@ -482,22 +482,22 @@ tasks.register("runProductionAutoTestClient", JavaExec) {
 		workingDir.mkdirs()
 
 		args(
-			"--assetIndex", loom.minecraftProvider.versionInfo.assetIndex().fabricId(loom.minecraftProvider.minecraftVersion()),
-			"--assetsDir", new File(loom.files.userCache, "assets").absolutePath,
-			"--gameDir", workingDir.absolutePath
-		)
+				"--assetIndex", loom.minecraftProvider.versionInfo.assetIndex().fabricId(loom.minecraftProvider.minecraftVersion()),
+				"--assetsDir", new File(loom.files.userCache, "assets").absolutePath,
+				"--gameDir", workingDir.absolutePath
+				)
 
 		if (Platform.CURRENT.operatingSystem.isMacOS()) {
 			jvmArgs(
-				"-XstartOnFirstThread"
-			)
+					"-XstartOnFirstThread"
+					)
 		}
 
 		jvmArgs(
-			"-Dnotebook.addMods=${remapJar.archiveFile.get().asFile.absolutePath}${File.pathSeparator}${remapTestmodJar.archiveFile.get().asFile.absolutePath}",
-			"-Dnotebook.autoTest",
-			"-Dnotebook-tag-conventions-v2.missingTagTranslationWarning=fail"
-		)
+				"-Dnotebook.addMods=${remapJar.archiveFile.get().asFile.absolutePath}${File.pathSeparator}${remapTestmodJar.archiveFile.get().asFile.absolutePath}",
+				"-Dnotebook.autoTest",
+				"-Dnotebook-tag-conventions-v2.missingTagTranslationWarning=fail"
+				)
 		jvmArgs(debugArgs)
 	}
 }
