@@ -1,0 +1,32 @@
+version = rootProject.version
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			artifactId = 'fabric-api-deprecated'
+
+			pom.withXml {
+				def depsNode = asNode().appendNode("dependencies")
+				allprojects.each {
+					if (it.name == "deprecated") return
+
+
+					if (!it.path.startsWith(":deprecated")) return
+
+					def depNode = depsNode.appendNode("dependency")
+					depNode.appendNode("groupId", it.group)
+					depNode.appendNode("artifactId", it.name)
+					depNode.appendNode("version", it.version)
+					depNode.appendNode("scope", "compile")
+				}
+
+
+				def depNode = depsNode.appendNode("dependency")
+				depNode.appendNode("groupId", group)
+				depNode.appendNode("artifactId", "notebook-api")
+				depNode.appendNode("version", version)
+				depNode.appendNode("scope", "compile")
+			}
+		}
+	}
+}

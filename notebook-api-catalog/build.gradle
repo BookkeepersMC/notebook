@@ -1,0 +1,56 @@
+plugins {
+	id 'version-catalog'
+}
+
+version = rootProject.version
+
+publishing.publications {
+	register("mavenJava", MavenPublication) {
+		from components.versionCatalog
+	}
+}
+
+tasks.withType(GenerateModuleMetadata) {
+	enabled = true
+}
+
+tasks.register('configureCatalog') {
+	doFirst {
+		doConfigureCatalog()
+	}
+}
+
+tasks.named("generateCatalogAsToml") {
+	dependsOn('configureCatalog')
+}
+
+def doConfigureCatalog() {
+	for (proj in rootProject.allprojects) {
+		if (proj == project) {
+			continue
+		}
+
+		String catalogName = proj.name
+		if (catalogName == 'notebook-api-base') {
+			catalogName = 'base'
+		} else if (catalogName == 'notebook-api-bom') {
+			catalogName = 'bom'
+		} else if (catalogName == 'deprecated') {
+			catalogName = 'deprecated-notebook-api'
+		} else if (catalogName == 'notebook-api') {
+			catalogName = 'notebook-api'
+		} else {
+			catalogName = catalogName.substring('notebook-'.length())
+		}
+
+		if (proj.parent != null && proj.parent.name == 'deprecated') {
+			catalogName = 'deprecated-' + catalogName
+		}
+
+		catalog {
+			versionCatalog {
+				library(catalogName, "com.bookkeepersmc.notebook-api:${proj.name}:${proj.version}")
+			}
+		}
+	}
+}
