@@ -3,7 +3,8 @@ version = rootProject.version
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			artifactId = 'fabric-api-deprecated'
+			// Name of deprecated artifacts
+			artifactId = 'notebook-api-deprecated'
 
 			pom.withXml {
 				def depsNode = asNode().appendNode("dependencies")
