@@ -1,0 +1,46 @@
+name: Publish
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: apt update && apt install git -y && git --version
+      - run: git config --global --add safe.directory /__w/notebook/notebook
+
+      - name: Checkout Resources
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout M2 Repo
+        uses: actions/checkout@v4
+        with:
+          repository: 'BookkeepersMC/m2'
+          path: './m2/'
+          ref: 'master'
+          token: ${{ secrets.CHECKOUT_TOKEN }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build and Publish
+        run: ./gradlew build publish --stacktrace
+
+      - name: Commit artifacts to m2 repo
+        uses: EndBug/add-and-commit@v9.1.4
+        with:
+          add: './com/'
+          author_name: github_actions
+          cwd: "./m2/"
+          message: "Publish Notebook API"
