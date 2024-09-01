@@ -5,7 +5,7 @@
   "version": "${version}",
   "environment": "*",
   "depends": {
-    "notebookloader": ">=0.3.0"
+    "notebookloader": ">=0.3.2"
   },
   "mixins": [
     "notebook-resource-loader-v0.mixins.json",

@@ -27,7 +27,7 @@ import java.util.concurrent.CompletionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.minecraft.network.chat.Component;
+import net.minecraft.text.Text;
 
 import com.bookkeepersmc.api.ClientModInitializer;
 import com.bookkeepersmc.notebook.api.client.networking.v1.ClientConfigurationNetworking;
@@ -61,9 +61,9 @@ public class RegistrySyncClientInit implements ClientModInitializer {
 		});
 	}
 
-	private Component getText(Throwable e) {
+	private Text getText(Throwable e) {
 		if (e instanceof RemapException remapException) {
-			final Component text = remapException.getComponent();
+			final Text text = remapException.getComponent();
 
 			if (text != null) {
 				return text;
@@ -72,6 +72,6 @@ public class RegistrySyncClientInit implements ClientModInitializer {
 			return getText(completionException.getCause());
 		}
 
-		return Component.literal("Registry remapping failed: " + e.getMessage());
+		return Text.literal("Registry remapping failed: " + e.getMessage());
 	}
 }

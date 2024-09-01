@@ -29,31 +29,31 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.registry.ResourceKey;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceCondition;
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceConditionType;
 import com.bookkeepersmc.notebook.impl.resource.conditions.DefaultResourceConditionTypes;
 import com.bookkeepersmc.notebook.impl.resource.conditions.ResourceConditionsImpl;
 
-public record RegistryContainsResourceCondition(ResourceLocation registry, List<ResourceLocation> entries) implements ResourceCondition {
+public record RegistryContainsResourceCondition(Identifier registry, List<Identifier> entries) implements ResourceCondition {
 	// Cannot use registry-bound codec because they fail parsing if nonexistent,
 	// and resource conditions themselves should not fail to parse on condition failure
 	public static final MapCodec<RegistryContainsResourceCondition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			ResourceLocation.CODEC.fieldOf("registry").orElse(Registries.ITEM.location()).forGetter(RegistryContainsResourceCondition::registry),
-			ResourceLocation.CODEC.listOf().fieldOf("values").forGetter(RegistryContainsResourceCondition::entries)
+			Identifier.CODEC.fieldOf("registry").orElse(Registries.ITEM.getValue()).forGetter(RegistryContainsResourceCondition::registry),
+			Identifier.CODEC.listOf().fieldOf("values").forGetter(RegistryContainsResourceCondition::entries)
 	).apply(instance, RegistryContainsResourceCondition::new));
 
-	public RegistryContainsResourceCondition(ResourceLocation registry, ResourceLocation... entries) {
+	public RegistryContainsResourceCondition(Identifier registry, Identifier... entries) {
 		this(registry, List.of(entries));
 	}
 
 	@SafeVarargs
 	public <T> RegistryContainsResourceCondition(ResourceKey<T>... entries) {
-		this(entries[0].registry(), Arrays.stream(entries).map(ResourceKey::location).toList());
+		this(entries[0].getRegistry(), Arrays.stream(entries).map(ResourceKey::getValue).toList());
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public record RegistryContainsResourceCondition(ResourceLocation registry, List<
 	}
 
 	@Override
-	public boolean test(@Nullable HolderLookup.Provider registryLookup) {
+	public boolean test(@Nullable RegistryOps.RegistryInfoLookup registryLookup) {
 		return ResourceConditionsImpl.registryContains(registryLookup, this.registry(), this.entries());
 	}
 }

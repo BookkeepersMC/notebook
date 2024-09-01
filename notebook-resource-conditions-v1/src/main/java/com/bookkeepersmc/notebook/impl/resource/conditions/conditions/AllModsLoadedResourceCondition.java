@@ -29,7 +29,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.core.HolderLookup;
+import net.minecraft.registry.RegistryOps;
 
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceCondition;
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceConditionType;
@@ -47,7 +47,7 @@ public record AllModsLoadedResourceCondition(List<String> modIds) implements Res
 	}
 
 	@Override
-	public boolean test(@Nullable HolderLookup.Provider registryLookup) {
+	public boolean test(@Nullable RegistryOps.RegistryInfoLookup registryLookup) {
 		return ResourceConditionsImpl.modsLoaded(this.modIds(), true);
 	}
 }

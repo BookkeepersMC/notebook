@@ -20,29 +20,20 @@
  * SOFTWARE.
  *
  */
-package com.bookkeepersmc.notebook.mixin.resource.conditions;
+package com.bookkeepersmc.notebook.mixin.registry.sync.client;
 
 import java.util.List;
+import java.util.Map;
 
-import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import net.minecraft.tags.TagManager;
+import net.minecraft.registry.DynamicRegistrySync;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.ResourceKey;
 
-import com.bookkeepersmc.notebook.impl.resource.conditions.ResourceConditionsImpl;
-
-@Mixin(TagManager.class)
-public class TagManagerMixin {
-	@Shadow
-	private List<TagManager.LoadResult<?>> results;
-
-	@Dynamic
-	@Inject(method = "method_40098(Ljava/util/List;Ljava/lang/Void;)V", at = @At("RETURN"))
-	private void hookApply(List<?> list, Void void_, CallbackInfo info) {
-		ResourceConditionsImpl.setTags(results);
-	}
+@Mixin(targets = "net/minecraft/unmapped/C_jcuvnmyx$C_wzbwncua")
+public interface ClientRegistriesDynamicRegistriesAccessor {
+	@Accessor("field_48769")
+	Map<ResourceKey<? extends Registry<?>>, List<DynamicRegistrySync.SerializedRegistryEntry>> getDynamicRegistries();
 }

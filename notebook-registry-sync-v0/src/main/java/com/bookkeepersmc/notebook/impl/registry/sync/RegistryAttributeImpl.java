@@ -26,7 +26,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.registry.ResourceKey;
 
 import com.bookkeepersmc.notebook.api.event.registry.RegistryAttribute;
 import com.bookkeepersmc.notebook.api.event.registry.RegistryAttributeHolder;

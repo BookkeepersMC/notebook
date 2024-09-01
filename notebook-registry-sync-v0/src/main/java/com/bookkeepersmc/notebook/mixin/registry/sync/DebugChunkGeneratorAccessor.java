@@ -28,26 +28,26 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.DebugLevelSource;
+import net.minecraft.block.BlockState;
+import net.minecraft.world.gen.chunk.DebugChunkGenerator;
 
-@Mixin(DebugLevelSource.class)
+@Mixin(DebugChunkGenerator.class)
 public interface DebugChunkGeneratorAccessor {
 	@Accessor
 	@Mutable
-	static void setALL_BLOCKS(List<BlockState> blocks) {
+	static void setBLOCK_STATES(List<BlockState> blocks) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Accessor
 	@Mutable
-	static void setGRID_WIDTH(int length) {
+	static void setX_SIDE_LENGTH(int length) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Accessor
 	@Mutable
-	static void setGRID_HEIGHT(int length) {
+	static void setZ_SIDE_LENGTH(int length) {
 		throw new UnsupportedOperationException();
 	}
 }

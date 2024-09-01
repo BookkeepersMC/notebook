@@ -29,27 +29,27 @@ import java.util.concurrent.CompletableFuture;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.client.network.ClientLoginNetworkHandler;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.PacketSendListener;
-import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
-import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.packet.c2s.login.LoginQueryResponseC2SPacket;
+import net.minecraft.network.packet.s2c.login.LoginQueryRequestS2CPacket;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.client.networking.v1.ClientLoginConnectionEvents;
 import com.bookkeepersmc.notebook.api.client.networking.v1.ClientLoginNetworking;
 import com.bookkeepersmc.notebook.api.networking.v1.ByteBufUtils;
 import com.bookkeepersmc.notebook.impl.networking.AbstractNetworkAddon;
-import com.bookkeepersmc.notebook.impl.networking.payload.FriendlyByteBufLoginQueryRequestPayload;
-import com.bookkeepersmc.notebook.impl.networking.payload.FriendlyByteBufLoginQueryResponse;
+import com.bookkeepersmc.notebook.impl.networking.payload.PacketByteBufLoginQueryRequestPayload;
+import com.bookkeepersmc.notebook.impl.networking.payload.PacketByteBufLoginQueryResponse;
 import com.bookkeepersmc.notebook.mixin.networking.client.accessor.ClientLoginNetworkHandlerAccessor;
 
 public final class ClientLoginNetworkAddon extends AbstractNetworkAddon<ClientLoginNetworking.LoginQueryRequestHandler> {
-	private final ClientHandshakePacketListenerImpl handler;
+	private final ClientLoginNetworkHandler handler;
 	private final Minecraft client;
 	private boolean firstResponse = true;
 
-	public ClientLoginNetworkAddon(ClientHandshakePacketListenerImpl handler, Minecraft client) {
+	public ClientLoginNetworkAddon(ClientLoginNetworkHandler handler, Minecraft client) {
 		super(ClientNetworkingImpl.LOGIN, "ClientLoginNetworkAddon for Client");
 		this.handler = handler;
 		this.client = client;
@@ -60,12 +60,12 @@ public final class ClientLoginNetworkAddon extends AbstractNetworkAddon<ClientLo
 		ClientLoginConnectionEvents.INIT.invoker().onLoginStart(this.handler, this.client);
 	}
 
-	public boolean handlePacket(ClientboundCustomQueryPacket packet) {
-		FriendlyByteBufLoginQueryRequestPayload payload = (FriendlyByteBufLoginQueryRequestPayload) packet.payload();
-		return handlePacket(packet.transactionId(), packet.payload().id(), payload.data());
+	public boolean handlePacket(LoginQueryRequestS2CPacket packet) {
+		PacketByteBufLoginQueryRequestPayload payload = (PacketByteBufLoginQueryRequestPayload) packet.payload();
+		return handlePacket(packet.queryId(), packet.payload().id(), payload.data());
 	}
 
-	private boolean handlePacket(int queryId, ResourceLocation channelName, FriendlyByteBuf originalBuf) {
+	private boolean handlePacket(int queryId, Identifier channelName, PacketByteBuf originalBuf) {
 		this.logger.debug("Handling inbound login response with id {} and channel with name {}", queryId, channelName);
 
 		if (this.firstResponse) {
@@ -79,13 +79,13 @@ public final class ClientLoginNetworkAddon extends AbstractNetworkAddon<ClientLo
 			return false;
 		}
 
-		FriendlyByteBuf buf = ByteBufUtils.slice(originalBuf);
+		PacketByteBuf buf = ByteBufUtils.slice(originalBuf);
 		List<PacketSendListener> callbacks = new ArrayList<>();
 
 		try {
-			CompletableFuture<@Nullable FriendlyByteBuf> future = handler.receive(this.client, this.handler, buf, callbacks::add);
+			CompletableFuture<@Nullable PacketByteBuf> future = handler.receive(this.client, this.handler, buf, callbacks::add);
 			future.thenAccept(result -> {
-				ServerboundCustomQueryAnswerPacket packet = new ServerboundCustomQueryAnswerPacket(queryId, result == null ? null : new FriendlyByteBufLoginQueryResponse(result));
+				LoginQueryResponseC2SPacket packet = new LoginQueryResponseC2SPacket(queryId, result == null ? null : new PacketByteBufLoginQueryResponse(result));
 				((ClientLoginNetworkHandlerAccessor) this.handler).getConnection().send(packet, new PacketSendListener() {
 					@Override
 					public void onSuccess() {
@@ -102,11 +102,11 @@ public final class ClientLoginNetworkAddon extends AbstractNetworkAddon<ClientLo
 	}
 
 	@Override
-	protected void handleRegistration(ResourceLocation channelName) {
+	protected void handleRegistration(Identifier channelName) {
 	}
 
 	@Override
-	protected void handleUnregistration(ResourceLocation channelName) {
+	protected void handleUnregistration(Identifier channelName) {
 	}
 
 	@Override
@@ -115,7 +115,7 @@ public final class ClientLoginNetworkAddon extends AbstractNetworkAddon<ClientLo
 	}
 
 	@Override
-	protected boolean isReservedChannel(ResourceLocation channelName) {
+	protected boolean isReservedChannel(Identifier channelName) {
 		return false;
 	}
 }

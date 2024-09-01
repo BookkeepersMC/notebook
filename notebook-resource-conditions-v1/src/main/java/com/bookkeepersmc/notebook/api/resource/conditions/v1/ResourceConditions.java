@@ -27,16 +27,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.flag.FeatureFlag;
+import net.minecraft.feature_flags.FeatureFlag;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.ResourceKey;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.impl.resource.conditions.conditions.*;
 
 public final class ResourceConditions {
-	private static final Map<ResourceLocation, ResourceConditionType<?>> REGISTERED_CONDITIONS = new ConcurrentHashMap<>();
+	private static final Map<Identifier, ResourceConditionType<?>> REGISTERED_CONDITIONS = new ConcurrentHashMap<>();
 
 	public static final String CONDITIONS_KEY = "notebook:load_conditions";
 
@@ -53,7 +53,7 @@ public final class ResourceConditions {
 		}
 	}
 
-	public static ResourceConditionType<?> getConditionType(ResourceLocation id) {
+	public static ResourceConditionType<?> getConditionType(Identifier id) {
 		return REGISTERED_CONDITIONS.get(id);
 	}
 
@@ -88,10 +88,10 @@ public final class ResourceConditions {
 
 	@SafeVarargs
 	public static <T> ResourceCondition tagsPopulated(ResourceKey<? extends Registry<T>> registry, TagKey<T>... tags) {
-		return new TagsPopulatedResourceCondition(registry.location(), tags);
+		return new TagsPopulatedResourceCondition(registry.getValue(), tags);
 	}
 
-	public static ResourceCondition featuresEnabled(ResourceLocation... features) {
+	public static ResourceCondition featuresEnabled(Identifier... features) {
 		return new FeaturesEnabledResourceCondition(features);
 	}
 
@@ -104,7 +104,7 @@ public final class ResourceConditions {
 		return new RegistryContainsResourceCondition(entries);
 	}
 
-	public static <T> ResourceCondition registryContains(ResourceKey<? extends Registry<T>> registry, ResourceLocation... entries) {
-		return new RegistryContainsResourceCondition(registry.location(), entries);
+	public static <T> ResourceCondition registryContains(ResourceKey<? extends Registry<T>> registry, Identifier... entries) {
+		return new RegistryContainsResourceCondition(registry.getValue(), entries);
 	}
 }

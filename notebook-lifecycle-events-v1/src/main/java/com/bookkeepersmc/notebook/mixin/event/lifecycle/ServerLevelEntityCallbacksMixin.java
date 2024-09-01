@@ -29,26 +29,26 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.entity.Entity;
+import net.minecraft.server.world.ServerWorld;
 
 import com.bookkeepersmc.notebook.api.event.lifecycle.v1.ServerEntityEvents;
 
-@Mixin(targets = "net/minecraft/server/level/ServerLevel$EntityCallbacks")
+@Mixin(targets = "net/minecraft/server/world/ServerWorld$ServerEntityHandler")
 abstract class ServerLevelEntityCallbacksMixin {
 	// final synthetic Lnet/minecraft/server/world/ServerWorld; field_26936
 	//@SuppressWarnings("ShadowTarget")
 	@Shadow
 	@Final
-	private ServerLevel field_26936;
+	private ServerWorld world;
 
-	@Inject(method = "onTrackingStart(Lnet/minecraft/world/entity/Entity;)V", at = @At("TAIL"))
+	@Inject(method = "startTracking(Lnet/minecraft/entity/Entity;)V", at = @At("TAIL"))
 	private void invokeEntityLoadEvent(Entity entity, CallbackInfo ci) {
-		ServerEntityEvents.ENTITY_LOAD.invoker().onLoad(entity, this.field_26936);
+		ServerEntityEvents.ENTITY_LOAD.invoker().onLoad(entity, this.world);
 	}
 
-	@Inject(method = "onTrackingEnd(Lnet/minecraft/world/entity/Entity;)V", at = @At("HEAD"))
+	@Inject(method = "stopTracking(Lnet/minecraft/entity/Entity;)V", at = @At("HEAD"))
 	private void invokeEntityUnloadEvent(Entity entity, CallbackInfo info) {
-		ServerEntityEvents.ENTITY_UNLOAD.invoker().onUnload(entity, this.field_26936);
+		ServerEntityEvents.ENTITY_UNLOAD.invoker().onUnload(entity, this.world);
 	}
 }

@@ -24,9 +24,9 @@ package com.bookkeepersmc.notebook.api.client.keybind.v1;
 
 import java.util.Objects;
 
-import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.InputUtil;
 
-import net.minecraft.client.KeyMapping;
+import net.minecraft.client.option.KeyBind;
 
 import com.bookkeepersmc.notebook.impl.client.keybinding.KeybindingRegistryImpl;
 import com.bookkeepersmc.notebook.mixin.client.keybind.KeyMappingAccessor;
@@ -35,12 +35,12 @@ public final class KeybindHelper {
 	private KeybindHelper() {
 	}
 
-	public static KeyMapping registerKeybind(KeyMapping mapping) {
+	public static KeyBind registerKeybind(KeyBind mapping) {
 		Objects.requireNonNull(mapping, "Key binding cannot be null!");
 		return KeybindingRegistryImpl.registerKeybind(mapping);
 	}
 
-	public static InputConstants.Key getBoundKeyOf(KeyMapping mapping) {
+	public static InputUtil.Key getBoundKeyOf(KeyBind mapping) {
 		return ((KeyMappingAccessor) mapping).notebook_getKey();
 	}
 }

@@ -26,33 +26,30 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.WorldChunk;
 
 import com.bookkeepersmc.notebook.impl.event.lifecycle.LoadedChunksCache;
 
-@Mixin(Level.class)
+@Mixin(World.class)
 public abstract class LevelMixin implements LoadedChunksCache {
-	@Shadow
-	public abstract boolean isClientSide();
 	@Unique
-	private final Set<LevelChunk> loadedChunks = new HashSet<>();
+	private final Set<WorldChunk> loadedChunks = new HashSet<>();
 
 	@Override
-	public Set<LevelChunk> notebook_getLoadedChunks() {
+	public Set<WorldChunk> notebook_getLoadedChunks() {
 		return this.loadedChunks;
 	}
 
 	@Override
-	public void notebook_markLoaded(LevelChunk chunk) {
+	public void notebook_markLoaded(WorldChunk chunk) {
 		this.loadedChunks.add(chunk);
 	}
 
 	@Override
-	public void notebook_markUnloaded(LevelChunk chunk) {
+	public void notebook_markUnloaded(WorldChunk chunk) {
 		this.loadedChunks.remove(chunk);
 	}
 }

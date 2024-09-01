@@ -26,8 +26,10 @@ import java.util.List;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.registry.Holder;
 
 import com.bookkeepersmc.notebook.impl.recipe.CustomIngredientImpl;
 
@@ -35,7 +37,7 @@ public interface CustomIngredient {
 
 	boolean test(ItemStack stack);
 
-	List<ItemStack> getMatchingStacks();
+	List<Holder<Item>> getMatchingStacks();
 
 	boolean requiresTesting();
 

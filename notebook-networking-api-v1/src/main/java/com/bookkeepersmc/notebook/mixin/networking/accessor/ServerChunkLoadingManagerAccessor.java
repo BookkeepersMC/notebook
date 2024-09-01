@@ -26,10 +26,10 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import net.minecraft.server.level.ChunkMap;
+import net.minecraft.server.world.ThreadedChunkManager;
 
-@Mixin(ChunkMap.class)
+@Mixin(ThreadedChunkManager.class)
 public interface ServerChunkLoadingManagerAccessor {
-	@Accessor("entityMap")
+	@Accessor
 	Int2ObjectMap<EntityTrackerAccessor> getEntityTrackers();
 }

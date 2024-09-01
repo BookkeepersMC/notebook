@@ -26,14 +26,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.NetworkPhase;
 import net.minecraft.network.PacketSendListener;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ClientboundPingPacket;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.payload.CustomPayload;
+import net.minecraft.network.packet.s2c.common.PingS2CPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
+import net.minecraft.server.network.ServerConfigurationNetworkHandler;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.networking.v1.PacketSender;
 import com.bookkeepersmc.notebook.api.networking.v1.S2CConfigurationChannelEvents;
@@ -46,19 +46,19 @@ import com.bookkeepersmc.notebook.impl.networking.RegistrationPayload;
 import com.bookkeepersmc.notebook.mixin.networking.accessor.ServerCommonNetworkHandlerAccessor;
 
 public final class ServerConfigurationNetworkAddon extends AbstractChanneledNetworkAddon<ServerConfigurationNetworking.ConfigurationPacketHandler<?>> {
-	private final ServerConfigurationPacketListenerImpl handler;
+	private final ServerConfigurationNetworkHandler handler;
 	private final MinecraftServer server;
 	private final ServerConfigurationNetworking.Context context;
 	private RegisterState registerState = RegisterState.NOT_SENT;
 
-	public ServerConfigurationNetworkAddon(ServerConfigurationPacketListenerImpl handler, MinecraftServer server) {
-		super(ServerNetworkingImpl.CONFIGURATION, ((ServerCommonNetworkHandlerAccessor) handler).getConnection(), "ServerConfigurationNetworkAddon for " + handler.getOwner().getName());
+	public ServerConfigurationNetworkAddon(ServerConfigurationNetworkHandler handler, MinecraftServer server) {
+		super(ServerNetworkingImpl.CONFIGURATION, ((ServerCommonNetworkHandlerAccessor) handler).getConnection(), "ServerConfigurationNetworkAddon for " + handler.getHost().getName());
 		this.handler = handler;
 		this.server = server;
 		this.context = new ContextImpl(server, handler, this);
 
 		// Must register pending channels via lateinit
-		this.registerPendingChannels((ChannelInfoHolder) this.connection, ConnectionProtocol.CONFIGURATION);
+		this.registerPendingChannels((ChannelInfoHolder) this.connection, NetworkPhase.CONFIGURATION);
 	}
 
 	@Override
@@ -77,7 +77,7 @@ public final class ServerConfigurationNetworkAddon extends AbstractChanneledNetw
 		if (this.registerState == RegisterState.NOT_SENT) {
 			// Send the registration packet, followed by a ping
 			this.sendInitialChannelRegistrationPacket();
-			this.sendPacket(new ClientboundPingPacket(0xFAB71C));
+			this.sendPacket(new PingS2CPacket(0xFAB71C));
 
 			this.registerState = RegisterState.SENT;
 
@@ -110,7 +110,7 @@ public final class ServerConfigurationNetworkAddon extends AbstractChanneledNetw
 	}
 
 	@Override
-	protected void receive(ServerConfigurationNetworking.ConfigurationPacketHandler<?> handler, CustomPacketPayload payload) {
+	protected void receive(ServerConfigurationNetworking.ConfigurationPacketHandler<?> handler, CustomPayload payload) {
 		((ServerConfigurationNetworking.ConfigurationPacketHandler) handler).receive(payload, this.context);
 	}
 
@@ -122,22 +122,22 @@ public final class ServerConfigurationNetworkAddon extends AbstractChanneledNetw
 	}
 
 	@Override
-	public Packet<?> createPacket(CustomPacketPayload packet) {
+	public Packet<?> createPacket(CustomPayload packet) {
 		return ServerConfigurationNetworking.createS2CPacket(packet);
 	}
 
 	@Override
-	protected void invokeRegisterEvent(List<ResourceLocation> ids) {
+	protected void invokeRegisterEvent(List<Identifier> ids) {
 		S2CConfigurationChannelEvents.REGISTER.invoker().onChannelRegister(this.handler, this, this.server, ids);
 	}
 
 	@Override
-	protected void invokeUnregisterEvent(List<ResourceLocation> ids) {
+	protected void invokeUnregisterEvent(List<Identifier> ids) {
 		S2CConfigurationChannelEvents.UNREGISTER.invoker().onChannelUnregister(this.handler, this, this.server, ids);
 	}
 
 	@Override
-	protected void handleRegistration(ResourceLocation channelName) {
+	protected void handleRegistration(Identifier channelName) {
 		// If we can already send packets, immediately send the register packet for this channel
 		if (this.registerState != RegisterState.NOT_SENT) {
 			RegistrationPayload registrationPayload = this.createRegistrationPayload(RegistrationPayload.REGISTER, Collections.singleton(channelName));
@@ -149,7 +149,7 @@ public final class ServerConfigurationNetworkAddon extends AbstractChanneledNetw
 	}
 
 	@Override
-	protected void handleUnregistration(ResourceLocation channelName) {
+	protected void handleUnregistration(Identifier channelName) {
 		// If we can already send packets, immediately send the unregister packet for this channel
 		if (this.registerState != RegisterState.NOT_SENT) {
 			RegistrationPayload registrationPayload = this.createRegistrationPayload(RegistrationPayload.UNREGISTER, Collections.singleton(channelName));
@@ -166,7 +166,7 @@ public final class ServerConfigurationNetworkAddon extends AbstractChanneledNetw
 	}
 
 	@Override
-	protected boolean isReservedChannel(ResourceLocation channelName) {
+	protected boolean isReservedChannel(Identifier channelName) {
 		return NetworkingImpl.isReservedCommonChannel(channelName);
 	}
 
@@ -186,7 +186,7 @@ public final class ServerConfigurationNetworkAddon extends AbstractChanneledNetw
 		return (ChannelInfoHolder) ((ServerCommonNetworkHandlerAccessor) handler).getConnection();
 	}
 
-	private record ContextImpl(MinecraftServer server, ServerConfigurationPacketListenerImpl networkHandler, PacketSender responseSender) implements ServerConfigurationNetworking.Context {
+	private record ContextImpl(MinecraftServer server, ServerConfigurationNetworkHandler networkHandler, PacketSender responseSender) implements ServerConfigurationNetworking.Context {
 		private ContextImpl {
 			Objects.requireNonNull(server, "server");
 			Objects.requireNonNull(networkHandler, "networkHandler");

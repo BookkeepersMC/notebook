@@ -23,8 +23,8 @@
 package com.bookkeepersmc.notebook.api.client.networking.v1;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientConfigurationPacketListenerImpl;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.client.network.ClientConfigurationNetworkHandler;
+import net.minecraft.network.packet.payload.CustomPayload;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 import com.bookkeepersmc.notebook.api.event.EventFactory;
@@ -38,10 +38,10 @@ public final class ClientConfigurationConnectionEvents {
 	 *
 	 * <p>No packets should be sent when this event is invoked.
 	 *
-	 * @see ClientConfigurationNetworking#registerReceiver(CustomPacketPayload.Type, ClientConfigurationNetworking.ConfigurationPayloadHandler)
+	 * @see ClientConfigurationNetworking#registerReceiver(CustomPayload.Id, ClientConfigurationNetworking.ConfigurationPayloadHandler)
 	 */
-	public static final Event<Init> INIT = EventFactory.createArrayBacked(Init.class, callbacks -> (handler, client) -> {
-		for (Init callback : callbacks) {
+	public static final Event<ClientConfigurationConnectionEvents.Init> INIT = EventFactory.createArrayBacked(ClientConfigurationConnectionEvents.Init.class, callbacks -> (handler, client) -> {
+		for (ClientConfigurationConnectionEvents.Init callback : callbacks) {
 			callback.onConfigurationInit(handler, client);
 		}
 	});
@@ -51,8 +51,8 @@ public final class ClientConfigurationConnectionEvents {
 	 *
 	 * <p>Packets may be sent during this event.
 	 */
-	public static final Event<Start> START = EventFactory.createArrayBacked(Start.class, callbacks -> (handler, client) -> {
-		for (Start callback : callbacks) {
+	public static final Event<ClientConfigurationConnectionEvents.Start> START = EventFactory.createArrayBacked(ClientConfigurationConnectionEvents.Start.class, callbacks -> (handler, client) -> {
+		for (ClientConfigurationConnectionEvents.Start callback : callbacks) {
 			callback.onConfigurationStart(handler, client);
 		}
 	});
@@ -62,8 +62,8 @@ public final class ClientConfigurationConnectionEvents {
 	 *
 	 * <p>No packets should be sent when this event is invoked.
 	 */
-	public static final Event<Complete> COMPLETE = EventFactory.createArrayBacked(Complete.class, callbacks -> (handler, client) -> {
-		for (Complete callback : callbacks) {
+	public static final Event<ClientConfigurationConnectionEvents.Complete> COMPLETE = EventFactory.createArrayBacked(ClientConfigurationConnectionEvents.Complete.class, callbacks -> (handler, client) -> {
+		for (ClientConfigurationConnectionEvents.Complete callback : callbacks) {
 			callback.onConfigurationComplete(handler, client);
 		}
 	});
@@ -73,8 +73,8 @@ public final class ClientConfigurationConnectionEvents {
 	 *
 	 * <p>No packets should be sent when this event is invoked.
 	 */
-	public static final Event<Disconnect> DISCONNECT = EventFactory.createArrayBacked(Disconnect.class, callbacks -> (handler, client) -> {
-		for (Disconnect callback : callbacks) {
+	public static final Event<ClientConfigurationConnectionEvents.Disconnect> DISCONNECT = EventFactory.createArrayBacked(ClientConfigurationConnectionEvents.Disconnect.class, callbacks -> (handler, client) -> {
+		for (ClientConfigurationConnectionEvents.Disconnect callback : callbacks) {
 			callback.onConfigurationDisconnect(handler, client);
 		}
 	});
@@ -84,22 +84,22 @@ public final class ClientConfigurationConnectionEvents {
 
 	@FunctionalInterface
 	public interface Init {
-		void onConfigurationInit(ClientConfigurationPacketListenerImpl handler, Minecraft client);
+		void onConfigurationInit(ClientConfigurationNetworkHandler handler, Minecraft client);
 	}
 
 	@FunctionalInterface
 	public interface Start {
-		void onConfigurationStart(ClientConfigurationPacketListenerImpl handler, Minecraft client);
+		void onConfigurationStart(ClientConfigurationNetworkHandler handler, Minecraft client);
 	}
 
 	@FunctionalInterface
 	public interface Complete {
-		void onConfigurationComplete(ClientConfigurationPacketListenerImpl handler, Minecraft client);
+		void onConfigurationComplete(ClientConfigurationNetworkHandler handler, Minecraft client);
 	}
 
 	@FunctionalInterface
 	public interface Disconnect {
-		void onConfigurationDisconnect(ClientConfigurationPacketListenerImpl handler, Minecraft client);
+		void onConfigurationDisconnect(ClientConfigurationNetworkHandler handler, Minecraft client);
 	}
 
 	// Deprecated:
@@ -108,18 +108,18 @@ public final class ClientConfigurationConnectionEvents {
 	 * @deprecated replaced by {@link #COMPLETE}
 	 */
 	@Deprecated
-	public static final Event<Ready> READY = EventFactory.createArrayBacked(Ready.class, callbacks -> (handler, client) -> {
-		for (Ready callback : callbacks) {
+	public static final Event<ClientConfigurationConnectionEvents.Ready> READY = EventFactory.createArrayBacked(ClientConfigurationConnectionEvents.Ready.class, callbacks -> (handler, client) -> {
+		for (ClientConfigurationConnectionEvents.Ready callback : callbacks) {
 			callback.onConfigurationReady(handler, client);
 		}
 	});
 
 	/**
-	 * @deprecated replaced by {@link Complete}
+	 * @deprecated replaced by {@link ClientConfigurationConnectionEvents.Complete}
 	 */
 	@Deprecated
 	@FunctionalInterface
 	public interface Ready {
-		void onConfigurationReady(ClientConfigurationPacketListenerImpl handler, Minecraft client);
+		void onConfigurationReady(ClientConfigurationNetworkHandler handler, Minecraft client);
 	}
 }

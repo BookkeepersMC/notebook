@@ -22,9 +22,9 @@
  */
 package com.bookkeepersmc.notebook.api.event.lifecycle.v1;
 
+import net.minecraft.resource.AutoCloseableResourceManager;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.packs.resources.CloseableResourceManager;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 import com.bookkeepersmc.notebook.api.event.EventFactory;
@@ -109,17 +109,17 @@ public final class ServerLifecycleEvents {
 
 	@FunctionalInterface
 	public interface SyncDataPackContents {
-		void onSyncDataPackContents(ServerPlayer player, boolean joined);
+		void onSyncDataPackContents(ServerPlayerEntity player, boolean joined);
 	}
 
 	@FunctionalInterface
 	public interface StartDataPackReload {
-		void startDataPackReload(MinecraftServer server, CloseableResourceManager resourceManager);
+		void startDataPackReload(MinecraftServer server, AutoCloseableResourceManager resourceManager);
 	}
 
 	@FunctionalInterface
 	public interface EndDataPackReload {
-		void endDataPackReload(MinecraftServer server, CloseableResourceManager resourceManager, boolean success);
+		void endDataPackReload(MinecraftServer server, AutoCloseableResourceManager resourceManager, boolean success);
 	}
 
 	@FunctionalInterface

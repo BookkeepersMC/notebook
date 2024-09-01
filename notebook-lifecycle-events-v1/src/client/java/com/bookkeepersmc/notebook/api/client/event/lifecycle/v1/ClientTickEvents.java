@@ -23,7 +23,7 @@
 package com.bookkeepersmc.notebook.api.client.event.lifecycle.v1;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.world.ClientWorld;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 import com.bookkeepersmc.notebook.api.event.EventFactory;
@@ -68,11 +68,11 @@ public final class ClientTickEvents {
 
 	@FunctionalInterface
 	public interface StartWorldTick {
-		void onStartTick(ClientLevel world);
+		void onStartTick(ClientWorld world);
 	}
 
 	@FunctionalInterface
 	public interface EndWorldTick {
-		void onEndTick(ClientLevel world);
+		void onEndTick(ClientWorld world);
 	}
 }

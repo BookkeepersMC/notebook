@@ -35,41 +35,41 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.network.Connection;
-import net.minecraft.network.ConnectionProtocol;
-import net.minecraft.network.PacketListener;
+import net.minecraft.network.ClientConnection;
+import net.minecraft.network.NetworkPhase;
+import net.minecraft.network.NetworkSide;
 import net.minecraft.network.PacketSendListener;
-import net.minecraft.network.ProtocolInfo;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.listener.PacketListener;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.phase.NetworkPhaseProtocol;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.impl.networking.ChannelInfoHolder;
 import com.bookkeepersmc.notebook.impl.networking.NetworkHandlerExtensions;
 import com.bookkeepersmc.notebook.impl.networking.PacketCallbackListener;
 
-@Mixin(Connection.class)
+@Mixin(ClientConnection.class)
 abstract class ClientConnectionMixin implements ChannelInfoHolder {
 	@Shadow
 	private PacketListener packetListener;
 
 	@Unique
-	private Map<ConnectionProtocol, Collection<ResourceLocation>> playChannels;
+	private Map<NetworkPhase, Collection<Identifier>> playChannels;
 
 	@Inject(method = "<init>", at = @At("RETURN"))
-	private void initAddedFields(PacketFlow side, CallbackInfo ci) {
+	private void initAddedFields(NetworkSide side, CallbackInfo ci) {
 		this.playChannels = new ConcurrentHashMap<>();
 	}
 
-	@Inject(method = "sendPacket", at = @At(value = "FIELD", target = "Lnet/minecraft/network/Connection;sentPackets:I"))
+	@Inject(method = "sendImmediately", at = @At(value = "FIELD", target = "Lnet/minecraft/network/ClientConnection;packetsSentCounter:I"))
 	private void checkPacket(Packet<?> packet, PacketSendListener callback, boolean flush, CallbackInfo ci) {
 		if (this.packetListener instanceof PacketCallbackListener) {
 			((PacketCallbackListener) this.packetListener).sent(packet);
 		}
 	}
 
-	@Inject(method = "validateListener", at = @At("HEAD"))
-	private void unwatchAddon(ProtocolInfo<?> state, PacketListener listener, CallbackInfo ci) {
+	@Inject(method = "validateInboundProtocol", at = @At("HEAD"))
+	private void unwatchAddon(NetworkPhaseProtocol<?> state, PacketListener listener, CallbackInfo ci) {
 		if (this.packetListener instanceof NetworkHandlerExtensions oldListener) {
 			oldListener.getAddon().endSession();
 		}
@@ -82,7 +82,7 @@ abstract class ClientConnectionMixin implements ChannelInfoHolder {
 		}
 	}
 
-	@Inject(method = "handleDisconnection", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketListener;onDisconnect(Lnet/minecraft/network/DisconnectionDetails;)V"))
+	@Inject(method = "handleDisconnection", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/listener/PacketListener;onDisconnected(Lnet/minecraft/network/DisconnectionDetails;)V"))
 	private void disconnectAddon(CallbackInfo ci) {
 		if (packetListener instanceof NetworkHandlerExtensions extension) {
 			extension.getAddon().handleDisconnect();
@@ -90,7 +90,7 @@ abstract class ClientConnectionMixin implements ChannelInfoHolder {
 	}
 
 	@Override
-	public Collection<ResourceLocation> notebook_getPendingChannelsNames(ConnectionProtocol state) {
+	public Collection<Identifier> fabric_getPendingChannelsNames(NetworkPhase state) {
 		return this.playChannels.computeIfAbsent(state, (key) -> Collections.newSetFromMap(new ConcurrentHashMap<>()));
 	}
 }

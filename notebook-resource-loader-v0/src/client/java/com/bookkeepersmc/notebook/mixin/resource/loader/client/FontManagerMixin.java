@@ -24,8 +24,8 @@ package com.bookkeepersmc.notebook.mixin.resource.loader.client;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-import net.minecraft.client.gui.font.FontManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.font.FontManager;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.resource.IdentifiableResourceReloadListener;
 import com.bookkeepersmc.notebook.api.resource.ResourceReloadListenerKeys;
@@ -33,7 +33,7 @@ import com.bookkeepersmc.notebook.api.resource.ResourceReloadListenerKeys;
 @Mixin(FontManager.class)
 public abstract class FontManagerMixin implements IdentifiableResourceReloadListener {
 	@Override
-	public ResourceLocation getNotebookId() {
+	public Identifier getNotebookId() {
 		return ResourceReloadListenerKeys.FONTS;
 	}
 }

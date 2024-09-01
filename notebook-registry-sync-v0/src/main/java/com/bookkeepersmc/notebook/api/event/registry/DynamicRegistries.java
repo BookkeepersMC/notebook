@@ -27,9 +27,9 @@ import java.util.List;
 import com.mojang.serialization.Codec;
 import org.jetbrains.annotations.Unmodifiable;
 
-import net.minecraft.core.Registry;
-import net.minecraft.resources.RegistryDataLoader;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryLoader;
+import net.minecraft.registry.ResourceKey;
 
 import com.bookkeepersmc.notebook.impl.registry.sync.DynamicRegistriesImpl;
 
@@ -37,7 +37,7 @@ public final class DynamicRegistries {
 	private DynamicRegistries() {
 	}
 
-	public static @Unmodifiable List<RegistryDataLoader.RegistryData<?>> getDynamicRegistries() {
+	public static @Unmodifiable List<RegistryLoader.DecodingData<?>> getDynamicRegistries() {
 		return DynamicRegistriesImpl.getDynamicRegistries();
 	}
 

@@ -28,15 +28,15 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import net.minecraft.data.registries.RegistryPatchGenerator;
-import net.minecraft.resources.RegistryDataLoader;
+import net.minecraft.registry.RegistryLoader;
+import net.minecraft.registry.RegistryPatchGenerator;
 
 import com.bookkeepersmc.notebook.api.event.registry.DynamicRegistries;
 
 @Mixin(RegistryPatchGenerator.class)
 class RegistryPatchGeneratorMixin {
-	@Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/resources/RegistryDataLoader;WORLDGEN_REGISTRIES:Ljava/util/List;"), method = "method_54839")
-	private static List<RegistryDataLoader.RegistryData<?>> getDynamicRegistries() {
+	@Redirect(at = @At(value = "FIELD", target = "Lnet/minecraft/registry/RegistryLoader;WORLDGEN_REGISTRIES:Ljava/util/List;"), method = "method_54839")
+	private static List<RegistryLoader.DecodingData<?>> getDynamicRegistries() {
 		return DynamicRegistries.getDynamicRegistries();
 	}
 }

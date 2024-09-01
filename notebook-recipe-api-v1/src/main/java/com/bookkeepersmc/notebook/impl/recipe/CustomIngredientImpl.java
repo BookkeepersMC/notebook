@@ -22,19 +22,23 @@
  */
 package com.bookkeepersmc.notebook.impl.recipe;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.registry.Holder;
+import net.minecraft.registry.HolderSet;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.recipe.v1.CustomIngredient;
 import com.bookkeepersmc.notebook.api.recipe.v1.CustomIngredientSerializer;
@@ -42,9 +46,9 @@ import com.bookkeepersmc.notebook.api.recipe.v1.CustomIngredientSerializer;
 public class CustomIngredientImpl extends Ingredient {
 	public static final String TYPE_KEY = "notebook:type";
 
-	static final Map<ResourceLocation, CustomIngredientSerializer<?>> REGISTERED_SERIALIZERS = new ConcurrentHashMap<>();
+	static final Map<Identifier, CustomIngredientSerializer<?>> REGISTERED_SERIALIZERS = new ConcurrentHashMap<>();
 
-	public static final Codec<CustomIngredientSerializer<?>> CODEC = ResourceLocation.CODEC.flatXmap(identifier ->
+	public static final Codec<CustomIngredientSerializer<?>> CODEC = Identifier.CODEC.flatXmap(identifier ->
 					Optional.ofNullable(REGISTERED_SERIALIZERS.get(identifier))
 							.map(DataResult::success)
 							.orElseGet(() -> DataResult.error(() -> "Unknown custom ingredient serializer: " + identifier)),
@@ -60,7 +64,7 @@ public class CustomIngredientImpl extends Ingredient {
 	}
 
 	@Nullable
-	public static CustomIngredientSerializer<?> getSerializer(ResourceLocation identifier) {
+	public static CustomIngredientSerializer<?> getSerializer(Identifier identifier) {
 		Objects.requireNonNull(identifier, "Identifier may not be null.");
 
 		return REGISTERED_SERIALIZERS.get(identifier);
@@ -71,7 +75,7 @@ public class CustomIngredientImpl extends Ingredient {
 	private final CustomIngredient customIngredient;
 
 	public CustomIngredientImpl(CustomIngredient customIngredient) {
-		super(Stream.empty());
+		super(HolderSet.createDirect(Items.STONE.getBuiltInRegistryHolder()));
 
 		this.customIngredient = customIngredient;
 	}
@@ -87,21 +91,16 @@ public class CustomIngredientImpl extends Ingredient {
 	}
 
 	@Override
-	public ItemStack[] getItems() {
-		if (this.itemStacks == null) {
-			this.itemStacks = customIngredient.getMatchingStacks().toArray(ItemStack[]::new);
+	public List<Holder<Item>> method_8105() {
+		if (this.field_9018 == null) {
+			this.field_9018 = customIngredient.getMatchingStacks();
 		}
 
-		return this.itemStacks;
+		return this.field_9018;
 	}
 
 	@Override
 	public boolean test(@Nullable ItemStack stack) {
 		return stack != null && customIngredient.test(stack);
-	}
-
-	@Override
-	public boolean isEmpty() {
-		return itemStacks != null && itemStacks.length == 0;
 	}
 }

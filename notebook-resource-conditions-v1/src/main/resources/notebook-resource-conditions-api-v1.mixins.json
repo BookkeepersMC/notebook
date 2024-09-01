@@ -11,8 +11,7 @@
     "ReloadableServerResourcesMixin",
     "ServerAdvancementManagerMixin",
     "SimpleJsonResourceReloadListenerMixin",
-    "SimplePreparableReloadListenerMixin",
-    "TagManagerMixin"
+    "SimplePreparableReloadListenerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

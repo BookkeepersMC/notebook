@@ -27,11 +27,11 @@ import java.util.function.Function;
 
 import com.mojang.serialization.MapCodec;
 
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.recipe.v1.CustomIngredient;
 import com.bookkeepersmc.notebook.api.recipe.v1.CustomIngredientSerializer;
@@ -66,31 +66,29 @@ abstract class CombinedIngredient implements CustomIngredient {
 	}
 
 	static class Serializer<I extends CombinedIngredient> implements CustomIngredientSerializer<I> {
-		private final ResourceLocation identifier;
-		private final MapCodec<I> allowEmptyCodec;
-		private final MapCodec<I> disallowEmptyCodec;
-		private final StreamCodec<RegistryFriendlyByteBuf, I> packetCodec;
+		private final Identifier identifier;
+		private final MapCodec<I> codec;
+		private final PacketCodec<RegistryByteBuf, I> packetCodec;
 
-		Serializer(ResourceLocation identifier, Function<List<Ingredient>, I> factory, MapCodec<I> allowEmptyCodec, MapCodec<I> disallowEmptyCodec) {
+		Serializer(Identifier identifier, Function<List<Ingredient>, I> factory, MapCodec<I> codec) {
 			this.identifier = identifier;
-			this.allowEmptyCodec = allowEmptyCodec;
-			this.disallowEmptyCodec = disallowEmptyCodec;
-			this.packetCodec = Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.list())
+			this.codec = codec;
+			this.packetCodec = Ingredient.PACKET_CODEC.apply(PacketCodecs.toCollection())
 					.map(factory, I::getIngredients);
 		}
 
 		@Override
-		public ResourceLocation getId() {
+		public Identifier getId() {
 			return identifier;
 		}
 
 		@Override
-		public MapCodec<I> getCodec(boolean allowEmpty) {
-			return allowEmpty ? allowEmptyCodec : disallowEmptyCodec;
+		public MapCodec<I> getCodec() {
+			return codec;
 		}
 
 		@Override
-		public StreamCodec<RegistryFriendlyByteBuf, I> getStreamCodec() {
+		public PacketCodec<RegistryByteBuf, I> getStreamCodec() {
 			return this.packetCodec;
 		}
 	}

@@ -27,7 +27,7 @@ import java.util.List;
 import com.mojang.serialization.Codec;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.core.HolderLookup;
+import net.minecraft.registry.RegistryOps;
 
 public interface ResourceCondition {
 
@@ -39,5 +39,5 @@ public interface ResourceCondition {
 
 	ResourceConditionType<?> getType();
 
-	boolean test(@Nullable HolderLookup.Provider provider);
+	boolean test(@Nullable RegistryOps.RegistryInfoLookup provider);
 }

@@ -32,36 +32,36 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
-import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.resource.JsonDataLoader;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.profiler.Profiler;
 
 import com.bookkeepersmc.notebook.impl.resource.conditions.ResourceConditionsImpl;
 
-@Mixin(SimpleJsonResourceReloadListener.class)
+@Mixin(JsonDataLoader.class)
 public class SimpleJsonResourceReloadListenerMixin extends SimplePreparableReloadListenerMixin {
 	@Shadow
 	@Final
-	private String directory;
+	private String dataType;
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected void notebook_applyResourceConditions(ResourceManager resourceManager, ProfilerFiller profiler, Object object, @Nullable HolderLookup.Provider registryLookup) {
-		profiler.push("Notebook resource conditions: %s".formatted(directory));
+	protected void notebook_applyResourceConditions(ResourceManager resourceManager, Profiler profiler, Object object, @Nullable RegistryOps.RegistryInfoLookup registryLookup) {
+		profiler.push("Notebook resource conditions: %s".formatted(dataType));
 
-		Iterator<Map.Entry<ResourceLocation, JsonElement>> it = ((Map<ResourceLocation, JsonElement>) object).entrySet().iterator();
+		Iterator<Map.Entry<Identifier, JsonElement>> it = ((Map<Identifier, JsonElement>) object).entrySet().iterator();
 
 		while (it.hasNext()) {
-			Map.Entry<ResourceLocation, JsonElement> entry = it.next();
+			Map.Entry<Identifier, JsonElement> entry = it.next();
 
 			JsonElement resourceData = entry.getValue();
 
 			if (resourceData.isJsonObject()) {
 				JsonObject obj = resourceData.getAsJsonObject();
 
-				if (!ResourceConditionsImpl.applyResourceConditions(obj, directory, entry.getKey(), notebook_getRegistryLookup())) {
+				if (!ResourceConditionsImpl.applyResourceConditions(obj, dataType, entry.getKey(), notebook_getRegistryLookup())) {
 					it.remove();
 				}
 			}

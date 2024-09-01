@@ -8,7 +8,8 @@
     "ItemModelShaperMixin",
     "MinecraftMixin",
     "ParticleEngineMixin",
-    "RegistryDataCollectorContentsCollectorMixin"
+    "RegistryDataCollectorContentsCollectorMixin",
+    "ClientRegistriesDynamicRegistriesAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

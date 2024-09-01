@@ -22,20 +22,20 @@
  */
 package com.bookkeepersmc.notebook.impl.recipe;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.packet.payload.CustomPayload;
 
-public record CustomIngredientPayloadS2C(int protocolVersion) implements CustomPacketPayload {
-	public static final StreamCodec<FriendlyByteBuf, CustomIngredientPayloadS2C> CODEC = StreamCodec.composite(
-			ByteBufCodecs.VAR_INT, CustomIngredientPayloadS2C::protocolVersion,
+public record CustomIngredientPayloadS2C(int protocolVersion) implements CustomPayload {
+	public static final PacketCodec<PacketByteBuf, CustomIngredientPayloadS2C> CODEC = PacketCodec.tuple(
+			PacketCodecs.VAR_INT, CustomIngredientPayloadS2C::protocolVersion,
 			CustomIngredientPayloadS2C::new
 	);
-	public static final CustomPacketPayload.Type<CustomIngredientPayloadS2C> TYPE = new Type<>(CustomIngredientSync.PACKET_ID);
+	public static final CustomPayload.Id<CustomIngredientPayloadS2C> TYPE = new Id<>(CustomIngredientSync.PACKET_ID);
 
 	@Override
-	public Type<? extends CustomPacketPayload> type() {
+	public Id<? extends CustomIngredientPayloadS2C> getId() {
 		return TYPE;
 	}
 }

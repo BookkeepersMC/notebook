@@ -25,22 +25,22 @@ package com.bookkeepersmc.notebook.impl.networking.client;
 import java.util.Collections;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
-import net.minecraft.network.Connection;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.network.AbstractClientNetworkHandler;
+import net.minecraft.network.ClientConnection;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.impl.networking.AbstractChanneledNetworkAddon;
 import com.bookkeepersmc.notebook.impl.networking.GlobalReceiverRegistry;
 import com.bookkeepersmc.notebook.impl.networking.NetworkingImpl;
 import com.bookkeepersmc.notebook.impl.networking.RegistrationPayload;
 
-abstract class ClientCommonNetworkAddon<H, T extends ClientCommonPacketListenerImpl> extends AbstractChanneledNetworkAddon<H> {
+abstract class ClientCommonNetworkAddon<H, T extends AbstractClientNetworkHandler> extends AbstractChanneledNetworkAddon<H> {
 	protected final T handler;
 	protected final Minecraft client;
 
 	protected boolean isServerReady = false;
 
-	protected ClientCommonNetworkAddon(GlobalReceiverRegistry<H> receiver, Connection connection, String description, T handler, Minecraft client) {
+	protected ClientCommonNetworkAddon(GlobalReceiverRegistry<H> receiver, ClientConnection connection, String description, T handler, Minecraft client) {
 		super(receiver, connection, description);
 		this.handler = handler;
 		this.client = client;
@@ -51,7 +51,7 @@ abstract class ClientCommonNetworkAddon<H, T extends ClientCommonPacketListenerI
 	}
 
 	@Override
-	protected void handleRegistration(ResourceLocation channelName) {
+	protected void handleRegistration(Identifier channelName) {
 		// If we can already send packets, immediately send the register packet for this channel
 		if (this.isServerReady) {
 			final RegistrationPayload payload = this.createRegistrationPayload(RegistrationPayload.REGISTER, Collections.singleton(channelName));
@@ -63,7 +63,7 @@ abstract class ClientCommonNetworkAddon<H, T extends ClientCommonPacketListenerI
 	}
 
 	@Override
-	protected void handleUnregistration(ResourceLocation channelName) {
+	protected void handleUnregistration(Identifier channelName) {
 		// If we can already send packets, immediately send the unregister packet for this channel
 		if (this.isServerReady) {
 			final RegistrationPayload payload = this.createRegistrationPayload(RegistrationPayload.UNREGISTER, Collections.singleton(channelName));
@@ -75,7 +75,7 @@ abstract class ClientCommonNetworkAddon<H, T extends ClientCommonPacketListenerI
 	}
 
 	@Override
-	protected boolean isReservedChannel(ResourceLocation channelName) {
+	protected boolean isReservedChannel(Identifier channelName) {
 		return NetworkingImpl.isReservedCommonChannel(channelName);
 	}
 

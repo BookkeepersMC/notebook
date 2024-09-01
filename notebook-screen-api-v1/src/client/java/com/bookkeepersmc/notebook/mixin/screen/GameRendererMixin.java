@@ -28,14 +28,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.render.GameRenderer;
 
 import com.bookkeepersmc.notebook.api.client.screen.v1.ScreenEvents;
 
 @Mixin(GameRenderer.class)
 abstract class GameRendererMixin {
-	@WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;renderWithTooltip(Lnet/minecraft/client/gui/GuiGraphics;IIF)V"))
+	@WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;renderWithTooltip(Lnet/minecraft/client/gui/GuiGraphics;IIF)V"))
 	private void onRenderScreen(Screen current, GuiGraphics guiGraphics, int x, int y, float delta, Operation<Void> operation) {
 		ScreenEvents.beforeRender(current).invoker().beforeRender(current, guiGraphics, x, y, delta);
 		operation.call(current, guiGraphics, x, y, delta);

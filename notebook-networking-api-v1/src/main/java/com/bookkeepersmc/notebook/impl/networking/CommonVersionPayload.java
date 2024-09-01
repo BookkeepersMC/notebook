@@ -22,25 +22,25 @@
  */
 package com.bookkeepersmc.notebook.impl.networking;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.payload.CustomPayload;
+import net.minecraft.util.Identifier;
 
-public record CommonVersionPayload(int[] versions) implements CustomPacketPayload {
-	public static final StreamCodec<FriendlyByteBuf, CommonVersionPayload> CODEC = CustomPacketPayload.codec(CommonVersionPayload::write, CommonVersionPayload::new);
-	public static final Type<CommonVersionPayload> ID = new Type<>(ResourceLocation.parse("c:version"));
+public record CommonVersionPayload(int[] versions) implements CustomPayload {
+	public static final PacketCodec<PacketByteBuf, CommonVersionPayload> CODEC = CustomPayload.create(CommonVersionPayload::write, CommonVersionPayload::new);
+	public static final CustomPayload.Id<CommonVersionPayload> ID = new Id<>(Identifier.parse("c:version"));
 
-	private CommonVersionPayload(FriendlyByteBuf buf) {
-		this(buf.readVarIntArray());
+	private CommonVersionPayload(PacketByteBuf buf) {
+		this(buf.readIntArray());
 	}
 
-	public void write(FriendlyByteBuf buf) {
-		buf.writeVarIntArray(versions);
+	public void write(PacketByteBuf buf) {
+		buf.writeIntArray(versions);
 	}
 
 	@Override
-	public Type<? extends CustomPacketPayload> type() {
+	public Id<? extends CustomPayload> getId() {
 		return ID;
 	}
 }

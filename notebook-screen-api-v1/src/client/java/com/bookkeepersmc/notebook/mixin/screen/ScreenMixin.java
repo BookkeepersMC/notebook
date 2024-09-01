@@ -33,11 +33,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Renderable;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.Selectable;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ClickableWidget;
 
 import com.bookkeepersmc.notebook.api.client.screen.v1.ScreenEvents;
 import com.bookkeepersmc.notebook.api.client.screen.v1.ScreenKeyboardEvents;
@@ -51,13 +51,13 @@ import com.bookkeepersmc.notebook.impl.client.screen.ScreenExtensions;
 abstract class ScreenMixin implements ScreenExtensions {
 	@Shadow
 	@Final
-	protected List<NarratableEntry> narratables;
+	protected List<Selectable> selectables;
 	@Shadow
 	@Final
-	protected List<GuiEventListener> children;
+	protected List<Element> children;
 	@Shadow
 	@Final
-	protected List<Renderable> renderables;
+	protected List<Drawable> drawables;
 
 	@Unique
 	private ButtonList fabricButtons;
@@ -164,10 +164,10 @@ abstract class ScreenMixin implements ScreenExtensions {
 	}
 
 	@Override
-	public List<AbstractWidget> notebook_getButtons() {
+	public List<ClickableWidget> notebook_getButtons() {
 		// Lazy init to make the list access safe after Screen#init
 		if (this.fabricButtons == null) {
-			this.fabricButtons = new ButtonList(this.renderables, this.narratables, this.children);
+			this.fabricButtons = new ButtonList(this.drawables, this.selectables, this.children);
 		}
 
 		return this.fabricButtons;

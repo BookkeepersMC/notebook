@@ -26,8 +26,8 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.Ingredient;
 
 public class ShapelessMatch {
 	private final int[] match;

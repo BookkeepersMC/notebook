@@ -28,7 +28,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.core.HolderLookup;
+import net.minecraft.registry.RegistryOps;
 
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceCondition;
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceConditionType;
@@ -46,7 +46,7 @@ public record OrResourceCondition(List<ResourceCondition> conditions) implements
 	}
 
 	@Override
-	public boolean test(@Nullable HolderLookup.Provider registryLookup) {
+	public boolean test(@Nullable RegistryOps.RegistryInfoLookup registryLookup) {
 		return ResourceConditionsImpl.conditionsMet(this.conditions(), registryLookup, false);
 	}
 }

@@ -31,61 +31,61 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
-import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.c2s.login.LoginQueryResponseC2SPacket;
+import net.minecraft.network.packet.s2c.login.LoginQueryRequestS2CPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import net.minecraft.server.network.ServerLoginNetworkHandler;
 
 import com.bookkeepersmc.notebook.impl.networking.NetworkHandlerExtensions;
 import com.bookkeepersmc.notebook.impl.networking.PacketCallbackListener;
-import com.bookkeepersmc.notebook.impl.networking.payload.FriendlyByteBufLoginQueryResponse;
+import com.bookkeepersmc.notebook.impl.networking.payload.PacketByteBufLoginQueryResponse;
 import com.bookkeepersmc.notebook.impl.networking.server.ServerLoginNetworkAddon;
 
-@Mixin(ServerLoginPacketListenerImpl.class)
+@Mixin(ServerLoginNetworkHandler.class)
 abstract class ServerLoginNetworkHandlerMixin implements NetworkHandlerExtensions, PacketCallbackListener {
 	@Shadow
-	protected abstract void verifyLoginAndFinishConnectionSetup(GameProfile profile);
+	protected abstract void method_52419(GameProfile profile);
 
 	@Unique
 	private ServerLoginNetworkAddon addon;
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void initAddon(CallbackInfo ci) {
-		this.addon = new ServerLoginNetworkAddon((ServerLoginPacketListenerImpl) (Object) this);
+		this.addon = new ServerLoginNetworkAddon((ServerLoginNetworkHandler) (Object) this);
 		// A bit of a hack but it allows the field above to be set in case someone registers handlers during INIT event which refers to said field
 		this.addon.lateInit();
 	}
 
-	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;verifyLoginAndFinishConnectionSetup(Lcom/mojang/authlib/GameProfile;)V"))
-	private void handlePlayerJoin(ServerLoginPacketListenerImpl instance, GameProfile profile) {
+	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerLoginNetworkHandler;method_52419(Lcom/mojang/authlib/GameProfile;)V"))
+	private void handlePlayerJoin(ServerLoginNetworkHandler instance, GameProfile profile) {
 		// Do not accept the player, thereby moving into play stage until all login futures being waited on are completed
 		if (this.addon.queryTick()) {
-			this.verifyLoginAndFinishConnectionSetup(profile);
+			this.method_52419(profile);
 		}
 	}
 
-	@Inject(method = "handleCustomQueryPacket", at = @At("HEAD"), cancellable = true)
-	private void handleCustomPayloadReceivedAsync(ServerboundCustomQueryAnswerPacket packet, CallbackInfo ci) {
+	@Inject(method = "onQueryResponse", at = @At("HEAD"), cancellable = true)
+	private void handleCustomPayloadReceivedAsync(LoginQueryResponseC2SPacket packet, CallbackInfo ci) {
 		// Handle queries
 		if (this.addon.handle(packet)) {
 			ci.cancel();
 		} else {
-			if (packet.payload() instanceof FriendlyByteBufLoginQueryResponse response) {
+			if (packet.payload() instanceof PacketByteBufLoginQueryResponse response) {
 				response.data().skipBytes(response.data().readableBytes());
 			}
 		}
 	}
 
-	@Redirect(method = "verifyLoginAndFinishConnectionSetup", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCompressionThreshold()I", ordinal = 0))
+	@Redirect(method = "method_52419", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getNetworkCompressionThreshold()I", ordinal = 0))
 	private int removeLateCompressionPacketSending(MinecraftServer server) {
 		return -1;
 	}
 
 	@Override
 	public void sent(Packet<?> packet) {
-		if (packet instanceof ClientboundCustomQueryPacket) {
-			this.addon.registerOutgoingPacket((ClientboundCustomQueryPacket) packet);
+		if (packet instanceof LoginQueryRequestS2CPacket) {
+			this.addon.registerOutgoingPacket((LoginQueryRequestS2CPacket) packet);
 		}
 	}
 

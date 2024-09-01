@@ -29,32 +29,32 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceCondition;
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceConditionType;
 import com.bookkeepersmc.notebook.impl.resource.conditions.DefaultResourceConditionTypes;
 import com.bookkeepersmc.notebook.impl.resource.conditions.ResourceConditionsImpl;
 
-public record TagsPopulatedResourceCondition(ResourceLocation registry, List<ResourceLocation> tags) implements ResourceCondition {
+public record TagsPopulatedResourceCondition(Identifier registry, List<Identifier> tags) implements ResourceCondition {
 	// Cannot use registry-bound codec because they fail parsing if nonexistent,
 	// and resource conditions themselves should not fail to parse on condition failure
 	public static final MapCodec<TagsPopulatedResourceCondition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			ResourceLocation.CODEC.fieldOf("registry").orElse(Registries.ITEM.location()).forGetter(TagsPopulatedResourceCondition::registry),
-			ResourceLocation.CODEC.listOf().fieldOf("values").forGetter(TagsPopulatedResourceCondition::tags)
+			Identifier.CODEC.fieldOf("registry").orElse(Registries.ITEM.getValue()).forGetter(TagsPopulatedResourceCondition::registry),
+			Identifier.CODEC.listOf().fieldOf("values").forGetter(TagsPopulatedResourceCondition::tags)
 	).apply(instance, TagsPopulatedResourceCondition::new));
 
 	@SafeVarargs
-	public <T> TagsPopulatedResourceCondition(ResourceLocation registry, TagKey<T>... tags) {
-		this(registry, Arrays.stream(tags).map(TagKey::location).toList());
+	public <T> TagsPopulatedResourceCondition(Identifier registry, TagKey<T>... tags) {
+		this(registry, Arrays.stream(tags).map(TagKey::id).toList());
 	}
 
 	@SafeVarargs
 	public <T> TagsPopulatedResourceCondition(TagKey<T>... tags) {
-		this(tags[0].registry().location(), Arrays.stream(tags).map(TagKey::location).toList());
+		this(tags[0].registry().getValue(), Arrays.stream(tags).map(TagKey::id).toList());
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public record TagsPopulatedResourceCondition(ResourceLocation registry, List<Res
 	}
 
 	@Override
-	public boolean test(@Nullable HolderLookup.Provider registryLookup) {
+	public boolean test(@Nullable RegistryOps.RegistryInfoLookup registryLookup) {
 		return ResourceConditionsImpl.tagsPopulated(this.registry(), this.tags());
 	}
 }

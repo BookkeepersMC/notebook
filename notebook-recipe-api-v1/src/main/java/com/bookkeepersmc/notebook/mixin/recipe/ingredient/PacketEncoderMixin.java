@@ -33,8 +33,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.network.PacketEncoder;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.impl.recipe.CustomIngredientSync;
 import com.bookkeepersmc.notebook.impl.recipe.SupportedIngredientsPacketEncoder;
@@ -42,18 +42,18 @@ import com.bookkeepersmc.notebook.impl.recipe.SupportedIngredientsPacketEncoder;
 @Mixin(PacketEncoder.class)
 public class PacketEncoderMixin implements SupportedIngredientsPacketEncoder {
 	@Unique
-	private Set<ResourceLocation> notebook_supportedCustomIngredients = Set.of();
+	private Set<Identifier> notebook_supportedCustomIngredients = Set.of();
 
 	@Override
-	public void notebook_setSupportedCustomIngredients(Set<ResourceLocation> supportedCustomIngredients) {
+	public void notebook_setSupportedCustomIngredients(Set<Identifier> supportedCustomIngredients) {
 		notebook_supportedCustomIngredients = supportedCustomIngredients;
 	}
 
 	@Inject(
-			method = "encode(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;Lio/netty/buffer/ByteBuf;)V",
+			method = "encode(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/packet/Packet;Lio/netty/buffer/ByteBuf;)V",
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/network/codec/StreamCodec;encode(Ljava/lang/Object;Ljava/lang/Object;)V"
+					target = "Lnet/minecraft/network/codec/PacketCodec;encode(Ljava/lang/Object;Ljava/lang/Object;)V"
 			)
 	)
 	private void captureEncoder(ChannelHandlerContext context, Packet<?> packet, ByteBuf buf, CallbackInfo info) {
@@ -61,18 +61,18 @@ public class PacketEncoderMixin implements SupportedIngredientsPacketEncoder {
 	}
 
 	@Inject(
-			method = "encode(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;Lio/netty/buffer/ByteBuf;)V",
+			method = "encode(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/packet/Packet;Lio/netty/buffer/ByteBuf;)V",
 			at = {
 					@At(
 							value = "INVOKE",
-							target = "Lnet/minecraft/network/codec/StreamCodec;encode(Ljava/lang/Object;Ljava/lang/Object;)V",
+							target = "Lnet/minecraft/network/codec/PacketCodec;encode(Ljava/lang/Object;Ljava/lang/Object;)V",
 							shift = At.Shift.AFTER,
 							by = 1
 					),
 
 					@At(
 							value = "INVOKE",
-							target = "Lnet/minecraft/network/protocol/Packet;isSkippable()Z"
+							target = "Lnet/minecraft/network/packet/Packet;isWritingErrorSkippable()Z"
 					)
 			}
 	)

@@ -46,17 +46,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.minecraft.SharedConstants;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
-import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.server.packs.repository.ServerPacksSource;
-import net.minecraft.world.flag.FeatureFlags;
-import net.minecraft.world.level.DataPackConfig;
-import net.minecraft.world.level.WorldDataConfiguration;
-import net.minecraft.world.level.validation.DirectoryValidator;
+import net.minecraft.feature_flags.FeatureFlags;
+import net.minecraft.resource.ResourceType;
+import net.minecraft.resource.pack.DataPackSettings;
+import net.minecraft.resource.pack.PackManager;
+import net.minecraft.resource.pack.PackProfile;
+import net.minecraft.resource.pack.ResourcePack;
+import net.minecraft.resource.pack.VanillaDataPackProvider;
+import net.minecraft.resource.pack.metadata.PackResourceMetadataSection;
+import net.minecraft.server.world.FeatureAndDataSettings;
+import net.minecraft.text.Text;
+import net.minecraft.util.path.SymlinkValidator;
 
 import com.bookkeepersmc.loader.api.ModContainer;
 import com.bookkeepersmc.loader.api.NotebookLoader;
@@ -81,7 +81,7 @@ public final class ModResourcePackUtil {
 	 * @param type    the type of resource
 	 * @param subPath the resource pack sub path directory in mods, may be {@code null}
 	 */
-	public static void appendModResourcePacks(List<ModResourcePack> packs, PackType type, @Nullable String subPath) {
+	public static void appendModResourcePacks(List<ModResourcePack> packs, ResourceType type, @Nullable String subPath) {
 		for (ModContainer container : NotebookLoader.getInstance().getAllMods()) {
 			if (container.getMetadata().getType().equals("builtin")) {
 				continue;
@@ -95,28 +95,28 @@ public final class ModResourcePackUtil {
 		}
 	}
 
-	public static void refreshAutoEnabledPacks(List<Pack> enabledProfiles, Map<String, Pack> allProfiles) {
-		LOGGER.debug("[Notebook] Starting internal pack sorting with: {}", enabledProfiles.stream().map(Pack::getId).toList());
+	public static void refreshAutoEnabledPacks(List<PackProfile> enabledProfiles, Map<String, PackProfile> allProfiles) {
+		LOGGER.debug("[Notebook] Starting internal pack sorting with: {}", enabledProfiles.stream().map(PackProfile::getName).toList());
 		enabledProfiles.removeIf(profile -> ((NotebookResourcePackProfile) profile).notebook_isHidden());
-		LOGGER.debug("[Notebook] Removed all internal packs, result: {}", enabledProfiles.stream().map(Pack::getId).toList());
-		ListIterator<Pack> it = enabledProfiles.listIterator();
+		LOGGER.debug("[Notebook] Removed all internal packs, result: {}", enabledProfiles.stream().map(PackProfile::getName).toList());
+		ListIterator<PackProfile> it = enabledProfiles.listIterator();
 		Set<String> seen = new LinkedHashSet<>();
 
 		while (it.hasNext()) {
-			Pack profile = it.next();
-			seen.add(profile.getId());
+			PackProfile profile = it.next();
+			seen.add(profile.getName());
 
-			for (Pack p : allProfiles.values()) {
+			for (PackProfile p : allProfiles.values()) {
 				NotebookResourcePackProfile fp = (NotebookResourcePackProfile) p;
 
-				if (fp.notebook_isHidden() && fp.notebook_parentsEnabled(seen) && seen.add(p.getId())) {
+				if (fp.notebook_isHidden() && fp.notebook_parentsEnabled(seen) && seen.add(p.getName())) {
 					it.add(p);
-					LOGGER.debug("[Notebook] cur @ {}, auto-enabled {}, currently enabled: {}", profile.getId(), p.getId(), seen);
+					LOGGER.debug("[Notebook] cur @ {}, auto-enabled {}, currently enabled: {}", profile.getName(), p.getName(), seen);
 				}
 			}
 		}
 
-		LOGGER.debug("[Notebook] Final sorting result: {}", enabledProfiles.stream().map(Pack::getId).toList());
+		LOGGER.debug("[Notebook] Final sorting result: {}", enabledProfiles.stream().map(PackProfile::getName).toList());
 	}
 
 	public static boolean containsDefault(String filename, boolean modBundled) {
@@ -135,11 +135,11 @@ public final class ModResourcePackUtil {
 		return null;
 	}
 
-	public static InputStream openDefault(ModContainer container, PackType type, String filename) throws IOException {
+	public static InputStream openDefault(ModContainer container, ResourceType type, String filename) throws IOException {
 		switch (filename) {
 		case "pack.mcmeta":
 			String description = Objects.requireNonNullElse(container.getMetadata().getId(), "");
-			String metadata = serializeMetadata(SharedConstants.getCurrentVersion().getPackVersion(type), description);
+			String metadata = serializeMetadata(SharedConstants.getGameVersion().getResourceVersion(type), description);
 			return IOUtils.toInputStream(metadata, Charsets.UTF_8);
 		case "pack.png":
 			Optional<Path> path = container.getMetadata().getIconPath(512).flatMap(container::findPath);
@@ -154,27 +154,27 @@ public final class ModResourcePackUtil {
 		}
 	}
 
-	public static PackMetadataSection getMetadataPack(int packVersion, Component description) {
-		return new PackMetadataSection(description, packVersion, Optional.empty());
+	public static PackResourceMetadataSection getMetadataPack(int packVersion, Text description) {
+		return new PackResourceMetadataSection(description, packVersion, Optional.empty());
 	}
 
-	public static JsonObject getMetadataPackJson(int packVersion, Component description) {
-		return PackMetadataSection.TYPE.toJson(getMetadataPack(packVersion, description));
+	public static JsonObject getMetadataPackJson(int packVersion, Text description) {
+		return PackResourceMetadataSection.TYPE.toJson(getMetadataPack(packVersion, description));
 	}
 
 	public static String serializeMetadata(int packVersion, String description) {
 		// This seems to be still manually deserialized
-		JsonObject pack = getMetadataPackJson(packVersion, Component.literal(description));
+		JsonObject pack = getMetadataPackJson(packVersion, Text.literal(description));
 		JsonObject metadata = new JsonObject();
 		metadata.add("pack", pack);
 		return GSON.toJson(metadata);
 	}
 
-	public static Component getName(ModMetadata info) {
+	public static Text getName(ModMetadata info) {
 		if (info.getId() != null) {
-			return Component.literal(info.getId());
+			return Text.literal(info.getId());
 		} else {
-			return Component.translatable("pack.name.notebookMod", info.getId());
+			return Text.translatable("pack.name.notebookMod", info.getId());
 		}
 	}
 
@@ -183,34 +183,34 @@ public final class ModResourcePackUtil {
 	 * {@code DataPackSettings.SAFE_MODE} used in vanilla.
 	 * @return the default data pack settings
 	 */
-	public static WorldDataConfiguration createDefaultDataConfiguration() {
-		ModResourcePackCreator modResourcePackCreator = new ModResourcePackCreator(PackType.SERVER_DATA);
-		List<Pack> moddedResourcePacks = new ArrayList<>();
+	public static FeatureAndDataSettings createDefaultDataConfiguration() {
+		ModResourcePackCreator modResourcePackCreator = new ModResourcePackCreator(ResourceType.SERVER_DATA);
+		List<PackProfile> moddedResourcePacks = new ArrayList<>();
 		modResourcePackCreator.loadPacks(moddedResourcePacks::add);
 
-		List<String> enabled = new ArrayList<>(DataPackConfig.DEFAULT.getEnabled());
-		List<String> disabled = new ArrayList<>(DataPackConfig.DEFAULT.getDisabled());
+		List<String> enabled = new ArrayList<>(DataPackSettings.SAFE_MODE.getEnabled());
+		List<String> disabled = new ArrayList<>(DataPackSettings.SAFE_MODE.getDisabled());
 
 		// This ensures that any built-in registered data packs by mods which needs to be enabled by default are
 		// as the data pack screen automatically put any data pack as disabled except the Default data pack.
-		for (Pack profile : moddedResourcePacks) {
-			if (profile.getPackSource() == ModResourcePackCreator.RESOURCE_PACK_SOURCE) {
-				enabled.add(profile.getId());
+		for (PackProfile profile : moddedResourcePacks) {
+			if (profile.getSource() == ModResourcePackCreator.RESOURCE_PACK_SOURCE) {
+				enabled.add(profile.getName());
 				continue;
 			}
 
-			try (PackResources pack = profile.open()) {
+			try (ResourcePack pack = profile.createPack()) {
 				if (pack instanceof ModNioResourcePack && ((ModNioResourcePack) pack).getActivationType().isEnabledByDefault()) {
-					enabled.add(profile.getId());
+					enabled.add(profile.getName());
 				} else {
-					disabled.add(profile.getId());
+					disabled.add(profile.getName());
 				}
 			}
 		}
 
-		return new WorldDataConfiguration(
-				new DataPackConfig(enabled, disabled),
-				FeatureFlags.DEFAULT_FLAGS
+		return new FeatureAndDataSettings(
+				new DataPackSettings(enabled, disabled),
+				FeatureFlags.DEFAULT_SET
 		);
 	}
 
@@ -219,11 +219,11 @@ public final class ModResourcePackUtil {
 	 * which means the Vanilla pack has higher precedence than modded, breaking our tests.
 	 * To fix this, we move all modded pack profiles to the end of the list.
 	 */
-	public static DataPackConfig createTestServerSettings(List<String> enabled, List<String> disabled) {
+	public static DataPackSettings createTestServerSettings(List<String> enabled, List<String> disabled) {
 		// Collect modded profiles
 		Set<String> moddedProfiles = new HashSet<>();
-		ModResourcePackCreator modResourcePackCreator = new ModResourcePackCreator(PackType.SERVER_DATA);
-		modResourcePackCreator.loadPacks(profile -> moddedProfiles.add(profile.getId()));
+		ModResourcePackCreator modResourcePackCreator = new ModResourcePackCreator(ResourceType.SERVER_DATA);
+		modResourcePackCreator.loadPacks(profile -> moddedProfiles.add(profile.getName()));
 
 		// Remove them from the enabled list
 		List<String> moveToTheEnd = new ArrayList<>();
@@ -240,14 +240,14 @@ public final class ModResourcePackUtil {
 		// Add back at the end
 		enabled.addAll(moveToTheEnd);
 
-		return new DataPackConfig(enabled, disabled);
+		return new DataPackSettings(enabled, disabled);
 	}
 
 	/**
 	 * Creates the ResourcePackManager used by the ClientDataPackManager and replaces
 	 * {@code VanillaDataPackProvider.createClientManager} used by vanilla.
 	 */
-	public static PackRepository createClientManager() {
-		return new PackRepository(new ServerPacksSource(new DirectoryValidator((path) -> true)), new ModResourcePackCreator(PackType.SERVER_DATA, true));
+	public static PackManager createClientManager() {
+		return new PackManager(new VanillaDataPackProvider(new SymlinkValidator((path) -> true)), new ModResourcePackCreator(ResourceType.SERVER_DATA, true));
 	}
 }

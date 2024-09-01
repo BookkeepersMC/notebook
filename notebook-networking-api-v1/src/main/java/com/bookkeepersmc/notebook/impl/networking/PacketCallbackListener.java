@@ -22,7 +22,7 @@
  */
 package com.bookkeepersmc.notebook.impl.networking;
 
-import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.packet.Packet;
 
 public interface PacketCallbackListener {
 	/**

@@ -29,28 +29,26 @@ import java.util.Map;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Coerce;
 
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistrySynchronization;
-import net.minecraft.resources.RegistryDataLoader;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.registry.DynamicRegistrySync;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryLoader;
+import net.minecraft.registry.ResourceKey;
+import net.minecraft.resource.ResourceFactory;
+import net.minecraft.unmapped.C_jcuvnmyx;
 
 import com.bookkeepersmc.notebook.impl.registry.sync.DynamicRegistriesImpl;
 
-@Mixin(targets = "net/minecraft/client/multiplayer/RegistryDataCollector$ContentsCollector")
+@Mixin(C_jcuvnmyx.class)
 public class RegistryDataCollectorContentsCollectorMixin {
-	@Shadow
-	@Final
-	private Map<ResourceKey<? extends Registry<?>>, List<RegistrySynchronization.PackedRegistryEntry>> elements;
-
-	@WrapOperation(method = "loadRegistries", at = @At(value = "FIELD", target = "Lnet/minecraft/resources/RegistryDataLoader;SYNCHRONIZED_REGISTRIES:Ljava/util/List;", opcode = Opcodes.GETSTATIC))
-	private List<RegistryDataLoader.RegistryData<?>> skipEmptyRegistries(Operation<List<RegistryDataLoader.RegistryData<?>>> operation) {
-		List<RegistryDataLoader.RegistryData<?>> result = new ArrayList<>(operation.call());
-		result.removeIf(entry -> DynamicRegistriesImpl.SKIP_EMPTY_SYNC_REGISTRIES.contains(entry.key()) && !this.elements.containsKey(entry.key()));
+	@WrapOperation(method = "method_62155", at = @At(value = "FIELD", target = "Lnet/minecraft/registry/RegistryLoader;SYNCED_REGISTRIES:Ljava/util/List;", opcode = Opcodes.GETSTATIC))
+	private List<RegistryLoader.DecodingData<?>> skipEmptyRegistries(Operation<List<RegistryLoader.DecodingData<?>>> operation, ResourceFactory resourceFactory, @Coerce ClientRegistriesDynamicRegistriesAccessor storage, boolean bl) {
+		Map<ResourceKey<? extends Registry<?>>, List<DynamicRegistrySync.SerializedRegistryEntry>> dynamicRegistries = storage.getDynamicRegistries();
+		List<RegistryLoader.DecodingData<?>> result = new ArrayList<>(operation.call());
+		result.removeIf(entry -> DynamicRegistriesImpl.SKIP_EMPTY_SYNC_REGISTRIES.contains(entry.key()) && !dynamicRegistries.containsKey(entry.key()));
 		return result;
 	}
 }

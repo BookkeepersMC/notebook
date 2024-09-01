@@ -28,24 +28,24 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
-import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.SinglePreparationResourceReloader;
+import net.minecraft.util.profiler.Profiler;
 
-@Mixin(SimplePreparableReloadListener.class)
+@Mixin(SinglePreparationResourceReloader.class)
 public class SimplePreparableReloadListenerMixin {
 
 	@Inject(method = "method_18790", at = @At("HEAD"))
-	private void applyResourceConditions(ResourceManager resourceManager, ProfilerFiller profilerFiller, Object object, CallbackInfo info) {
+	private void applyResourceConditions(ResourceManager resourceManager, Profiler profilerFiller, Object object, CallbackInfo info) {
 		notebook_applyResourceConditions(resourceManager, profilerFiller, object, notebook_getRegistryLookup());
 	}
 
-	protected void notebook_applyResourceConditions(ResourceManager resourceManager, ProfilerFiller profiler, Object object, @Nullable HolderLookup.Provider registryLookup) {
+	protected void notebook_applyResourceConditions(ResourceManager resourceManager, Profiler profiler, Object object, @Nullable RegistryOps.RegistryInfoLookup registryLookup) {
 	}
 
 	@Nullable
-	protected HolderLookup.Provider notebook_getRegistryLookup() {
+	protected RegistryOps.RegistryInfoLookup notebook_getRegistryLookup() {
 		return null;
 	}
 }

@@ -26,9 +26,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.ResourceKey;
 
 import com.bookkeepersmc.notebook.api.event.registry.DynamicRegistryView;
 import com.bookkeepersmc.notebook.api.event.registry.RegistryEntryAddedCallback;
@@ -41,11 +41,11 @@ public final class DynamicRegistryViewImpl implements DynamicRegistryView {
 	}
 
 	@Override
-	public RegistryAccess asDynamicRegistryManager() {
-		return new RegistryAccess.Frozen() {
+	public DynamicRegistryManager asDynamicRegistryManager() {
+		return new DynamicRegistryManager.Frozen() {
 			@SuppressWarnings("unchecked")
 			@Override
-			public <T> Optional<Registry<T>> registry(ResourceKey<? extends Registry<? extends T>> resourceKey) {
+			public <T> Optional<Registry<T>> getOptional(ResourceKey<? extends Registry<? extends T>> resourceKey) {
 				return Optional.ofNullable((Registry<T>) DynamicRegistryViewImpl.this.registries.get(resourceKey));
 			}
 
@@ -55,7 +55,7 @@ public final class DynamicRegistryViewImpl implements DynamicRegistryView {
 			}
 
 			private <T> RegistryEntry<T> entry(Registry<T> registry) {
-				return new RegistryEntry<>(registry.key(), registry);
+				return new RegistryEntry<>(registry.getKey(), registry);
 			}
 
 			public Frozen freeze() {

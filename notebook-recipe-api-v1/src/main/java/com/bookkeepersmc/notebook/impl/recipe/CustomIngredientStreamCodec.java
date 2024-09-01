@@ -24,24 +24,24 @@ package com.bookkeepersmc.notebook.impl.recipe;
 
 import java.util.Set;
 
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.recipe.v1.CustomIngredient;
 import com.bookkeepersmc.notebook.api.recipe.v1.CustomIngredientSerializer;
 
-public class CustomIngredientStreamCodec implements StreamCodec<RegistryFriendlyByteBuf, Ingredient> {
+public class CustomIngredientStreamCodec implements PacketCodec<RegistryByteBuf, Ingredient> {
 	private static final int PACKET_MARKER = -1;
-	private final StreamCodec<RegistryFriendlyByteBuf, Ingredient> fallback;
+	private final PacketCodec<RegistryByteBuf, Ingredient> fallback;
 
-	public CustomIngredientStreamCodec(StreamCodec<RegistryFriendlyByteBuf, Ingredient> fallback) {
+	public CustomIngredientStreamCodec(PacketCodec<RegistryByteBuf, Ingredient> fallback) {
 		this.fallback = fallback;
 	}
 
 	@Override
-	public Ingredient decode(RegistryFriendlyByteBuf buf) {
+	public Ingredient decode(RegistryByteBuf buf) {
 		int index = buf.readerIndex();
 
 		if (buf.readVarInt() != PACKET_MARKER) {
@@ -50,7 +50,7 @@ public class CustomIngredientStreamCodec implements StreamCodec<RegistryFriendly
 			return this.fallback.decode(buf);
 		}
 
-		ResourceLocation type = buf.readResourceLocation();
+		Identifier type = buf.readIdentifier();
 		CustomIngredientSerializer<?> serializer = CustomIngredientSerializer.get(type);
 
 		if (serializer == null) {
@@ -62,7 +62,7 @@ public class CustomIngredientStreamCodec implements StreamCodec<RegistryFriendly
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void encode(RegistryFriendlyByteBuf buf, Ingredient value) {
+	public void encode(RegistryByteBuf buf, Ingredient value) {
 		CustomIngredient customIngredient = value.getCustomIngredient();
 
 		if (shouldEncodeFallback(customIngredient)) {
@@ -71,8 +71,8 @@ public class CustomIngredientStreamCodec implements StreamCodec<RegistryFriendly
 		}
 
 		buf.writeVarInt(PACKET_MARKER);
-		buf.writeResourceLocation(customIngredient.getSerializer().getId());
-		StreamCodec<RegistryFriendlyByteBuf, CustomIngredient> packetCodec = (StreamCodec<RegistryFriendlyByteBuf, CustomIngredient>) customIngredient.getSerializer().getStreamCodec();
+		buf.writeIdentifier(customIngredient.getSerializer().getId());
+		PacketCodec<RegistryByteBuf, CustomIngredient> packetCodec = (PacketCodec<RegistryByteBuf, CustomIngredient>) customIngredient.getSerializer().getStreamCodec();
 		packetCodec.encode(buf, customIngredient);
 	}
 
@@ -81,7 +81,7 @@ public class CustomIngredientStreamCodec implements StreamCodec<RegistryFriendly
 			return true;
 		}
 
-		Set<ResourceLocation> supportedIngredients = CustomIngredientSync.CURRENT_SUPPORTED_INGREDIENTS.get();
+		Set<Identifier> supportedIngredients = CustomIngredientSync.CURRENT_SUPPORTED_INGREDIENTS.get();
 		return supportedIngredients != null && !supportedIngredients.contains(customIngredient.getSerializer().getId());
 	}
 }

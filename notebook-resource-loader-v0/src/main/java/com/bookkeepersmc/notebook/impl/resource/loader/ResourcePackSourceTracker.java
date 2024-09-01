@@ -24,8 +24,8 @@ package com.bookkeepersmc.notebook.impl.resource.loader;
 
 import java.util.WeakHashMap;
 
-import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.resource.pack.PackSource;
+import net.minecraft.resource.pack.ResourcePack;
 
 /**
  * Tracks the sources of resource packs in a global weak hash map.
@@ -37,7 +37,7 @@ import net.minecraft.server.packs.repository.PackSource;
  */
 public final class ResourcePackSourceTracker {
 	// Use a weak hash map so that if resource packs would be deleted, this won't keep them alive.
-	private static final WeakHashMap<PackResources, PackSource> SOURCES = new WeakHashMap<>();
+	private static final WeakHashMap<ResourcePack, PackSource> SOURCES = new WeakHashMap<>();
 
 	/**
 	 * Gets the source of a pack.
@@ -45,8 +45,8 @@ public final class ResourcePackSourceTracker {
 	 * @param pack the resource pack
 	 * @return the source, or {@link PackSource#DEFAULT} if not tracked
 	 */
-	public static PackSource getSource(PackResources pack) {
-		return SOURCES.getOrDefault(pack, PackSource.DEFAULT);
+	public static PackSource getSource(ResourcePack pack) {
+		return SOURCES.getOrDefault(pack, PackSource.PACK_SOURCE_NONE);
 	}
 
 	/**
@@ -55,7 +55,7 @@ public final class ResourcePackSourceTracker {
 	 * @param pack the resource pack
 	 * @param source the source
 	 */
-	public static void setSource(PackResources pack, PackSource source) {
+	public static void setSource(ResourcePack pack, PackSource source) {
 		SOURCES.put(pack, source);
 	}
 }

@@ -25,9 +25,9 @@ package com.bookkeepersmc.notebook.api.recipe.v1;
 import com.mojang.serialization.MapCodec;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.impl.recipe.CustomIngredientImpl;
 
@@ -38,13 +38,13 @@ public interface CustomIngredientSerializer<T extends CustomIngredient> {
 	}
 
 	@Nullable
-	static CustomIngredientSerializer<?> get(ResourceLocation identifier) {
+	static CustomIngredientSerializer<?> get(Identifier identifier) {
 		return CustomIngredientImpl.getSerializer(identifier);
 	}
 
-	ResourceLocation getId();
+	Identifier getId();
 
-	MapCodec<T> getCodec(boolean allowEmpty);
+	MapCodec<T> getCodec();
 
-	StreamCodec<RegistryFriendlyByteBuf, T> getStreamCodec();
+	PacketCodec<RegistryByteBuf, T> getStreamCodec();
 }

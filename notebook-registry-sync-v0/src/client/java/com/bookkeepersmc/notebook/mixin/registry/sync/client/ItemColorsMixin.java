@@ -29,10 +29,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.color.item.ItemColor;
+import net.minecraft.client.color.item.ItemColorProvider;
 import net.minecraft.client.color.item.ItemColors;
-import net.minecraft.core.IdMapper;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.registry.BuiltInRegistries;
+import net.minecraft.util.collection.IdList;
 
 import com.bookkeepersmc.notebook.impl.registry.sync.trackers.IdListTracker;
 
@@ -40,10 +40,10 @@ import com.bookkeepersmc.notebook.impl.registry.sync.trackers.IdListTracker;
 public class ItemColorsMixin {
 	@Final
 	@Shadow
-	private IdMapper<ItemColor> itemColors;
+	private IdList<ItemColorProvider> providers;
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void create(CallbackInfo info) {
-		IdListTracker.register(BuiltInRegistries.ITEM, "ItemColors.providers", itemColors);
+		IdListTracker.register(BuiltInRegistries.ITEM, "ItemColors.providers", providers);
 	}
 }

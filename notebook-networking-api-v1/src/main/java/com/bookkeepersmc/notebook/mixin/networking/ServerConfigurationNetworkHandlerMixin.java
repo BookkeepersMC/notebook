@@ -33,20 +33,20 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.network.Connection;
+import net.minecraft.network.ClientConnection;
+import net.minecraft.network.ConnectedClientData;
+import net.minecraft.network.configuration.ConfigurationTask;
+import net.minecraft.network.listener.AbstractServerPacketHandler;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.CommonListenerCookie;
-import net.minecraft.server.network.ConfigurationTask;
-import net.minecraft.server.network.ServerCommonPacketListenerImpl;
-import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
+import net.minecraft.server.network.ServerConfigurationNetworkHandler;
 
 import com.bookkeepersmc.notebook.api.networking.v1.NotebookServerConfigurationNetworkHandler;
 import com.bookkeepersmc.notebook.impl.networking.NetworkHandlerExtensions;
 import com.bookkeepersmc.notebook.impl.networking.server.ServerConfigurationNetworkAddon;
 
 // We want to apply a bit earlier than other mods which may not use us in order to prevent refCount issues
-@Mixin(value = ServerConfigurationPacketListenerImpl.class, priority = 900)
-public abstract class ServerConfigurationNetworkHandlerMixin extends ServerCommonPacketListenerImpl implements NetworkHandlerExtensions, NotebookServerConfigurationNetworkHandler {
+@Mixin(value = ServerConfigurationNetworkHandler.class, priority = 900)
+public abstract class ServerConfigurationNetworkHandlerMixin extends AbstractServerPacketHandler implements NetworkHandlerExtensions, NotebookServerConfigurationNetworkHandler {
 	@Shadow
 	@Nullable
 	private ConfigurationTask currentTask;
@@ -56,10 +56,10 @@ public abstract class ServerConfigurationNetworkHandlerMixin extends ServerCommo
 
 	@Shadow
 	@Final
-	private Queue<ConfigurationTask> configurationTasks;
+	private Queue<ConfigurationTask> tasks;
 
 	@Shadow
-	public abstract boolean isAcceptingMessages();
+	public abstract boolean isConnected();
 
 	@Shadow
 	public abstract void startConfiguration();
@@ -73,13 +73,13 @@ public abstract class ServerConfigurationNetworkHandlerMixin extends ServerCommo
 	@Unique
 	private boolean earlyTaskExecution;
 
-	public ServerConfigurationNetworkHandlerMixin(MinecraftServer server, Connection connection, CommonListenerCookie arg) {
+	public ServerConfigurationNetworkHandlerMixin(MinecraftServer server, ClientConnection connection, ConnectedClientData arg) {
 		super(server, connection, arg);
 	}
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void initAddon(CallbackInfo ci) {
-		this.addon = new ServerConfigurationNetworkAddon((ServerConfigurationPacketListenerImpl) (Object) this, this.server);
+		this.addon = new ServerConfigurationNetworkAddon((ServerConfigurationNetworkHandler) (Object) this, this.server);
 		// A bit of a hack but it allows the field above to be set in case someone registers handlers during INIT event which refers to said field
 		this.addon.lateInit();
 	}
@@ -112,7 +112,7 @@ public abstract class ServerConfigurationNetworkHandlerMixin extends ServerCommo
 
 		// All early tasks should have been completed
 		assert currentTask == null;
-		assert configurationTasks.isEmpty();
+		assert tasks.isEmpty();
 
 		// Run the vanilla tasks.
 		this.addon.configuration();
@@ -125,14 +125,14 @@ public abstract class ServerConfigurationNetworkHandlerMixin extends ServerCommo
 		}
 
 		if (this.currentTask != null) {
-			throw new IllegalStateException("Task " + this.currentTask.type().id() + " has not finished yet");
+			throw new IllegalStateException("Task " + this.currentTask.getType().id() + " has not finished yet");
 		}
 
-		if (!this.isAcceptingMessages()) {
+		if (!this.isConnected()) {
 			return false;
 		}
 
-		final ConfigurationTask task = this.configurationTasks.poll();
+		final ConfigurationTask task = this.tasks.poll();
 
 		if (task != null) {
 			this.currentTask = task;
@@ -150,7 +150,7 @@ public abstract class ServerConfigurationNetworkHandlerMixin extends ServerCommo
 
 	@Override
 	public void addTask(ConfigurationTask task) {
-		configurationTasks.add(task);
+		tasks.add(task);
 	}
 
 	@Override
@@ -160,7 +160,7 @@ public abstract class ServerConfigurationNetworkHandlerMixin extends ServerCommo
 			return;
 		}
 
-		final ConfigurationTask.Type currentKey = this.currentTask != null ? this.currentTask.type() : null;
+		final ConfigurationTask.Type currentKey = this.currentTask != null ? this.currentTask.getType() : null;
 
 		if (!key.equals(currentKey)) {
 			throw new IllegalStateException("Unexpected request for task finish, current task: " + currentKey + ", requested: " + key);

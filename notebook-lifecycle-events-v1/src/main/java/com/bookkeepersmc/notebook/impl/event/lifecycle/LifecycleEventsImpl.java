@@ -22,9 +22,9 @@
  */
 package com.bookkeepersmc.notebook.impl.event.lifecycle;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.Entity;
+import net.minecraft.world.chunk.WorldChunk;
 
 import com.bookkeepersmc.api.ModInitializer;
 import com.bookkeepersmc.notebook.api.event.lifecycle.v1.ServerBlockEntityEvents;
@@ -50,13 +50,13 @@ public final class LifecycleEventsImpl implements ModInitializer {
 		});
 
 		ServerWorldEvents.UNLOAD.register((server, world) -> {
-			for (LevelChunk chunk : ((LoadedChunksCache) world).notebook_getLoadedChunks()) {
+			for (WorldChunk chunk : ((LoadedChunksCache) world).notebook_getLoadedChunks()) {
 				for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
 					ServerBlockEntityEvents.BLOCK_ENTITY_UNLOAD.invoker().onUnload(blockEntity, world);
 				}
 			}
 
-			for (Entity entity : world.getAllEntities()) {
+			for (Entity entity : world.iterateEntities()) {
 				ServerEntityEvents.ENTITY_UNLOAD.invoker().onUnload(entity, world);
 			}
 		});

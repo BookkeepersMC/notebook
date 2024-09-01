@@ -28,40 +28,37 @@ import java.util.Locale;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.ServerAdvancementManager;
-import net.minecraft.server.ServerFunctionLibrary;
-import net.minecraft.tags.TagManager;
-import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.recipe.RecipeManager;
+import net.minecraft.server.ServerAdvancementLoader;
+import net.minecraft.server.function.FunctionLoader;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.resource.IdentifiableResourceReloadListener;
 import com.bookkeepersmc.notebook.api.resource.ResourceReloadListenerKeys;
 
 @Mixin({
 		/* public */
-		RecipeManager.class, ServerAdvancementManager.class, ServerFunctionLibrary.class, TagManager.class
+		RecipeManager.class, ServerAdvancementLoader.class, FunctionLoader.class
 		/* private */
 })
 public abstract class KeyedResourceReloadListenerMixin implements IdentifiableResourceReloadListener {
-	private ResourceLocation notebook$id;
-	private Collection<ResourceLocation> notebook$dependencies;
+	private Identifier notebook$id;
+	private Collection<Identifier> notebook$dependencies;
 
 	@Override
 	@SuppressWarnings({"ConstantConditions", "RedundantCast"})
-	public ResourceLocation getNotebookId() {
+	public Identifier getNotebookId() {
 		if (this.notebook$id == null) {
 			Object self = this;
 
 			if (self instanceof RecipeManager) {
 				this.notebook$id = ResourceReloadListenerKeys.RECIPES;
-			} else if (self instanceof ServerAdvancementManager) {
+			} else if (self instanceof ServerAdvancementLoader) {
 				this.notebook$id = ResourceReloadListenerKeys.ADVANCEMENTS;
-			} else if (self instanceof ServerFunctionLibrary) {
+			} else if (self instanceof FunctionLoader) {
 				this.notebook$id = ResourceReloadListenerKeys.FUNCTIONS;
-			} else if (self instanceof TagManager) {
-				this.notebook$id = ResourceReloadListenerKeys.TAGS;
 			} else {
-				this.notebook$id = ResourceLocation.withDefaultNamespace("private/" + self.getClass().getSimpleName().toLowerCase(Locale.ROOT));
+				this.notebook$id = Identifier.ofDefault("private/" + self.getClass().getSimpleName().toLowerCase(Locale.ROOT));
 			}
 		}
 
@@ -70,17 +67,11 @@ public abstract class KeyedResourceReloadListenerMixin implements IdentifiableRe
 
 	@Override
 	@SuppressWarnings({"ConstantConditions", "RedundantCast"})
-	public Collection<ResourceLocation> getNotebookDependencies() {
+	public Collection<Identifier> getNotebookDependencies() {
 		if (this.notebook$dependencies == null) {
-			Object self = this;
-
-			if (self instanceof TagManager) {
-				this.notebook$dependencies = Collections.emptyList();
-			} else {
-				this.notebook$dependencies = Collections.singletonList(ResourceReloadListenerKeys.TAGS);
-			}
+			this.notebook$dependencies = Collections.emptyList();
 		}
 
-		return this.notebook$dependencies;
+		return notebook$dependencies;
 	}
 }

@@ -26,10 +26,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
 
-import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.component.DataComponentPatch;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.recipe.Ingredient;
 
 import com.bookkeepersmc.notebook.impl.recipe.builtin.*;
 
@@ -67,10 +67,10 @@ public final class DefaultCustomIngredients {
 	public static Ingredient components(ItemStack stack) {
 		Objects.requireNonNull(stack, "Stack cannot be null");
 
-		return components(Ingredient.of(stack.getItem()), stack.getComponentsPatch());
+		return components(Ingredient.ofItems(stack.getItem()), stack.getComponentPatch());
 	}
 
-	public static Ingredient customData(Ingredient base, CompoundTag nbt) {
+	public static Ingredient customData(Ingredient base, NbtCompound nbt) {
 		return new CustomDataIngredient(base, nbt).toVanilla();
 	}
 

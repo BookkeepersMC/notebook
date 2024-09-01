@@ -29,10 +29,10 @@ import java.util.concurrent.Future;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import net.minecraft.server.network.ServerLoginNetworkHandler;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.impl.networking.server.ServerNetworkingImpl;
 import com.bookkeepersmc.notebook.mixin.networking.accessor.ServerLoginNetworkHandlerAccessor;
@@ -51,15 +51,15 @@ public final class ServerLoginNetworking {
 	 * A global receiver is registered to all connections, in the present and future.
 	 *
 	 * <p>If a handler is already registered to the {@code channel}, this method will return {@code false}, and no change will be made.
-	 * Use {@link #unregisterGlobalReceiver(ResourceLocation)} to unregister the existing handler.
+	 * Use {@link #unregisterGlobalReceiver(Identifier)} to unregister the existing handler.
 	 *
 	 * @param channelName the id of the channel
 	 * @param channelHandler the handler
 	 * @return false if a handler is already registered to the channel
-	 * @see ServerLoginNetworking#unregisterGlobalReceiver(ResourceLocation)
-	 * @see ServerLoginNetworking#registerReceiver(ServerLoginPacketListenerImpl, ResourceLocation, LoginQueryResponseHandler)
+	 * @see ServerLoginNetworking#unregisterGlobalReceiver(Identifier)
+	 * @see ServerLoginNetworking#registerReceiver(ServerLoginNetworkHandler, Identifier, LoginQueryResponseHandler)
 	 */
-	public static boolean registerGlobalReceiver(ResourceLocation channelName, LoginQueryResponseHandler channelHandler) {
+	public static boolean registerGlobalReceiver(Identifier channelName, LoginQueryResponseHandler channelHandler) {
 		return ServerNetworkingImpl.LOGIN.registerGlobalReceiver(channelName, channelHandler);
 	}
 
@@ -71,11 +71,11 @@ public final class ServerLoginNetworking {
 	 *
 	 * @param channelName the id of the channel
 	 * @return the previous handler, or {@code null} if no handler was bound to the channel
-	 * @see ServerLoginNetworking#registerGlobalReceiver(ResourceLocation, LoginQueryResponseHandler)
-	 * @see ServerLoginNetworking#unregisterReceiver(ServerLoginPacketListenerImpl, ResourceLocation)
+	 * @see ServerLoginNetworking#registerGlobalReceiver(Identifier, LoginQueryResponseHandler)
+	 * @see ServerLoginNetworking#unregisterReceiver(ServerLoginNetworkHandler, Identifier)
 	 */
 	@Nullable
-	public static ServerLoginNetworking.LoginQueryResponseHandler unregisterGlobalReceiver(ResourceLocation channelName) {
+	public static ServerLoginNetworking.LoginQueryResponseHandler unregisterGlobalReceiver(Identifier channelName) {
 		return ServerNetworkingImpl.LOGIN.unregisterGlobalReceiver(channelName);
 	}
 
@@ -85,7 +85,7 @@ public final class ServerLoginNetworking {
 	 *
 	 * @return all channel names which global receivers are registered for.
 	 */
-	public static Set<ResourceLocation> getGlobalReceivers() {
+	public static Set<Identifier> getGlobalReceivers() {
 		return ServerNetworkingImpl.LOGIN.getChannels();
 	}
 
@@ -93,14 +93,14 @@ public final class ServerLoginNetworking {
 	 * Registers a handler to a query response channel.
 	 *
 	 * <p>If a handler is already registered to the {@code channelName}, this method will return {@code false}, and no change will be made.
-	 * Use {@link #unregisterReceiver(ServerLoginPacketListenerImpl, ResourceLocation)} to unregister the existing handler.
+	 * Use {@link #unregisterReceiver(ServerLoginNetworkHandler, Identifier)} to unregister the existing handler.
 	 *
 	 * @param networkHandler the handler
 	 * @param channelName the id of the channel
 	 * @param responseHandler the handler
 	 * @return false if a handler is already registered to the channel name
 	 */
-	public static boolean registerReceiver(ServerLoginPacketListenerImpl networkHandler, ResourceLocation channelName, LoginQueryResponseHandler responseHandler) {
+	public static boolean registerReceiver(ServerLoginNetworkHandler networkHandler, Identifier channelName, LoginQueryResponseHandler responseHandler) {
 		Objects.requireNonNull(networkHandler, "Network handler cannot be null");
 
 		return ServerNetworkingImpl.getAddon(networkHandler).registerChannel(channelName, responseHandler);
@@ -115,7 +115,7 @@ public final class ServerLoginNetworking {
 	 * @return the previous handler, or {@code null} if no handler was bound to the channel name
 	 */
 	@Nullable
-	public static ServerLoginNetworking.LoginQueryResponseHandler unregisterReceiver(ServerLoginPacketListenerImpl networkHandler, ResourceLocation channelName) {
+	public static ServerLoginNetworking.LoginQueryResponseHandler unregisterReceiver(ServerLoginNetworkHandler networkHandler, Identifier channelName) {
 		Objects.requireNonNull(networkHandler, "Network handler cannot be null");
 
 		return ServerNetworkingImpl.getAddon(networkHandler).unregisterChannel(channelName);
@@ -128,7 +128,7 @@ public final class ServerLoginNetworking {
 	 *
 	 * @param handler the server login network handler
 	 */
-	public static MinecraftServer getServer(ServerLoginPacketListenerImpl handler) {
+	public static MinecraftServer getServer(ServerLoginNetworkHandler handler) {
 		Objects.requireNonNull(handler, "Network handler cannot be null");
 
 		return ((ServerLoginNetworkHandlerAccessor) handler).getServer();
@@ -143,7 +143,7 @@ public final class ServerLoginNetworking {
 		 * Handles an incoming query response from a client.
 		 *
 		 * <p>This method is executed on {@linkplain io.netty.channel.EventLoop netty's event loops}.
-		 * Modification to the game should be {@linkplain net.minecraft.util.thread.BlockableEventLoop#submit(Runnable) scheduled} using the provided Minecraft client instance.
+		 * Modification to the game should be {@linkplain net.minecraft.util.thread.ThreadExecutor#submit(Runnable) scheduled} using the provided Minecraft client instance.
 		 *
 		 * <p><b>Whether the client understood the query should be checked before reading from the payload of the packet.</b>
 		 * @param server the server
@@ -153,7 +153,7 @@ public final class ServerLoginNetworking {
 		 * @param synchronizer the synchronizer which may be used to delay log-in till a {@link Future} is completed.
 		 * @param responseSender the packet sender
 		 */
-		void receive(MinecraftServer server, ServerLoginPacketListenerImpl handler, boolean understood, FriendlyByteBuf buf, LoginSynchronizer synchronizer, PacketSender responseSender);
+		void receive(MinecraftServer server, ServerLoginNetworkHandler handler, boolean understood, PacketByteBuf buf, LoginSynchronizer synchronizer, PacketSender responseSender);
 	}
 
 	/**
@@ -194,7 +194,7 @@ public final class ServerLoginNetworking {
 		 * 	}));
 		 * });
 		 * }</pre>
-		 * Usually it is enough to pass the return value for {@link net.minecraft.util.thread.BlockableEventLoop#submit(Runnable)} for {@code future}.</p>
+		 * Usually it is enough to pass the return value for {@link net.minecraft.util.thread.ThreadExecutor#submit(Runnable)} for {@code future}.</p>
 		 *
 		 * @param future the future that must be done before the player can log in
 		 */

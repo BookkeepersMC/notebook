@@ -25,31 +25,31 @@ package com.bookkeepersmc.notebook.impl.resource.loader;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.server.packs.CompositePackResources;
-import net.minecraft.server.packs.PackLocationInfo;
-import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.resource.pack.CompositeResourcePack;
+import net.minecraft.resource.pack.PackLocationInfo;
+import net.minecraft.resource.pack.PackProfile;
+import net.minecraft.resource.pack.ResourcePack;
 
 import com.bookkeepersmc.notebook.api.resource.ModResourcePack;
 
-public record ModResourcePackFactory(ModResourcePack pack) implements Pack.ResourcesSupplier {
+public record ModResourcePackFactory(ModResourcePack pack) implements PackProfile.PackFactory {
 	@Override
-	public PackResources openPrimary(PackLocationInfo var1) {
+	public ResourcePack openPrimary(PackLocationInfo var1) {
 		return pack;
 	}
 
 	@Override
-	public PackResources openFull(PackLocationInfo var1, Pack.Metadata metadata) {
+	public ResourcePack open(PackLocationInfo var1, PackProfile.Metadata metadata) {
 		if (metadata.overlays().isEmpty()) {
 			return pack;
 		} else {
-			List<PackResources> overlays = new ArrayList<>(metadata.overlays().size());
+			List<ResourcePack> overlays = new ArrayList<>(metadata.overlays().size());
 
 			for (String overlay : metadata.overlays()) {
 				overlays.add(pack.createOverlay(overlay));
 			}
 
-			return new CompositePackResources(pack, overlays);
+			return new CompositeResourcePack(pack, overlays);
 		}
 	}
 }

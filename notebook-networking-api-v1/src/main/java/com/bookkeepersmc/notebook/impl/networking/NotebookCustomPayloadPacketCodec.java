@@ -22,8 +22,8 @@
  */
 package com.bookkeepersmc.notebook.impl.networking;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.PacketByteBuf;
 
-public interface NotebookCustomPayloadPacketCodec<B extends FriendlyByteBuf> {
-	void notebook_setPacketCodecProvider(CustomPayloadTypeProvider<B> customPayloadTypeProvider);
+public interface NotebookCustomPayloadPacketCodec<B extends PacketByteBuf> {
+	void fabric_setPacketCodecProvider(CustomPayloadTypeProvider<B> customPayloadTypeProvider);
 }

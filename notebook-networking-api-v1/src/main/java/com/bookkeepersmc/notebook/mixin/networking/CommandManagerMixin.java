@@ -31,22 +31,23 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.SharedConstants;
-import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.server.commands.DebugConfigCommand;
+import net.minecraft.command.CommandBuildContext;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.dedicated.command.dev.DebugConfigCommand;
 
 import com.bookkeepersmc.loader.api.NotebookLoader;
 
-@Mixin(Commands.class)
+
+@Mixin(CommandManager.class)
 public class CommandManagerMixin {
 	@Shadow
 	@Final
-	private CommandDispatcher<CommandSourceStack> dispatcher;
+	private CommandDispatcher<ServerCommandSource> dispatcher;
 
-	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/commands/BanIpCommands;register(Lcom/mojang/brigadier/CommandDispatcher;)V"))
-	private void init(Commands.CommandSelection environment, CommandBuildContext commandRegistryAccess, CallbackInfo ci) {
-		if (SharedConstants.IS_RUNNING_IN_IDE) {
+	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/dedicated/command/BanIpCommand;register(Lcom/mojang/brigadier/CommandDispatcher;)V"))
+	private void init(CommandManager.RegistrationEnvironment environment, CommandBuildContext commandRegistryAccess, CallbackInfo ci) {
+		if (SharedConstants.isDevelopment) {
 			// Command is registered when isDevelopment is set.
 			return;
 		}

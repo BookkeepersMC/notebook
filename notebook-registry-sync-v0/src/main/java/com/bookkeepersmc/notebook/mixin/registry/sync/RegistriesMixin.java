@@ -27,18 +27,18 @@ import com.llamalad7.mixinextras.sugar.Local;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.ResourceKey;
+import net.minecraft.util.Identifier;
 
 @Mixin(Registries.class)
 public class RegistriesMixin {
-	@ModifyReturnValue(method = "tagsDirPath", at = @At("RETURN"))
+	@ModifyReturnValue(method = "getTagDirectory", at = @At("RETURN"))
 	private static String prependDirectoryWithNamespace(String original, @Local(argsOnly = true) ResourceKey<? extends Registry<?>> resourceKey) {
-		ResourceLocation id = resourceKey.location();
+		Identifier id = resourceKey.getValue();
 
-		if (!id.getNamespace().equals(ResourceLocation.DEFAULT_NAMESPACE)) {
+		if (!id.getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) {
 			return "tags/" + id.getNamespace() + "/" + id.getPath();
 		}
 

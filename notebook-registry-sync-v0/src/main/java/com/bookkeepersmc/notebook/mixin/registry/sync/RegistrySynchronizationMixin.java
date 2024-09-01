@@ -33,19 +33,19 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.RegistrySynchronization;
-import net.minecraft.resources.RegistryDataLoader;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.DynamicRegistrySync;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryLoader;
 
 import com.bookkeepersmc.notebook.impl.registry.sync.DynamicRegistriesImpl;
 
-@Mixin(RegistrySynchronization.class)
+@Mixin(DynamicRegistrySync.class)
 abstract class RegistrySynchronizationMixin {
 
 	@Dynamic("method_45961: Stream.filter in stream")
 	@Inject(method = "method_56601", at = @At("HEAD"), cancellable = true)
-	private static void filterNonSyncedEntries(RegistryAccess.RegistryEntry<?> entry, CallbackInfoReturnable<Boolean> cir) {
+	private static void filterNonSyncedEntries(DynamicRegistryManager.RegistryEntry<?> entry, CallbackInfoReturnable<Boolean> cir) {
 		boolean canSkip = DynamicRegistriesImpl.SKIP_EMPTY_SYNC_REGISTRIES.contains(entry.key());
 
 		if (canSkip && entry.value().size() == 0) {
@@ -55,8 +55,8 @@ abstract class RegistrySynchronizationMixin {
 
 	@Dynamic("method_56597: Optional.isPresent in packRegistry")
 	@Inject(method = "method_56596", at = @At("HEAD"), cancellable = true)
-	private static void filterNonSyncedEntriesAgain(Set set, RegistryDataLoader.RegistryData entry, DynamicOps dynamicOps, BiConsumer biConsumer, Registry registry, CallbackInfo ci) {
-		boolean canSkip = DynamicRegistriesImpl.SKIP_EMPTY_SYNC_REGISTRIES.contains(registry.key());
+	private static void filterNonSyncedEntriesAgain(Set set, RegistryLoader.DecodingData entry, DynamicOps dynamicOps, BiConsumer biConsumer, Registry registry, CallbackInfo ci) {
+		boolean canSkip = DynamicRegistriesImpl.SKIP_EMPTY_SYNC_REGISTRIES.contains(registry.getKey());
 
 		if (canSkip && registry.size() == 0) {
 			ci.cancel();

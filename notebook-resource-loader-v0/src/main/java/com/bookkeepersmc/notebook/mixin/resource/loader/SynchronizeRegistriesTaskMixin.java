@@ -37,42 +37,42 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.configuration.ClientboundSelectKnownPacks;
-import net.minecraft.server.network.config.SynchronizeRegistriesTask;
-import net.minecraft.server.packs.repository.KnownPack;
+import net.minecraft.network.configuration.SynchronizeRegistriesConfigurationTask;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.s2c.configuration.SelectKnownPacksS2CPacket;
+import net.minecraft.resource.pack.KnownPack;
 
 import com.bookkeepersmc.notebook.impl.resource.loader.ModResourcePackCreator;
 
-@Mixin(SynchronizeRegistriesTask.class)
+@Mixin(SynchronizeRegistriesConfigurationTask.class)
 public abstract class SynchronizeRegistriesTaskMixin {
 	@Unique
 	private static final Logger LOGGER = LoggerFactory.getLogger("SynchronizeRegistriesTaskMixin");
 	@Shadow
 	@Final
-	private List<KnownPack> requestedPacks;
+	private List<KnownPack> packs;
 
 	@Shadow
-	protected abstract void sendRegistries(Consumer<Packet<?>> sender, Set<KnownPack> commonKnownPacks);
+	protected abstract void method_56925(Consumer<Packet<?>> sender, Set<KnownPack> commonKnownPacks);
 
-	@Inject(method = "handleResponse", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "method_56923", at = @At("HEAD"), cancellable = true)
 	public void onSelectKnownPacks(List<KnownPack> clientKnownPacks, Consumer<Packet<?>> sender, CallbackInfo ci) {
-		if (new HashSet<>(this.requestedPacks).containsAll(clientKnownPacks)) {
-			this.sendRegistries(sender, Set.copyOf(clientKnownPacks));
+		if (new HashSet<>(this.packs).containsAll(clientKnownPacks)) {
+			this.method_56925(sender, Set.copyOf(clientKnownPacks));
 			ci.cancel();
 		}
 	}
 
-	@Inject(method = "sendRegistries", at = @At("HEAD"))
-	public void sendRegistries(Consumer<Packet<?>> sender, Set<KnownPack> commonKnownPacks, CallbackInfo ci) {
+	@Inject(method = "method_56925", at = @At("HEAD"))
+	public void method_56925(Consumer<Packet<?>> sender, Set<KnownPack> commonKnownPacks, CallbackInfo ci) {
 		LOGGER.debug("Synchronizing registries with common known packs: {}", commonKnownPacks);
 	}
 
 	@Inject(method = "start", at = @At("HEAD"), cancellable = true)
 	private void sendPacket(Consumer<Packet<?>> sender, CallbackInfo ci) {
-		if (this.requestedPacks.size() > ModResourcePackCreator.MAX_KNOWN_PACKS) {
-			LOGGER.warn("Too many knownPacks: Found {}; max {}", this.requestedPacks.size(), ModResourcePackCreator.MAX_KNOWN_PACKS);
-			sender.accept(new ClientboundSelectKnownPacks(this.requestedPacks.subList(0, ModResourcePackCreator.MAX_KNOWN_PACKS)));
+		if (this.packs.size() > ModResourcePackCreator.MAX_KNOWN_PACKS) {
+			LOGGER.warn("Too many knownPacks: Found {}; max {}", this.packs.size(), ModResourcePackCreator.MAX_KNOWN_PACKS);
+			sender.accept(new SelectKnownPacksS2CPacket(this.packs.subList(0, ModResourcePackCreator.MAX_KNOWN_PACKS)));
 			ci.cancel();
 		}
 	}

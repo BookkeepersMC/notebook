@@ -24,7 +24,7 @@ package com.bookkeepersmc.notebook.api.event;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 @ApiStatus.NonExtendable
 public abstract class Event<T> {
@@ -37,13 +37,13 @@ public abstract class Event<T> {
 
 	public abstract void register(T listener);
 
-	public static final ResourceLocation DEFAULT_PHASE = ResourceLocation.fromNamespaceAndPath("notebook", "default");
+	public static final Identifier DEFAULT_PHASE = Identifier.of("notebook", "default");
 
-	public void register(ResourceLocation phase, T listener) {
+	public void register(Identifier phase, T listener) {
 		register(listener);
 	}
 
-	public void addPhaseOrdering(ResourceLocation firstPhase, ResourceLocation secondPhase) {
+	public void addPhaseOrdering(Identifier firstPhase, Identifier secondPhase) {
 
 	}
 

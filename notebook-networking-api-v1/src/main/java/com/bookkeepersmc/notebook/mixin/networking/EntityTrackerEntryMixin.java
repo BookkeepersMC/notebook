@@ -29,25 +29,25 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.server.level.ServerEntity;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.entity.Entity;
+import net.minecraft.server.network.EntityTrackerEntry;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import com.bookkeepersmc.notebook.api.networking.v1.EntityTrackingEvents;
 
-@Mixin(ServerEntity.class)
+@Mixin(EntityTrackerEntry.class)
 abstract class EntityTrackerEntryMixin {
 	@Shadow
 	@Final
 	private Entity entity;
 
-	@Inject(method = "addPairing", at = @At("HEAD"))
-	private void onStartTracking(ServerPlayer player, CallbackInfo ci) {
+	@Inject(method = "startTracking", at = @At("HEAD"))
+	private void onStartTracking(ServerPlayerEntity player, CallbackInfo ci) {
 		EntityTrackingEvents.START_TRACKING.invoker().onStartTracking(this.entity, player);
 	}
 
-	@Inject(method = "removePairing", at = @At("TAIL"))
-	private void onStopTracking(ServerPlayer player, CallbackInfo ci) {
+	@Inject(method = "stopTracking", at = @At("TAIL"))
+	private void onStopTracking(ServerPlayerEntity player, CallbackInfo ci) {
 		EntityTrackingEvents.STOP_TRACKING.invoker().onStopTracking(this.entity, player);
 	}
 }

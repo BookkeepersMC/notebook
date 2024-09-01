@@ -28,15 +28,15 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-import net.minecraft.resources.RegistryDataLoader;
+import net.minecraft.registry.RegistryLoader;
 import net.minecraft.server.WorldLoader;
 
 import com.bookkeepersmc.notebook.api.event.registry.DynamicRegistries;
 
 @Mixin(WorldLoader.class)
 abstract class WorldLoaderMixin {
-	@ModifyArg(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/WorldLoader;loadAndReplaceLayer(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/LayeredRegistryAccess;Lnet/minecraft/server/RegistryLayer;Ljava/util/List;)Lnet/minecraft/core/LayeredRegistryAccess;"), allow = 1)
-	private static List<RegistryDataLoader.RegistryData<?>> modifyLoadedEntries(List<RegistryDataLoader.RegistryData<?>> entries) {
+	@ModifyArg(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/registry/RegistryLoader;method_56515(Lnet/minecraft/resource/ResourceManager;Ljava/util/List;Ljava/util/List;)Lnet/minecraft/registry/DynamicRegistryManager$Frozen;", ordinal = 0), index = 2, allow = 1)
+	private static List<RegistryLoader.DecodingData<?>> modifyLoadedEntries(List<RegistryLoader.DecodingData<?>> entries) {
 		return DynamicRegistries.getDynamicRegistries();
 	}
 }

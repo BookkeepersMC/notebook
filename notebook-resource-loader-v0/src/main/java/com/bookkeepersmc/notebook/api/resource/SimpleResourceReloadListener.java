@@ -25,9 +25,8 @@ package com.bookkeepersmc.notebook.api.resource;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.util.profiler.Profiler;
 
 /**
  * A simplified version of the "resource reload listener" interface, hiding the
@@ -50,8 +49,8 @@ import net.minecraft.util.profiling.ProfilerFiller;
  */
 public interface SimpleResourceReloadListener<T> extends IdentifiableResourceReloadListener {
 	@Override
-	default CompletableFuture<Void> reload(PreparationBarrier helper, ResourceManager manager, ProfilerFiller loadProfiler, ProfilerFiller applyProfiler, Executor loadExecutor, Executor applyExecutor) {
-		return load(manager, loadProfiler, loadExecutor).thenCompose(helper::wait).thenCompose(
+	default CompletableFuture<Void> reload(Synchronizer helper, ResourceManager manager, Profiler loadProfiler, Profiler applyProfiler, Executor loadExecutor, Executor applyExecutor) {
+		return load(manager, loadProfiler, loadExecutor).thenCompose(helper::whenPrepared).thenCompose(
 			(o) -> apply(o, manager, applyProfiler, applyExecutor)
 		);
 	}
@@ -65,7 +64,7 @@ public interface SimpleResourceReloadListener<T> extends IdentifiableResourceRel
 	 * @param executor The executor which should be used for this stage.
 	 * @return A CompletableFuture representing the "data loading" stage.
 	 */
-	CompletableFuture<T> load(ResourceManager manager, ProfilerFiller profiler, Executor executor);
+	CompletableFuture<T> load(ResourceManager manager, Profiler profiler, Executor executor);
 
 	/**
 	 * Synchronously apply loaded data to the game state.
@@ -75,5 +74,5 @@ public interface SimpleResourceReloadListener<T> extends IdentifiableResourceRel
 	 * @param executor The executor which should be used for this stage.
 	 * @return A CompletableFuture representing the "data applying" stage.
 	 */
-	CompletableFuture<Void> apply(T data, ResourceManager manager, ProfilerFiller profiler, Executor executor);
+	CompletableFuture<Void> apply(T data, ResourceManager manager, Profiler profiler, Executor executor);
 }

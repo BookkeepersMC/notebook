@@ -22,18 +22,18 @@
  */
 package com.bookkeepersmc.notebook.impl.recipe.builtin;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.registry.Holder;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.recipe.v1.CustomIngredient;
 import com.bookkeepersmc.notebook.api.recipe.v1.CustomIngredientSerializer;
@@ -55,10 +55,11 @@ public class DifferenceIngredient implements CustomIngredient {
 	}
 
 	@Override
-	public List<ItemStack> getMatchingStacks() {
-		List<ItemStack> stacks = new ArrayList<>(List.of(base.getItems()));
-		stacks.removeIf(subtracted);
-		return stacks;
+	public List<Holder<Item>> getMatchingStacks() {
+		final List<Holder<Item>> subtractedMatchingStacks = subtracted.method_8105();
+		return base.method_8105().stream()
+				.filter(registryEntry -> !subtractedMatchingStacks.contains(registryEntry))
+				.toList();
 	}
 
 	@Override
@@ -80,36 +81,31 @@ public class DifferenceIngredient implements CustomIngredient {
 	}
 
 	private static class Serializer implements CustomIngredientSerializer<DifferenceIngredient> {
-		private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("notebook", "difference");
-		private static final MapCodec<DifferenceIngredient> ALLOW_EMPTY_CODEC = createCodec(Ingredient.CODEC);
-		private static final MapCodec<DifferenceIngredient> DISALLOW_EMPTY_CODEC = createCodec(Ingredient.CODEC_NONEMPTY);
-		private static final StreamCodec<RegistryFriendlyByteBuf, DifferenceIngredient> PACKET_CODEC = StreamCodec.composite(
-				Ingredient.CONTENTS_STREAM_CODEC, DifferenceIngredient::getBase,
-				Ingredient.CONTENTS_STREAM_CODEC, DifferenceIngredient::getSubtracted,
+		private static final Identifier ID = Identifier.of("notebook", "difference");
+		private static final MapCodec<DifferenceIngredient> CODEC = RecordCodecBuilder.mapCodec(instance ->
+				instance.group(
+						Ingredient.ALLOW_EMPTY_CODEC.fieldOf("base").forGetter(DifferenceIngredient::getBase),
+						Ingredient.ALLOW_EMPTY_CODEC.fieldOf("subtracted").forGetter(DifferenceIngredient::getSubtracted)
+				).apply(instance, DifferenceIngredient::new)
+		);
+		private static final PacketCodec<RegistryByteBuf, DifferenceIngredient> PACKET_CODEC = PacketCodec.tuple(
+				Ingredient.PACKET_CODEC, DifferenceIngredient::getBase,
+				Ingredient.PACKET_CODEC, DifferenceIngredient::getSubtracted,
 				DifferenceIngredient::new
 		);
 
-		private static MapCodec<DifferenceIngredient> createCodec(Codec<Ingredient> ingredientCodec) {
-			return RecordCodecBuilder.mapCodec(instance ->
-					instance.group(
-							ingredientCodec.fieldOf("base").forGetter(DifferenceIngredient::getBase),
-							ingredientCodec.fieldOf("subtracted").forGetter(DifferenceIngredient::getSubtracted)
-					).apply(instance, DifferenceIngredient::new)
-			);
-		}
-
 		@Override
-		public ResourceLocation getId() {
+		public Identifier getId() {
 			return ID;
 		}
 
 		@Override
-		public MapCodec<DifferenceIngredient> getCodec(boolean allowEmpty) {
-			return allowEmpty ? ALLOW_EMPTY_CODEC : DISALLOW_EMPTY_CODEC;
+		public MapCodec<DifferenceIngredient> getCodec() {
+			return CODEC;
 		}
 
 		@Override
-		public StreamCodec<RegistryFriendlyByteBuf, DifferenceIngredient> getStreamCodec() {
+		public PacketCodec<RegistryByteBuf, DifferenceIngredient> getStreamCodec() {
 			return PACKET_CODEC;
 		}
 	}

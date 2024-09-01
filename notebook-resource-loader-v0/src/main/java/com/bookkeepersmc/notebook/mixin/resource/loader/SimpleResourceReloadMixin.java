@@ -34,40 +34,40 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.server.packs.resources.ProfiledReloadInstance;
-import net.minecraft.server.packs.resources.ReloadInstance;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimpleReloadInstance;
+import net.minecraft.resource.ProfiledResourceReload;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.ResourceReload;
+import net.minecraft.resource.ResourceReloader;
+import net.minecraft.resource.ResourceType;
+import net.minecraft.resource.SimpleResourceReload;
 import net.minecraft.util.Unit;
 
 import com.bookkeepersmc.notebook.impl.resource.loader.NotebookLifecycledResourceManager;
 import com.bookkeepersmc.notebook.impl.resource.loader.ResourceManagerHelperImpl;
 
-@Mixin(SimpleReloadInstance.class)
+@Mixin(SimpleResourceReload.class)
 public class SimpleResourceReloadMixin {
 	@Unique
-	private static final ThreadLocal<PackType> notebook_resourceType = new ThreadLocal<>();
+	private static final ThreadLocal<ResourceType> notebook_resourceType = new ThreadLocal<>();
 
-	@Inject(method = "create", at = @At("HEAD"))
-	private static void method_40087(ResourceManager resourceManager, List<PreparableReloadListener> list, Executor executor, Executor executor2, CompletableFuture<Unit> completableFuture, boolean bl, CallbackInfoReturnable<ReloadInstance> cir) {
+	@Inject(method = "create(Lnet/minecraft/resource/ResourceManager;Ljava/util/List;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Z)Lnet/minecraft/resource/ResourceReload;", at = @At("HEAD"))
+	private static void method_40087(ResourceManager resourceManager, List<ResourceReloader> list, Executor executor, Executor executor2, CompletableFuture<Unit> completableFuture, boolean bl, CallbackInfoReturnable<ResourceReload> cir) {
 		if (resourceManager instanceof NotebookLifecycledResourceManager flrm) {
 			notebook_resourceType.set(flrm.notebook_getResourceType());
 		}
 	}
 
-	@ModifyArg(method = "create", index = 1, at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/resources/SimpleReloadInstance;of(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;)Lnet/minecraft/server/packs/resources/SimpleReloadInstance;"))
-	private static List<PreparableReloadListener> sortSimple(List<PreparableReloadListener> reloaders) {
-		List<PreparableReloadListener> sorted = ResourceManagerHelperImpl.sort(notebook_resourceType.get(), reloaders);
+	@ModifyArg(method = "create(Lnet/minecraft/resource/ResourceManager;Ljava/util/List;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Z)Lnet/minecraft/resource/ResourceReload;", index = 1, at = @At(value = "INVOKE", target = "Lnet/minecraft/resource/SimpleResourceReload;create(Lnet/minecraft/resource/ResourceManager;Ljava/util/List;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;)Lnet/minecraft/resource/SimpleResourceReload;"))
+	private static List<ResourceReloader> sortSimple(List<ResourceReloader> reloaders) {
+		List<ResourceReloader> sorted = ResourceManagerHelperImpl.sort(notebook_resourceType.get(), reloaders);
 		notebook_resourceType.set(null);
 		return sorted;
 	}
 
-	@Redirect(method = "create", at = @At(value = "NEW", target = "(Lnet/minecraft/server/packs/resources/ResourceManager;Ljava/util/List;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;)Lnet/minecraft/server/packs/resources/ProfiledReloadInstance;"))
-	private static ProfiledReloadInstance sortProfiled(ResourceManager manager, List<PreparableReloadListener> reloaders, Executor prepareExecutor, Executor applyExecutor, CompletableFuture<Unit> initialStage) {
-		List<PreparableReloadListener> sorted = ResourceManagerHelperImpl.sort(notebook_resourceType.get(), reloaders);
+	@Redirect(method = "create(Lnet/minecraft/resource/ResourceManager;Ljava/util/List;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;Z)Lnet/minecraft/resource/ResourceReload;", at = @At(value = "NEW", target = "(Lnet/minecraft/resource/ResourceManager;Ljava/util/List;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;Ljava/util/concurrent/CompletableFuture;)Lnet/minecraft/resource/ProfiledResourceReload;"))
+	private static ProfiledResourceReload sortProfiled(ResourceManager manager, List<ResourceReloader> reloaders, Executor prepareExecutor, Executor applyExecutor, CompletableFuture<Unit> initialStage) {
+		List<ResourceReloader> sorted = ResourceManagerHelperImpl.sort(notebook_resourceType.get(), reloaders);
 		notebook_resourceType.set(null);
-		return new ProfiledReloadInstance(manager, sorted, prepareExecutor, applyExecutor, initialStage);
+		return new ProfiledResourceReload(manager, sorted, prepareExecutor, applyExecutor, initialStage);
 	}
 }

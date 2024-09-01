@@ -22,6 +22,7 @@
  */
 package com.bookkeepersmc.notebook.mixin.resource.conditions;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -31,24 +32,26 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.commands.Commands;
-import net.minecraft.core.LayeredRegistryAccess;
-import net.minecraft.server.RegistryLayer;
-import net.minecraft.server.ReloadableServerResources;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.feature_flags.FeatureFlagBitSet;
+import net.minecraft.registry.LayeredRegistryManager;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.ServerRegistryLayer;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.server.ServerReloadableResources;
+import net.minecraft.server.command.CommandManager;
 
 import com.bookkeepersmc.notebook.impl.resource.conditions.ResourceConditionsImpl;
 
-@Mixin(ReloadableServerResources.class)
+@Mixin(ServerReloadableResources.class)
 public class ReloadableServerResourcesMixin {
-	@Inject(method = "updateRegistryTags()V", at = @At("HEAD"))
-	private void hookRefresh(CallbackInfo info) {
-		ResourceConditionsImpl.LOADED_TAGS.remove();
+	@Inject(method = "loadResources", at = @At("HEAD"))
+	private static void hookReload(ResourceManager resources, LayeredRegistryManager<ServerRegistryLayer> dynamicRegistries, List<Registry.TagPending<?>> pendingTagLoads, FeatureFlagBitSet enabledFeatyres, CommandManager.RegistrationEnvironment environment, int level, Executor prepareExecutor, Executor applyExecutor, CallbackInfoReturnable<CompletableFuture<ServerReloadableResources>> cir) {
+		ResourceConditionsImpl.currentFeatures = enabledFeatyres;
+		ResourceConditionsImpl.setTags(pendingTagLoads);
 	}
 
-	@Inject(method = "loadResources", at = @At("HEAD"))
-	private static void hookReload(ResourceManager resourceManager, LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess, FeatureFlagSet featureFlagSet, Commands.CommandSelection commandSelection, int i, Executor executor, Executor executor2, CallbackInfoReturnable<CompletableFuture<ReloadableServerResources>> cir) {
-		ResourceConditionsImpl.currentFeatures = featureFlagSet;
+	@Inject(method = "method_61248", at = @At("TAIL"))
+	private void removeLoadedTags(CallbackInfo ci) {
+		ResourceConditionsImpl.LOADED_TAGS.remove();
 	}
 }

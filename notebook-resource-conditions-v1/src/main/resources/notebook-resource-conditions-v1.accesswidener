@@ -1,3 +1,4 @@
 accessWidener v2 named
 
-accessible class net/minecraft/server/ReloadableServerRegistries$EmptyTagLookupWrapper
+accessible class net/minecraft/registry/ReloadableRegistries$Holder
+accessible class net/minecraft/registry/RegistryOps$C_tbnrbtat

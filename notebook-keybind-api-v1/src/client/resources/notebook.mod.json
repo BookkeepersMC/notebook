@@ -5,7 +5,7 @@
   "version": "${version}",
   "environment": "client",
   "depends": {
-    "notebookloader": ">=0.3.0"
+    "notebookloader": ">=0.3.2"
   },
   "mixins": [
     "notebook-keybind-api-v1.mixins.json"

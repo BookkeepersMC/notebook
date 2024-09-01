@@ -24,8 +24,8 @@ package com.bookkeepersmc.notebook.impl.client.screen;
 
 import java.util.List;
 
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ClickableWidget;
 
 import com.bookkeepersmc.notebook.api.client.screen.v1.ScreenEvents;
 import com.bookkeepersmc.notebook.api.client.screen.v1.ScreenKeyboardEvents;
@@ -37,7 +37,7 @@ public interface ScreenExtensions {
 		return (ScreenExtensions) screen;
 	}
 
-	List<AbstractWidget> notebook_getButtons();
+	List<ClickableWidget> notebook_getButtons();
 
 	Event<ScreenEvents.Remove> notebook_getRemoveEvent();
 

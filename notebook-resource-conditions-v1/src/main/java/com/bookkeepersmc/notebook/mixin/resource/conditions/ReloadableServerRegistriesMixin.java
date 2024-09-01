@@ -22,9 +22,11 @@
  */
 package com.bookkeepersmc.notebook.mixin.resource.conditions;
 
+import java.util.List;
 import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.stream.Stream;
 
 import com.google.gson.JsonElement;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -39,41 +41,40 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.LayeredRegistryAccess;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.WritableRegistry;
-import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.RegistryLayer;
-import net.minecraft.server.ReloadableServerRegistries;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.world.level.storage.loot.LootDataType;
+import net.minecraft.loot.LootDataType;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.registry.LayeredRegistryManager;
+import net.minecraft.registry.MutableRegistry;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.registry.ReloadableRegistries;
+import net.minecraft.registry.ServerRegistryLayer;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.impl.resource.conditions.ResourceConditionsImpl;
 
-@Mixin(value = ReloadableServerRegistries.class, priority = 900)
+@Mixin(value = ReloadableRegistries.class, priority = 900)
 public class ReloadableServerRegistriesMixin {
 
 	@Unique
 	private static final WeakHashMap<RegistryOps<?>, HolderLookup.Provider> REGISTRY_LOOKUPS = new WeakHashMap<>();
 
-
-	@WrapOperation(method = "reload", at = @At(value = "NEW", target = "net/minecraft/server/ReloadableServerRegistries$EmptyTagLookupWrapper"))
-	private static ReloadableServerRegistries.EmptyTagLookupWrapper storeWrapperLookup(RegistryAccess registryManager, Operation<ReloadableServerRegistries.EmptyTagLookupWrapper> original, @Share("wrapper") LocalRef<HolderLookup.Provider> share) {
-		ReloadableServerRegistries.EmptyTagLookupWrapper lookup = original.call(registryManager);
-		share.set(lookup);
-		return lookup;
+	@WrapOperation(method = "reload", at = @At(value = "INVOKE", target = "Lnet/minecraft/registry/HolderLookup$Provider;create(Ljava/util/stream/Stream;)Lnet/minecraft/registry/HolderLookup$Provider;"))
+	private static HolderLookup.Provider storeWrapperLookup(Stream<HolderLookup.RegistryLookup<?>> lookups, Operation<HolderLookup.Provider> original, @Share("wrapper") LocalRef<HolderLookup.Provider> share) {
+		HolderLookup.Provider provider = original.call(lookups);
+		share.set(provider);
+		return provider;
 	}
 
-	@Inject(method = "reload", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/server/ReloadableServerRegistries$EmptyTagLookupWrapper;createSerializationContext(Lcom/mojang/serialization/DynamicOps;)Lnet/minecraft/resources/RegistryOps;", shift = At.Shift.AFTER))
-	private static void storeWrapperLookup(LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess, ResourceManager resourceManager, Executor executor, CallbackInfoReturnable<CompletableFuture<LayeredRegistryAccess<RegistryLayer>>> cir, @Local RegistryOps ops, @Share("wrapper") LocalRef<HolderLookup.Provider> share) {
+	@Inject(method = "reload", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/registry/HolderLookup$Provider;createSerializationContext(Lcom/mojang/serialization/DynamicOps;)Lnet/minecraft/registry/RegistryOps;", shift = At.Shift.AFTER))
+	private static void storeWrapperLookup(LayeredRegistryManager<ServerRegistryLayer> dynamicRegistries, List<Registry.TagPending<?>> pendingTagLoads, ResourceManager resourceManager, Executor prepareExecutor, CallbackInfoReturnable<CompletableFuture<ReloadableRegistries.C_ssgyvsmu>> cir, @Local RegistryOps ops, @Share("wrapper") LocalRef<HolderLookup.Provider> share) {
 		REGISTRY_LOOKUPS.put(ops, share.get());
 	}
 
-	@Inject(method = "method_58278", at = @At("HEAD"), cancellable = true)
-	private static void applyConditions(LootDataType lootDataType, RegistryOps registryOps, WritableRegistry writableRegistry, ResourceLocation resourceLocation, JsonElement jsonElement, CallbackInfo ci) {
-		if (jsonElement.isJsonObject() && !ResourceConditionsImpl.applyResourceConditions(jsonElement.getAsJsonObject(), lootDataType.registryKey().location().getPath(), resourceLocation, REGISTRY_LOOKUPS.get(registryOps))) {
+	@Inject(method = "method_61239", at = @At("HEAD"), cancellable = true)
+	private static void applyConditions(LootDataType lootDataType, RegistryOps ops, MutableRegistry mutableRegistry, Identifier id, JsonElement json, CallbackInfo ci) {
+		if (json.isJsonObject() && !ResourceConditionsImpl.applyResourceConditions(json.getAsJsonObject(), lootDataType.registryKey().getValue().getPath(), id, new RegistryOps.C_tbnrbtat(REGISTRY_LOOKUPS.get(ops)))) {
 			ci.cancel();
 		}
 	}

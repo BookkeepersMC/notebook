@@ -31,37 +31,37 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
+import net.minecraft.client.network.ClientLoginNetworkHandler;
+import net.minecraft.network.ClientConnection;
+import net.minecraft.network.packet.s2c.login.LoginQueryRequestS2CPacket;
 
 import com.bookkeepersmc.notebook.impl.networking.NetworkHandlerExtensions;
 import com.bookkeepersmc.notebook.impl.networking.client.ClientLoginNetworkAddon;
-import com.bookkeepersmc.notebook.impl.networking.payload.FriendlyByteBufLoginQueryRequestPayload;
+import com.bookkeepersmc.notebook.impl.networking.payload.PacketByteBufLoginQueryRequestPayload;
 
-@Mixin(ClientHandshakePacketListenerImpl.class)
+@Mixin(ClientLoginNetworkHandler.class)
 abstract class ClientLoginNetworkHandlerMixin implements NetworkHandlerExtensions {
 	@Shadow
 	@Final
-	private Minecraft minecraft;
+	private Minecraft client;
 
 	@Shadow
 	@Final
-	private Connection connection;
+	private ClientConnection connection;
 
 	@Unique
 	private ClientLoginNetworkAddon addon;
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void initAddon(CallbackInfo ci) {
-		this.addon = new ClientLoginNetworkAddon((ClientHandshakePacketListenerImpl) (Object) this, this.minecraft);
+		this.addon = new ClientLoginNetworkAddon((ClientLoginNetworkHandler) (Object) this, this.client);
 		// A bit of a hack but it allows the field above to be set in case someone registers handlers during INIT event which refers to said field
 		this.addon.lateInit();
 	}
 
-	@Inject(method = "handleCustomQuery", at = @At(value = "INVOKE", target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V", remap = false, shift = At.Shift.AFTER), cancellable = true)
-	private void handleQueryRequest(ClientboundCustomQueryPacket packet, CallbackInfo ci) {
-		if (packet.payload() instanceof FriendlyByteBufLoginQueryRequestPayload payload) {
+	@Inject(method = "onLoginQueryRequest", at = @At(value = "INVOKE", target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V", remap = false, shift = At.Shift.AFTER), cancellable = true)
+	private void handleQueryRequest(LoginQueryRequestS2CPacket packet, CallbackInfo ci) {
+		if (packet.payload() instanceof PacketByteBufLoginQueryRequestPayload payload) {
 			if (this.addon.handlePacket(packet)) {
 				ci.cancel();
 			} else {

@@ -24,9 +24,9 @@ package com.bookkeepersmc.notebook.api.networking.v1;
 
 import java.util.List;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
+import net.minecraft.server.network.ServerConfigurationNetworkHandler;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 import com.bookkeepersmc.notebook.api.event.EventFactory;
@@ -63,7 +63,7 @@ public final class S2CConfigurationChannelEvents {
 	 */
 	@FunctionalInterface
 	public interface Register {
-		void onChannelRegister(ServerConfigurationPacketListenerImpl handler, PacketSender sender, MinecraftServer server, List<ResourceLocation> channels);
+		void onChannelRegister(ServerConfigurationNetworkHandler handler, PacketSender sender, MinecraftServer server, List<Identifier> channels);
 	}
 
 	/**
@@ -71,6 +71,6 @@ public final class S2CConfigurationChannelEvents {
 	 */
 	@FunctionalInterface
 	public interface Unregister {
-		void onChannelUnregister(ServerConfigurationPacketListenerImpl handler, PacketSender sender, MinecraftServer server, List<ResourceLocation> channels);
+		void onChannelUnregister(ServerConfigurationNetworkHandler handler, PacketSender sender, MinecraftServer server, List<Identifier> channels);
 	}
 }

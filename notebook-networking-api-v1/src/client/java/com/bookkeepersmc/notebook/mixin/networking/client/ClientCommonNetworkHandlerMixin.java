@@ -27,19 +27,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.client.network.AbstractClientNetworkHandler;
+import net.minecraft.network.packet.payload.CustomPayload;
+import net.minecraft.network.packet.s2c.common.CustomPayloadS2CPacket;
 
 import com.bookkeepersmc.notebook.impl.networking.NetworkHandlerExtensions;
 import com.bookkeepersmc.notebook.impl.networking.client.ClientConfigurationNetworkAddon;
 import com.bookkeepersmc.notebook.impl.networking.client.ClientPlayNetworkAddon;
 
-@Mixin(ClientCommonPacketListenerImpl.class)
+@Mixin(AbstractClientNetworkHandler.class)
 public abstract class ClientCommonNetworkHandlerMixin implements NetworkHandlerExtensions {
-	@Inject(method = "handleCustomPayload(Lnet/minecraft/network/protocol/common/ClientboundCustomPayloadPacket;)V", at = @At("HEAD"), cancellable = true)
-	public void onCustomPayload(ClientboundCustomPayloadPacket packet, CallbackInfo ci) {
-		final CustomPacketPayload payload = packet.payload();
+	@Inject(method = "onCustomPayload(Lnet/minecraft/network/packet/s2c/common/CustomPayloadS2CPacket;)V", at = @At("HEAD"), cancellable = true)
+	public void onCustomPayload(CustomPayloadS2CPacket packet, CallbackInfo ci) {
+		final CustomPayload payload = packet.payload();
 		boolean handled;
 
 		if (this.getAddon() instanceof ClientPlayNetworkAddon addon) {

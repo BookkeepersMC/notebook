@@ -32,10 +32,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.server.packs.PackLocationInfo;
-import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.resource.pack.PackLocationInfo;
+import net.minecraft.resource.pack.PackProfile;
+import net.minecraft.resource.pack.ResourcePack;
 
 import com.bookkeepersmc.notebook.impl.resource.loader.NotebookResourcePackProfile;
 import com.bookkeepersmc.notebook.impl.resource.loader.ResourcePackSourceTracker;
@@ -47,7 +46,7 @@ import com.bookkeepersmc.notebook.impl.resource.loader.ResourcePackSourceTracker
  *
  * @see ResourcePackSourceTracker
  */
-@Mixin(Pack.class)
+@Mixin(PackProfile.class)
 abstract class ResourcePackProfileMixin implements NotebookResourcePackProfile {
 	@Unique
 	private static final Predicate<Set<String>> DEFAULT_PARENT_PREDICATE = parents -> true;
@@ -55,11 +54,11 @@ abstract class ResourcePackProfileMixin implements NotebookResourcePackProfile {
 	private Predicate<Set<String>> parentsPredicate = DEFAULT_PARENT_PREDICATE;
 
 	@Shadow
-	public abstract PackLocationInfo location();
+	public abstract PackLocationInfo getPackLocationInfo();
 
-	@Inject(method = "open", at = @At("RETURN"))
-	private void onCreateResourcePack(CallbackInfoReturnable<PackResources> info) {
-		ResourcePackSourceTracker.setSource(info.getReturnValue(), location().source());
+	@Inject(method = "createPack", at = @At("RETURN"))
+	private void onCreateResourcePack(CallbackInfoReturnable<ResourcePack> info) {
+		ResourcePackSourceTracker.setSource(info.getReturnValue(), getPackLocationInfo().source());
 	}
 
 	@Override

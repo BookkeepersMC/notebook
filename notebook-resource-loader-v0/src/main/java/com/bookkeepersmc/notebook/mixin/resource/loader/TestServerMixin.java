@@ -28,18 +28,18 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import net.minecraft.gametest.framework.GameTestServer;
-import net.minecraft.world.level.DataPackConfig;
+import net.minecraft.resource.pack.DataPackSettings;
+import net.minecraft.test.TestServer;
 
 import com.bookkeepersmc.notebook.impl.resource.loader.ModResourcePackUtil;
 
 /**
  * @see ModResourcePackUtil#createTestServerSettings
  */
-@Mixin(GameTestServer.class)
+@Mixin(TestServer.class)
 public class TestServerMixin {
-	@Redirect(method = "create", at = @At(value = "NEW", target = "(Ljava/util/List;Ljava/util/List;)Lnet/minecraft/world/level/DataPackConfig;"))
-	private static DataPackConfig replaceDefaultDataPackSettings(List<String> enabled, List<String> disabled) {
+	@Redirect(method = "create", at = @At(value = "NEW", target = "(Ljava/util/List;Ljava/util/List;)Lnet/minecraft/resource/pack/DataPackSettings;"))
+	private static DataPackSettings replaceDefaultDataPackSettings(List<String> enabled, List<String> disabled) {
 		return ModResourcePackUtil.createTestServerSettings(enabled, disabled);
 	}
 }

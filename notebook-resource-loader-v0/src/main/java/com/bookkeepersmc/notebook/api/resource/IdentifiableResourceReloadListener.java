@@ -25,8 +25,8 @@ package com.bookkeepersmc.notebook.api.resource;
 import java.util.Collection;
 import java.util.Collections;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.resource.ResourceReloader;
+import net.minecraft.util.Identifier;
 
 /**
  * Interface for "identifiable" resource reload listeners.
@@ -37,18 +37,18 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
  *
  * @see ResourceReloadListenerKeys
  */
-public interface IdentifiableResourceReloadListener extends PreparableReloadListener {
+public interface IdentifiableResourceReloadListener extends ResourceReloader {
 	/**
 	 * @return The unique identifier of this listener.
 	 */
-	ResourceLocation getNotebookId();
+	Identifier getNotebookId();
 
 	/**
 	 * @return The identifiers of listeners this listener expects to have been
 	 * executed before itself. Please keep in mind that this only takes effect
 	 * during the application stage!
 	 */
-	default Collection<ResourceLocation> getNotebookDependencies() {
+	default Collection<Identifier> getNotebookDependencies() {
 		return Collections.emptyList();
 	}
 }

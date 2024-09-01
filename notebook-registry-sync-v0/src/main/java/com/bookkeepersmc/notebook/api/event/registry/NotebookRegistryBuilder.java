@@ -26,28 +26,28 @@ import java.util.EnumSet;
 
 import com.mojang.serialization.Lifecycle;
 
-import net.minecraft.core.DefaultedMappedRegistry;
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.RegistrationInfo;
-import net.minecraft.core.Registry;
-import net.minecraft.core.WritableRegistry;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.registry.DefaultMappedRegistry;
+import net.minecraft.registry.MutableRegistry;
+import net.minecraft.registry.RegistrationInfo;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.ResourceKey;
+import net.minecraft.registry.SimpleRegistry;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.mixin.registry.sync.RegistriesAccessor;
 
-public final class NotebookRegistryBuilder<T, R extends WritableRegistry<T>> {
+public final class NotebookRegistryBuilder<T, R extends MutableRegistry<T>> {
 
-	public static <T, R extends WritableRegistry<T>> NotebookRegistryBuilder<T, R> from(R registry) {
+	public static <T, R extends MutableRegistry<T>> NotebookRegistryBuilder<T, R> from(R registry) {
 		return new NotebookRegistryBuilder<>(registry);
 	}
 
-	public static <T> NotebookRegistryBuilder<T, MappedRegistry<T>> createSimple(ResourceKey<Registry<T>> registryKey) {
-		return from(new MappedRegistry<>(registryKey, Lifecycle.stable(), false));
+	public static <T> NotebookRegistryBuilder<T, SimpleRegistry<T>> createSimple(ResourceKey<Registry<T>> registryKey) {
+		return from(new SimpleRegistry<>(registryKey, Lifecycle.stable(), false));
 	}
 
-	public static <T> NotebookRegistryBuilder<T, DefaultedMappedRegistry<T>> createDefaulted(ResourceKey<Registry<T>> registryKey, ResourceLocation defaultId) {
-		return from(new DefaultedMappedRegistry<T>(defaultId.toString(), registryKey, Lifecycle.stable(), false));
+	public static <T> NotebookRegistryBuilder<T, DefaultMappedRegistry<T>> createDefaulted(ResourceKey<Registry<T>> registryKey, Identifier defaultId) {
+		return from(new DefaultMappedRegistry<T>(defaultId.toString(), registryKey, Lifecycle.stable(), false));
 	}
 
 	private final R registry;
@@ -64,13 +64,13 @@ public final class NotebookRegistryBuilder<T, R extends WritableRegistry<T>> {
 	}
 
 	public R buildAndRegister() {
-		final ResourceKey<?> key = registry.key();
+		final ResourceKey<?> key = registry.getKey();
 
 		for (RegistryAttribute attribute : attributes) {
 			RegistryAttributeHolder.get(key).addAttribute(attribute);
 		}
 
-		RegistriesAccessor.getWRITABLE_REGISTRY().register((ResourceKey<WritableRegistry<?>>) key, registry, RegistrationInfo.BUILT_IN);
+		RegistriesAccessor.getINTERNAL_ROOT().register((ResourceKey<MutableRegistry<?>>) key, registry, RegistrationInfo.DEFAULT);
 
 		return registry;
 	}

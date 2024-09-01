@@ -25,30 +25,31 @@ package com.bookkeepersmc.notebook.impl.client.screen;
 import java.util.AbstractList;
 import java.util.List;
 
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Renderable;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.Selectable;
+import net.minecraft.client.gui.widget.ClickableWidget;
 
-public final class ButtonList extends AbstractList<AbstractWidget> {
-	private final List<Renderable> drawables;
-	private final List<NarratableEntry> selectables;
-	private final List<GuiEventListener> children;
 
-	public ButtonList(List<Renderable> drawables, List<NarratableEntry> selectables, List<GuiEventListener> children) {
+public final class ButtonList extends AbstractList<ClickableWidget> {
+	private final List<Drawable> drawables;
+	private final List<Selectable> selectables;
+	private final List<Element> children;
+
+	public ButtonList(List<Drawable> drawables, List<Selectable> selectables, List<Element> children) {
 		this.drawables = drawables;
 		this.selectables = selectables;
 		this.children = children;
 	}
 
 	@Override
-	public AbstractWidget get(int index) {
+	public ClickableWidget get(int index) {
 		final int drawableIndex = translateIndex(drawables, index, false);
-		return (AbstractWidget) drawables.get(drawableIndex);
+		return (ClickableWidget) drawables.get(drawableIndex);
 	}
 
 	@Override
-	public AbstractWidget set(int index, AbstractWidget element) {
+	public ClickableWidget set(int index, ClickableWidget element) {
 		final int drawableIndex = translateIndex(drawables, index, false);
 		drawables.set(drawableIndex, element);
 
@@ -56,11 +57,11 @@ public final class ButtonList extends AbstractList<AbstractWidget> {
 		selectables.set(selectableIndex, element);
 
 		final int childIndex = translateIndex(children, index, false);
-		return (AbstractWidget) children.set(childIndex, element);
+		return (ClickableWidget) children.set(childIndex, element);
 	}
 
 	@Override
-	public void add(int index, AbstractWidget element) {
+	public void add(int index, ClickableWidget element) {
 		// ensure no duplicates
 		final int duplicateIndex = drawables.indexOf(element);
 
@@ -85,10 +86,10 @@ public final class ButtonList extends AbstractList<AbstractWidget> {
 	}
 
 	@Override
-	public AbstractWidget remove(int index) {
+	public ClickableWidget remove(int index) {
 		index = translateIndex(drawables, index, false);
 
-		final AbstractWidget removedButton = (AbstractWidget) drawables.remove(index);
+		final ClickableWidget removedButton = (ClickableWidget) drawables.remove(index);
 		this.selectables.remove(removedButton);
 		this.children.remove(removedButton);
 
@@ -99,8 +100,8 @@ public final class ButtonList extends AbstractList<AbstractWidget> {
 	public int size() {
 		int ret = 0;
 
-		for (Renderable renderable : drawables) {
-			if (renderable instanceof AbstractWidget) {
+		for (Drawable renderable : drawables) {
+			if (renderable instanceof ClickableWidget) {
 				ret++;
 			}
 		}
@@ -112,7 +113,7 @@ public final class ButtonList extends AbstractList<AbstractWidget> {
 		int remaining = index;
 
 		for (int i = 0, max = list.size(); i < max; i++) {
-			if (list.get(i) instanceof AbstractWidget) {
+			if (list.get(i) instanceof ClickableWidget) {
 				if (remaining == 0) {
 					return i;
 				}

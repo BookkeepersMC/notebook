@@ -33,35 +33,35 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.gui.screens.packs.PackSelectionModel;
-import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.client.gui.screen.pack.ResourcePackOrganizer;
+import net.minecraft.resource.pack.PackManager;
+import net.minecraft.resource.pack.PackProfile;
 
 import com.bookkeepersmc.notebook.impl.resource.loader.NotebookResourcePackProfile;
 
-@Mixin(PackSelectionModel.class)
+@Mixin(ResourcePackOrganizer.class)
 public class ResourcePackOrganizerMixin {
 	@Shadow
 	@Final
-	List<Pack> selected;
+	List<PackProfile> enabledPacks;
 
 	@Shadow
 	@Final
-	List<Pack> unselected;
+	List<PackProfile> disabledPacks;
 
 	/**
 	 * Do not list hidden packs in either enabledPacks or disabledPacks.
 	 * They are managed entirely by ResourcePackManager on save, and are invisible to client.
 	 */
 	@Inject(method = "<init>", at = @At("TAIL"))
-	private void removeHiddenPacksInit(Runnable updateCallback, Function iconIdSupplier, PackRepository resourcePackManager, Consumer applier, CallbackInfo ci) {
-		this.selected.removeIf(profile -> ((NotebookResourcePackProfile) profile).notebook_isHidden());
-		this.unselected.removeIf(profile -> ((NotebookResourcePackProfile) profile).notebook_isHidden());
+	private void removeHiddenPacksInit(Runnable updateCallback, Function iconIdSupplier, PackManager resourcePackManager, Consumer applier, CallbackInfo ci) {
+		this.enabledPacks.removeIf(profile -> ((NotebookResourcePackProfile) profile).notebook_isHidden());
+		this.disabledPacks.removeIf(profile -> ((NotebookResourcePackProfile) profile).notebook_isHidden());
 	}
 
-	@Inject(method = "findNewPacks", at = @At("TAIL"))
+	@Inject(method = "refresh", at = @At("TAIL"))
 	private void removeHiddenPacksRefresh(CallbackInfo ci) {
-		this.selected.removeIf(profile -> ((NotebookResourcePackProfile) profile).notebook_isHidden());
-		this.unselected.removeIf(profile -> ((NotebookResourcePackProfile) profile).notebook_isHidden());
+		this.enabledPacks.removeIf(profile -> ((NotebookResourcePackProfile) profile).notebook_isHidden());
+		this.disabledPacks.removeIf(profile -> ((NotebookResourcePackProfile) profile).notebook_isHidden());
 	}
 }

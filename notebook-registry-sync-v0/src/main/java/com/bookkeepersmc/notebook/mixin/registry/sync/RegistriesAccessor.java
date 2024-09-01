@@ -25,13 +25,13 @@ package com.bookkeepersmc.notebook.mixin.registry.sync;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import net.minecraft.core.WritableRegistry;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.registry.BuiltInRegistries;
+import net.minecraft.registry.MutableRegistry;
 
 @Mixin(BuiltInRegistries.class)
 public interface RegistriesAccessor<T> {
 	@Accessor
-	static WritableRegistry<WritableRegistry<?>> getWRITABLE_REGISTRY() {
+	static MutableRegistry<MutableRegistry<?>> getINTERNAL_ROOT() {
 		throw new UnsupportedOperationException();
 	}
 }

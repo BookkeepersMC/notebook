@@ -47,20 +47,19 @@ import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.configuration.ConfigurationTask;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.registry.BuiltInRegistries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ConfigurationTask;
-import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
-import net.minecraft.util.thread.BlockableEventLoop;
+import net.minecraft.server.network.ServerConfigurationNetworkHandler;
+import net.minecraft.text.CommonTexts;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.thread.ThreadExecutor;
 
 import com.bookkeepersmc.notebook.api.event.registry.RegistryAttribute;
 import com.bookkeepersmc.notebook.api.event.registry.RegistryAttributeHolder;
@@ -81,8 +80,8 @@ public final class RegistrySyncManager {
 
 	private RegistrySyncManager() { }
 
-	public static void configureClient(ServerConfigurationPacketListenerImpl handler, MinecraftServer server) {
-		if (!DEBUG && server.isSingleplayerOwner(handler.getOwner())) {
+	public static void configureClient(ServerConfigurationNetworkHandler handler, MinecraftServer server) {
+		if (!DEBUG && server.isHost(handler.getHost())) {
 			// Dont send in singleplayer
 			return;
 		}
@@ -92,7 +91,7 @@ public final class RegistrySyncManager {
 			return;
 		}
 
-		final Map<ResourceLocation, Object2IntMap<ResourceLocation>> map = RegistrySyncManager.createAndPopulateRegistryMap();
+		final Map<Identifier, Object2IntMap<Identifier>> map = RegistrySyncManager.createAndPopulateRegistryMap();
 
 		if (map == null) {
 			// Don't send when there is nothing to map
@@ -103,8 +102,8 @@ public final class RegistrySyncManager {
 	}
 
 	public record SyncConfigurationTask(
-			ServerConfigurationPacketListenerImpl handler,
-			Map<ResourceLocation, Object2IntMap<ResourceLocation>> map
+			ServerConfigurationNetworkHandler handler,
+			Map<Identifier, Object2IntMap<Identifier>> map
 	) implements ConfigurationTask {
 		public static final Type KEY = new Type("notebook:registry/sync");
 
@@ -114,12 +113,12 @@ public final class RegistrySyncManager {
 		}
 
 		@Override
-		public Type type() {
+		public Type getType() {
 			return KEY;
 		}
 	}
 
-	public static <T extends RegistryPacketHandler.RegistrySyncPayload> CompletableFuture<Boolean> receivePacket(BlockableEventLoop<?> executor, RegistryPacketHandler<T> handler, T payload, boolean accept) {
+	public static <T extends RegistryPacketHandler.RegistrySyncPayload> CompletableFuture<Boolean> receivePacket(ThreadExecutor<?> executor, RegistryPacketHandler<T> handler, T payload, boolean accept) {
 		handler.receivePayload(payload);
 
 		if (!handler.isPacketFinished()) {
@@ -133,7 +132,7 @@ public final class RegistrySyncManager {
 			LOGGER.info("{} deflated size: {}", handlerName, handler.getDeflatedBufSize());
 		}
 
-		Map<ResourceLocation, Object2IntMap<ResourceLocation>> map = handler.getSyncedRegistryMap();
+		Map<Identifier, Object2IntMap<Identifier>> map = handler.getSyncedRegistryMap();
 
 		if (!accept) {
 			return CompletableFuture.completedFuture(true);
@@ -159,11 +158,11 @@ public final class RegistrySyncManager {
 	 * @return a {@link CompoundTag} to sync, null when empty
 	 */
 	@Nullable
-	public static Map<ResourceLocation, Object2IntMap<ResourceLocation>> createAndPopulateRegistryMap() {
-		Map<ResourceLocation, Object2IntMap<ResourceLocation>> map = new LinkedHashMap<>();
+	public static Map<Identifier, Object2IntMap<Identifier>> createAndPopulateRegistryMap() {
+		Map<Identifier, Object2IntMap<Identifier>> map = new LinkedHashMap<>();
 
-		for (ResourceLocation registryId : BuiltInRegistries.REGISTRY.keySet()) {
-			Registry registry = BuiltInRegistries.REGISTRY.get(registryId);
+		for (Identifier registryId : BuiltInRegistries.ROOT.getIds()) {
+			Registry registry = BuiltInRegistries.ROOT.get(registryId);
 
 			if (DEBUG_WRITE_REGISTRY_DATA) {
 				File location = new File(".fabric" + File.separatorChar + "debug" + File.separatorChar + "registry");
@@ -185,11 +184,11 @@ public final class RegistrySyncManager {
 						for (Object o : registry) {
 							String classType = (o == null) ? "null" : o.getClass().getName();
 							//noinspection unchecked
-							ResourceLocation id = registry.getKey(o);
+							Identifier id = registry.getId(o);
 							if (id == null) continue;
 
 							//noinspection unchecked
-							int rawId = registry.getId(o);
+							int rawId = registry.getRawId(o);
 							String stringId = id.toString();
 							builder.append("\"").append(rawId).append("\",\"").append(stringId).append("\",\"").append(classType).append("\"\n");
 						}
@@ -201,7 +200,7 @@ public final class RegistrySyncManager {
 				}
 			}
 
-			RegistryAttributeHolder attributeHolder = RegistryAttributeHolder.get(registry.key());
+			RegistryAttributeHolder attributeHolder = RegistryAttributeHolder.get(registry.getKey());
 
 			if (!attributeHolder.hasAttribute(RegistryAttribute.SYNCED)) {
 				LOGGER.debug("Not syncing registry: {}", registryId);
@@ -222,24 +221,24 @@ public final class RegistrySyncManager {
 			LOGGER.debug("Syncing registry: " + registryId);
 
 			if (registry instanceof RemappableRegistry) {
-				Object2IntMap<ResourceLocation> idMap = new Object2IntLinkedOpenHashMap<>();
+				Object2IntMap<Identifier> idMap = new Object2IntLinkedOpenHashMap<>();
 				IntSet rawIdsFound = DEBUG ? new IntOpenHashSet() : null;
 
 				for (Object o : registry) {
 					//noinspection unchecked
-					ResourceLocation id = registry.getKey(o);
+					Identifier id = registry.getId(o);
 					if (id == null) continue;
 
 					//noinspection unchecked
-					int rawId = registry.getId(o);
+					int rawId = registry.getRawId(o);
 
 					if (DEBUG) {
 						if (registry.get(id) != o) {
 							LOGGER.error("[notebook-registry-sync] Inconsistency detected in " + registryId + ": object " + o + " -> string ID " + id + " -> object " + registry.get(id) + "!");
 						}
 
-						if (registry.byId(rawId) != o) {
-							LOGGER.error("[notebook-registry-sync] Inconsistency detected in " + registryId + ": object " + o + " -> integer ID " + rawId + " -> object " + registry.byId(rawId) + "!");
+						if (registry.get(rawId) != o) {
+							LOGGER.error("[notebook-registry-sync] Inconsistency detected in " + registryId + ": object " + o + " -> integer ID " + rawId + " -> object " + registry.get(rawId) + "!");
 						}
 
 						if (!rawIdsFound.add(rawId)) {
@@ -261,22 +260,22 @@ public final class RegistrySyncManager {
 		return map;
 	}
 
-	public static void apply(Map<ResourceLocation, Object2IntMap<ResourceLocation>> map, RemappableRegistry.RemapMode mode) throws RemapException {
+	public static void apply(Map<Identifier, Object2IntMap<Identifier>> map, RemappableRegistry.RemapMode mode) throws RemapException {
 		if (mode == RemappableRegistry.RemapMode.REMOTE) {
 			checkRemoteRemap(map);
 		}
 
-		Set<ResourceLocation> containedRegistries = Sets.newHashSet(map.keySet());
+		Set<Identifier> containedRegistries = Sets.newHashSet(map.keySet());
 
-		for (ResourceLocation registryId : BuiltInRegistries.REGISTRY.keySet()) {
+		for (Identifier registryId : BuiltInRegistries.ROOT.getIds()) {
 			if (!containedRegistries.remove(registryId)) {
 				continue;
 			}
 
-			Object2IntMap<ResourceLocation> registryMap = map.get(registryId);
-			Registry<?> registry = BuiltInRegistries.REGISTRY.get(registryId);
+			Object2IntMap<Identifier> registryMap = map.get(registryId);
+			Registry<?> registry = BuiltInRegistries.ROOT.get(registryId);
 
-			RegistryAttributeHolder attributeHolder = RegistryAttributeHolder.get(registry.key());
+			RegistryAttributeHolder attributeHolder = RegistryAttributeHolder.get(registry.getKey());
 
 			if (!attributeHolder.hasAttribute(RegistryAttribute.MODDED)) {
 				LOGGER.debug("Not applying registry data to vanilla registry {}", registryId.toString());
@@ -296,21 +295,21 @@ public final class RegistrySyncManager {
 	}
 
 	@VisibleForTesting
-	public static void checkRemoteRemap(Map<ResourceLocation, Object2IntMap<ResourceLocation>> map) throws RemapException {
-		Map<ResourceLocation, List<ResourceLocation>> missingEntries = new HashMap<>();
+	public static void checkRemoteRemap(Map<Identifier, Object2IntMap<Identifier>> map) throws RemapException {
+		Map<Identifier, List<Identifier>> missingEntries = new HashMap<>();
 
-		for (Map.Entry<? extends ResourceKey<? extends Registry<?>>, ? extends Registry<?>> entry : BuiltInRegistries.REGISTRY.entrySet()) {
+		for (Map.Entry<? extends ResourceKey<? extends Registry<?>>, ? extends Registry<?>> entry : BuiltInRegistries.ROOT.getEntries()) {
 			final Registry<?> registry = entry.getValue();
-			final ResourceLocation registryId = entry.getKey().location();
-			final Object2IntMap<ResourceLocation> remoteRegistry = map.get(registryId);
+			final Identifier registryId = entry.getKey().getValue();
+			final Object2IntMap<Identifier> remoteRegistry = map.get(registryId);
 
 			if (remoteRegistry == null) {
 				// Registry sync does not contain data for this registry, will print a warning when applying.
 				continue;
 			}
 
-			for (ResourceLocation remoteId : remoteRegistry.keySet()) {
-				if (!registry.containsKey(remoteId)) {
+			for (Identifier remoteId : remoteRegistry.keySet()) {
+				if (!registry.containsId(remoteId)) {
 					// Found a registry entry from the server that is
 					missingEntries.computeIfAbsent(registryId, i -> new ArrayList<>()).add(remoteId);
 				}
@@ -325,50 +324,50 @@ public final class RegistrySyncManager {
 		// Print out details to the log
 		LOGGER.error("Received unknown remote registry entries from server");
 
-		for (Map.Entry<ResourceLocation, List<ResourceLocation>> entry : missingEntries.entrySet()) {
-			for (ResourceLocation identifier : entry.getValue()) {
+		for (Map.Entry<Identifier, List<Identifier>> entry : missingEntries.entrySet()) {
+			for (Identifier identifier : entry.getValue()) {
 				LOGGER.error("Registry entry ({}) is missing from local registry ({})", identifier, entry.getKey());
 			}
 		}
 
 		// Create a nice user friendly error message.
-		MutableComponent text = Component.empty();
+		MutableText text = Text.empty();
 
 		final int count = missingEntries.values().stream().mapToInt(List::size).sum();
 
 		if (count == 1) {
-			text = text.append(Component.translatable("notebook-registry-sync-v0.unknown-remote.title.singular"));
+			text = text.append(Text.translatable("notebook-registry-sync-v0.unknown-remote.title.singular"));
 		} else {
-			text = text.append(Component.translatable("notebook-registry-sync-v0.unknown-remote.title.plural", count));
+			text = text.append(Text.translatable("notebook-registry-sync-v0.unknown-remote.title.plural", count));
 		}
 
-		text = text.append(Component.translatable("notebook-registry-sync-v0.unknown-remote.subtitle.1").withStyle(ChatFormatting.GREEN));
-		text = text.append(Component.translatable("notebook-registry-sync-v0.unknown-remote.subtitle.2"));
+		text = text.append(Text.translatable("notebook-registry-sync-v0.unknown-remote.subtitle.1").formatted(Formatting.GREEN));
+		text = text.append(Text.translatable("notebook-registry-sync-v0.unknown-remote.subtitle.2"));
 
 		final int toDisplay = 4;
 		// Get the distinct missing namespaces
 		final List<String> namespaces = missingEntries.values().stream()
 				.flatMap(List::stream)
-				.map(ResourceLocation::getNamespace)
+				.map(Identifier::getNamespace)
 				.distinct()
 				.sorted()
 				.toList();
 
 		for (int i = 0; i < Math.min(namespaces.size(), toDisplay); i++) {
-			text = text.append(Component.literal(namespaces.get(i)).withStyle(ChatFormatting.YELLOW));
-			text = text.append(CommonComponents.NEW_LINE);
+			text = text.append(Text.literal(namespaces.get(i)).formatted(Formatting.YELLOW));
+			text = text.append(CommonTexts.LINE_BREAK);
 		}
 
 		if (namespaces.size() > toDisplay) {
-			text = text.append(Component.translatable("notebook-registry-sync-v0.unknown-remote.footer", namespaces.size() - toDisplay));
+			text = text.append(Text.translatable("notebook-registry-sync-v0.unknown-remote.footer", namespaces.size() - toDisplay));
 		}
 
 		throw new RemapException(text);
 	}
 
 	public static void unmap() throws RemapException {
-		for (ResourceLocation registryId : BuiltInRegistries.REGISTRY.keySet()) {
-			Registry registry = BuiltInRegistries.REGISTRY.get(registryId);
+		for (Identifier registryId : BuiltInRegistries.ROOT.getIds()) {
+			Registry registry = BuiltInRegistries.ROOT.get(registryId);
 
 			if (registry instanceof RemappableRegistry) {
 				((RemappableRegistry) registry).unmap(registryId.toString());

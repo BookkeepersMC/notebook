@@ -33,11 +33,11 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.world.level.WorldDataConfiguration;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.world.CreateWorldScreen;
+import net.minecraft.resource.ResourceType;
+import net.minecraft.resource.pack.PackManager;
+import net.minecraft.server.world.FeatureAndDataSettings;
 
 import com.bookkeepersmc.notebook.impl.resource.loader.ModResourcePackCreator;
 import com.bookkeepersmc.notebook.impl.resource.loader.ModResourcePackUtil;
@@ -45,29 +45,29 @@ import com.bookkeepersmc.notebook.impl.resource.loader.ModResourcePackUtil;
 @Mixin(CreateWorldScreen.class)
 public abstract class CreateWorldScreenMixin extends Screen {
 	@Shadow
-	private PackRepository tempDataPackRepository;
+	private PackManager packManager;
 
 	private CreateWorldScreenMixin() {
 		super(null);
 	}
 
-	@ModifyVariable(method = "openFresh",
-			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/worldselection/CreateWorldScreen;createDefaultLoadConfig(Lnet/minecraft/server/packs/repository/PackRepository;Lnet/minecraft/world/level/WorldDataConfiguration;)Lnet/minecraft/server/WorldLoader$InitConfig;"))
-	private static PackRepository onCreateResManagerInit(PackRepository manager) {
+	@ModifyVariable(method = "open",
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/world/CreateWorldScreen;createDefaultLoadConfig(Lnet/minecraft/resource/pack/PackManager;Lnet/minecraft/server/world/FeatureAndDataSettings;)Lnet/minecraft/server/WorldLoader$InitConfig;"))
+	private static PackManager onCreateResManagerInit(PackManager manager) {
 		// Add mod data packs to the initial res pack manager so they are active even if the user doesn't use custom data packs
-		manager.sources.add(new ModResourcePackCreator(PackType.SERVER_DATA));
+		manager.providers.add(new ModResourcePackCreator(ResourceType.SERVER_DATA));
 		return manager;
 	}
 
-	@Redirect(method = "openFresh", at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/WorldDataConfiguration;DEFAULT:Lnet/minecraft/world/level/WorldDataConfiguration;", ordinal = 0))
-	private static WorldDataConfiguration replaceDefaultSettings() {
+	@Redirect(method = "open", at = @At(value = "FIELD", target = "Lnet/minecraft/server/world/FeatureAndDataSettings;MINIMAL:Lnet/minecraft/server/world/FeatureAndDataSettings;", ordinal = 0))
+	private static FeatureAndDataSettings replaceDefaultSettings() {
 		return ModResourcePackUtil.createDefaultDataConfiguration();
 	}
 
-	@Inject(method = "getDataPackSelectionSettings",
-			at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/repository/PackRepository;reload()V", shift = At.Shift.BEFORE))
-	private void onScanPacks(CallbackInfoReturnable<Pair<File, PackRepository>> cir) {
+	@Inject(method = "getScannedDataPack",
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/resource/pack/PackManager;scanPacks()V", shift = At.Shift.BEFORE))
+	private void onScanPacks(CallbackInfoReturnable<Pair<File, PackManager>> cir) {
 		// Allow to display built-in data packs in the data pack selection screen at world creation.
-		this.tempDataPackRepository.sources.add(new ModResourcePackCreator(PackType.SERVER_DATA));
+		this.packManager.providers.add(new ModResourcePackCreator(ResourceType.SERVER_DATA));
 	}
 }

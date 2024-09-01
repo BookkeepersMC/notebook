@@ -32,20 +32,20 @@ import java.util.function.Predicate;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.packs.PackLocationInfo;
-import net.minecraft.server.packs.PackSelectionConfig;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.server.packs.repository.PackSource;
-import net.minecraft.server.packs.repository.RepositorySource;
+import net.minecraft.resource.PackPosition;
+import net.minecraft.resource.ResourceType;
+import net.minecraft.resource.pack.PackLocationInfo;
+import net.minecraft.resource.pack.PackProfile;
+import net.minecraft.resource.pack.PackProvider;
+import net.minecraft.resource.pack.PackSource;
+import net.minecraft.text.Text;
 
 import com.bookkeepersmc.notebook.api.resource.ModResourcePack;
 
 /**
  * Represents a resource pack provider for mods and built-in mods resource packs.
  */
-public class ModResourcePackCreator implements RepositorySource {
+public class ModResourcePackCreator implements PackProvider {
 	/**
 	 * The ID of the root resource pack profile for bundled packs.
 	 */
@@ -64,8 +64,8 @@ public class ModResourcePackCreator implements RepositorySource {
 	 */
 	public static final PackSource RESOURCE_PACK_SOURCE = new PackSource() {
 		@Override
-		public Component decorate(Component packName) {
-			return Component.translatable("pack.nameAndSource", packName, Component.translatable("pack.source.notebookmod"));
+		public Text decorate(Text packName) {
+			return Text.translatable("pack.nameAndSource", packName, Text.translatable("pack.source.notebookmod"));
 		}
 
 		@Override
@@ -73,23 +73,23 @@ public class ModResourcePackCreator implements RepositorySource {
 			return true;
 		}
 	};
-	public static final ModResourcePackCreator CLIENT_RESOURCE_PACK_PROVIDER = new ModResourcePackCreator(PackType.CLIENT_RESOURCES);
+	public static final ModResourcePackCreator CLIENT_RESOURCE_PACK_PROVIDER = new ModResourcePackCreator(ResourceType.CLIENT_RESOURCES);
 	/**
 	 * The maximum number of known data packs requested from the client, including vanilla data packs.
 	 */
 	public static final int MAX_KNOWN_PACKS = Integer.getInteger("notebook-resource-loader-v0:maxKnownPacks", 1024);
 
-	private final PackType type;
-	private final PackSelectionConfig activationInfo;
+	private final ResourceType type;
+	private final PackPosition activationInfo;
 	private final boolean forClientDataPackManager;
 
-	public ModResourcePackCreator(PackType type) {
+	public ModResourcePackCreator(ResourceType type) {
 		this(type, false);
 	}
 
-	protected ModResourcePackCreator(PackType type, boolean forClientDataPackManager) {
+	protected ModResourcePackCreator(ResourceType type, boolean forClientDataPackManager) {
 		this.type = type;
-		this.activationInfo = new PackSelectionConfig(!forClientDataPackManager, Pack.Position.TOP, false);
+		this.activationInfo = new PackPosition(!forClientDataPackManager, PackProfile.InsertionPosition.TOP, false);
 		this.forClientDataPackManager = forClientDataPackManager;
 	}
 
@@ -99,7 +99,7 @@ public class ModResourcePackCreator implements RepositorySource {
 	 * @param consumer The resource pack profile consumer.
 	 */
 	@Override
-	public void loadPacks(Consumer<Pack> consumer) {
+	public void loadPacks(Consumer<PackProfile> consumer) {
 		/*
 			Register order rule in this provider:
 			1. Mod resource packs
@@ -114,12 +114,12 @@ public class ModResourcePackCreator implements RepositorySource {
 
 		PackLocationInfo metadata = new PackLocationInfo(
 				NOTEBOOK,
-				Component.translatable("pack.name.notebookMods"),
+				Text.translatable("pack.name.notebookMods"),
 				RESOURCE_PACK_SOURCE,
 				Optional.empty()
 		);
 
-		consumer.accept(Pack.readMetaAndCreate(
+		consumer.accept(PackProfile.of(
 				metadata,
 				new PlaceholderResourcePack.Factory(this.type, metadata),
 				this.type,
@@ -129,7 +129,7 @@ public class ModResourcePackCreator implements RepositorySource {
 		// Build a list of mod resource packs.
 		registerModPack(consumer, null, BASE_PARENT);
 
-		if (this.type == PackType.CLIENT_RESOURCES) {
+		if (this.type == ResourceType.CLIENT_RESOURCES) {
 			// Programmer Art/High Contrast data packs can never be enabled.
 			registerModPack(consumer, PROGRAMMER_ART, PROGRAMMER_ART_PARENT);
 			registerModPack(consumer, HIGH_CONTRAST, HIGH_CONTRAST_PARENT);
@@ -139,13 +139,13 @@ public class ModResourcePackCreator implements RepositorySource {
 		ResourceManagerHelperImpl.registerBuiltinResourcePacks(this.type, consumer);
 	}
 
-	private void registerModPack(Consumer<Pack> consumer, @Nullable String subPath, Predicate<Set<String>> parents) {
+	private void registerModPack(Consumer<PackProfile> consumer, @Nullable String subPath, Predicate<Set<String>> parents) {
 		List<ModResourcePack> packs = new ArrayList<>();
 		ModResourcePackUtil.appendModResourcePacks(packs, this.type, subPath);
 
 		for (ModResourcePack pack : packs) {
-			Pack profile = Pack.readMetaAndCreate(
-					pack.location(),
+			PackProfile profile = PackProfile.of(
+					pack.getLocationInfo(),
 					new ModResourcePackFactory(pack),
 					this.type,
 					this.activationInfo

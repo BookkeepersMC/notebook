@@ -27,13 +27,13 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.ResourceKey;
 
 @ApiStatus.NonExtendable
 public interface DynamicRegistryView {
-	RegistryAccess asDynamicRegistryManager();
+	DynamicRegistryManager asDynamicRegistryManager();
 
 	Stream<Registry<?>> stream();
 

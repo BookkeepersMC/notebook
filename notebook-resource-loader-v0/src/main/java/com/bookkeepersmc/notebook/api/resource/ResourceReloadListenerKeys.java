@@ -22,7 +22,7 @@
  */
 package com.bookkeepersmc.notebook.api.resource;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 /**
  * This class contains default keys for various Minecraft resource reload listeners.
@@ -31,17 +31,16 @@ import net.minecraft.resources.ResourceLocation;
  */
 public final class ResourceReloadListenerKeys {
 	// client
-	public static final ResourceLocation SOUNDS = ResourceLocation.withDefaultNamespace("sounds");
-	public static final ResourceLocation FONTS = ResourceLocation.withDefaultNamespace("fonts");
-	public static final ResourceLocation MODELS = ResourceLocation.withDefaultNamespace("models");
-	public static final ResourceLocation LANGUAGES = ResourceLocation.withDefaultNamespace("languages");
-	public static final ResourceLocation TEXTURES = ResourceLocation.withDefaultNamespace("textures");
+	public static final Identifier SOUNDS = Identifier.ofDefault("sounds");
+	public static final Identifier FONTS = Identifier.ofDefault("fonts");
+	public static final Identifier MODELS = Identifier.ofDefault("models");
+	public static final Identifier LANGUAGES = Identifier.ofDefault("languages");
+	public static final Identifier TEXTURES = Identifier.ofDefault("textures");
 
 	// server
-	public static final ResourceLocation TAGS = ResourceLocation.withDefaultNamespace("tags");
-	public static final ResourceLocation RECIPES = ResourceLocation.withDefaultNamespace("recipes");
-	public static final ResourceLocation ADVANCEMENTS = ResourceLocation.withDefaultNamespace("advancements");
-	public static final ResourceLocation FUNCTIONS = ResourceLocation.withDefaultNamespace("functions");
+	public static final Identifier RECIPES = Identifier.ofDefault("recipes");
+	public static final Identifier ADVANCEMENTS = Identifier.ofDefault("advancements");
+	public static final Identifier FUNCTIONS = Identifier.ofDefault("functions");
 
 	private ResourceReloadListenerKeys() { }
 }

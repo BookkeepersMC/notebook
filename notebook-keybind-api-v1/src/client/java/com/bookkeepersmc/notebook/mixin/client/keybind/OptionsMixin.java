@@ -30,20 +30,20 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Options;
+import net.minecraft.client.option.GameOptions;
+import net.minecraft.client.option.KeyBind;
 
 import com.bookkeepersmc.notebook.impl.client.keybinding.KeybindingRegistryImpl;
 
-@Mixin(Options.class)
+@Mixin(GameOptions.class)
 public class OptionsMixin {
 	@Mutable
 	@Final
 	@Shadow
-	public KeyMapping[] keyMappings;
+	public KeyBind[] allKeys;
 
 	@Inject(at = @At("HEAD"), method = "load()V")
 	public void loadHook(CallbackInfo info) {
-		keyMappings = KeybindingRegistryImpl.process(keyMappings);
+		allKeys = KeybindingRegistryImpl.process(allKeys);
 	}
 }

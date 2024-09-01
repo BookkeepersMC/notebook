@@ -22,9 +22,9 @@
  */
 package com.bookkeepersmc.notebook.api.networking.v1;
 
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.packet.payload.CustomPayload;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 import com.bookkeepersmc.notebook.api.event.EventFactory;
@@ -36,7 +36,7 @@ public final class ServerPlayConnectionEvents {
 	/**
 	 * Event indicating a connection entered the PLAY state, ready for registering channel handlers.
 	 *
-	 * @see ServerPlayNetworking#registerReceiver(ServerGamePacketListenerImpl, CustomPacketPayload.Type, ServerPlayNetworking.PlayPayloadHandler)
+	 * @see ServerPlayNetworking#registerReceiver(ServerPlayNetworkHandler, CustomPayload.Id, ServerPlayNetworking.PlayPayloadHandler)
 	 */
 	public static final Event<Init> INIT = EventFactory.createArrayBacked(Init.class, callbacks -> (handler, server) -> {
 		for (Init callback : callbacks) {
@@ -71,16 +71,16 @@ public final class ServerPlayConnectionEvents {
 
 	@FunctionalInterface
 	public interface Init {
-		void onPlayInit(ServerGamePacketListenerImpl handler, MinecraftServer server);
+		void onPlayInit(ServerPlayNetworkHandler handler, MinecraftServer server);
 	}
 
 	@FunctionalInterface
 	public interface Join {
-		void onPlayReady(ServerGamePacketListenerImpl handler, PacketSender sender, MinecraftServer server);
+		void onPlayReady(ServerPlayNetworkHandler handler, PacketSender sender, MinecraftServer server);
 	}
 
 	@FunctionalInterface
 	public interface Disconnect {
-		void onPlayDisconnect(ServerGamePacketListenerImpl handler, MinecraftServer server);
+		void onPlayDisconnect(ServerPlayNetworkHandler handler, MinecraftServer server);
 	}
 }

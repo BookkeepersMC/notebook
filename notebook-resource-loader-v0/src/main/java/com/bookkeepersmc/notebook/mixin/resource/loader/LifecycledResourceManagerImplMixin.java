@@ -30,24 +30,24 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.resource.MultiPackResourceManager;
+import net.minecraft.resource.ResourceType;
+import net.minecraft.resource.pack.ResourcePack;
 
 import com.bookkeepersmc.notebook.impl.resource.loader.NotebookLifecycledResourceManager;
 
 @Mixin(MultiPackResourceManager.class)
 public class LifecycledResourceManagerImplMixin implements NotebookLifecycledResourceManager {
 	@Unique
-	private PackType notebook_resourceType;
+	private ResourceType notebook_resourceType;
 
 	@Inject(method = "<init>", at = @At("TAIL"))
-	private void init(PackType resourceType, List<PackResources> list, CallbackInfo ci) {
+	private void init(ResourceType resourceType, List<ResourcePack> list, CallbackInfo ci) {
 		this.notebook_resourceType = resourceType;
 	}
 
 	@Override
-	public PackType notebook_getResourceType() {
+	public ResourceType notebook_getResourceType() {
 		return notebook_resourceType;
 	}
 }

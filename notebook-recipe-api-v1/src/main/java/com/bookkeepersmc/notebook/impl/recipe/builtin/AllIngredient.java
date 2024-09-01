@@ -23,31 +23,26 @@
 package com.bookkeepersmc.notebook.impl.recipe.builtin;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.registry.Holder;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.recipe.v1.CustomIngredientSerializer;
 
 public class AllIngredient extends CombinedIngredient {
-	private static final MapCodec<AllIngredient> ALLOW_EMPTY_CODEC = createCodec(Ingredient.CODEC);
-	private static final MapCodec<AllIngredient> DISALLOW_EMPTY_CODEC = createCodec(Ingredient.CODEC_NONEMPTY);
-
-	private static MapCodec<AllIngredient> createCodec(Codec<Ingredient> ingredientCodec) {
-		return ingredientCodec
-				.listOf()
-				.fieldOf("ingredients")
-				.xmap(AllIngredient::new, AllIngredient::getIngredients);
-	}
+	private static final MapCodec<AllIngredient> CODEC = Ingredient.ALLOW_EMPTY_CODEC
+			.listOf()
+			.fieldOf("ingredients")
+			.xmap(AllIngredient::new, AllIngredient::getIngredients);
 
 	public static final CustomIngredientSerializer<AllIngredient> SERIALIZER =
-			new Serializer<>(ResourceLocation.fromNamespaceAndPath("notebook", "all"), AllIngredient::new, ALLOW_EMPTY_CODEC, DISALLOW_EMPTY_CODEC);
+			new Serializer<>(Identifier.of("notebook", "all"), AllIngredient::new, CODEC);
 
 	public AllIngredient(List<Ingredient> ingredients) {
 		super(ingredients);
@@ -65,13 +60,13 @@ public class AllIngredient extends CombinedIngredient {
 	}
 
 	@Override
-	public List<ItemStack> getMatchingStacks() {
+	public List<Holder<Item>> getMatchingStacks() {
 		// There's always at least one sub ingredient, so accessing ingredients[0] is safe.
-		List<ItemStack> previewStacks = new ArrayList<>(Arrays.asList(ingredients.get(0).getItems()));
+		List<Holder<Item>> previewStacks = new ArrayList<>(ingredients.getFirst().method_8105());
 
 		for (int i = 1; i < ingredients.size(); ++i) {
 			Ingredient ing = ingredients.get(i);
-			previewStacks.removeIf(stack -> !ing.test(stack));
+			previewStacks.removeIf(entry -> !ing.test(entry.value().getDefaultStack()));
 		}
 
 		return previewStacks;

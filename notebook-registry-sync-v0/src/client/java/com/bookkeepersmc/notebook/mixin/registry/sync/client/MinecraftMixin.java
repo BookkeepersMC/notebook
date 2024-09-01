@@ -31,9 +31,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.item.ItemGroups;
+import net.minecraft.registry.BuiltInRegistries;
 
 import com.bookkeepersmc.notebook.impl.registry.sync.RegistrySyncManager;
 import com.bookkeepersmc.notebook.impl.registry.sync.RemapException;
@@ -45,7 +45,7 @@ public class MinecraftMixin {
 	@Final
 	private static Logger LOGGER;
 
-	@Inject(at = @At("RETURN"), method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;Z)V")
+	@Inject(at = @At("RETURN"), method = "method_18096")
 	public void disconnectAfter(Screen disconnectionScreen, boolean bl, CallbackInfo ci) {
 		try {
 			RegistrySyncManager.unmap();
@@ -58,8 +58,8 @@ public class MinecraftMixin {
 	private void afterModInit(CallbackInfo ci) {
 		// Freeze the registries on the client
 		LOGGER.debug("Freezing registries");
-		BuiltInRegistries.bootStrap();
+		BuiltInRegistries.bootstrap();
 		BlockInitTracker.postFreeze();
-		CreativeModeTabs.validate();
+		ItemGroups.bootstrap();
 	}
 }

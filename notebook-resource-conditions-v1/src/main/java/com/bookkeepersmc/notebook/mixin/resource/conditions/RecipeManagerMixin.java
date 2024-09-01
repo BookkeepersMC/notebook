@@ -27,17 +27,18 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.recipe.RecipeManager;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.registry.RegistryOps;
 
 @Mixin(RecipeManager.class)
 public class RecipeManagerMixin extends SimplePreparableReloadListenerMixin {
 	@Shadow
 	@Final
-	private HolderLookup.Provider registries;
+	private HolderLookup.Provider lookupProvider;
 
 	@Override
-	protected @Nullable HolderLookup.Provider notebook_getRegistryLookup() {
-		return this.registries;
+	protected @Nullable RegistryOps.RegistryInfoLookup notebook_getRegistryLookup() {
+		return new RegistryOps.C_tbnrbtat(lookupProvider);
 	}
 }

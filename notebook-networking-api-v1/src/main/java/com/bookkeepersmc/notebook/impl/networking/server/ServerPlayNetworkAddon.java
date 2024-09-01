@@ -26,14 +26,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import net.minecraft.network.Connection;
-import net.minecraft.network.ConnectionProtocol;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.ClientConnection;
+import net.minecraft.network.NetworkPhase;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.payload.CustomPayload;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.networking.v1.PacketSender;
 import com.bookkeepersmc.notebook.api.networking.v1.S2CPlayChannelEvents;
@@ -45,19 +45,19 @@ import com.bookkeepersmc.notebook.impl.networking.NetworkingImpl;
 import com.bookkeepersmc.notebook.impl.networking.RegistrationPayload;
 
 public final class ServerPlayNetworkAddon extends AbstractChanneledNetworkAddon<ServerPlayNetworking.PlayPayloadHandler<?>> {
-	private final ServerGamePacketListenerImpl handler;
+	private final ServerPlayNetworkHandler handler;
 	private final MinecraftServer server;
 	private boolean sentInitialRegisterPacket;
 	private final ServerPlayNetworking.Context context;
 
-	public ServerPlayNetworkAddon(ServerGamePacketListenerImpl handler, Connection connection, MinecraftServer server) {
+	public ServerPlayNetworkAddon(ServerPlayNetworkHandler handler, ClientConnection connection, MinecraftServer server) {
 		super(ServerNetworkingImpl.PLAY, connection, "ServerPlayNetworkAddon for " + handler.player.getDisplayName());
 		this.handler = handler;
 		this.server = server;
 		this.context = new ContextImpl(server, handler, this);
 
 		// Must register pending channels via lateinit
-		this.registerPendingChannels((ChannelInfoHolder) this.connection, ConnectionProtocol.PLAY);
+		this.registerPendingChannels((ChannelInfoHolder) this.connection, NetworkPhase.PLAY);
 	}
 
 	@Override
@@ -73,7 +73,7 @@ public final class ServerPlayNetworkAddon extends AbstractChanneledNetworkAddon<
 	}
 
 	@Override
-	protected void receive(ServerPlayNetworking.PlayPayloadHandler<?> payloadHandler, CustomPacketPayload payload) {
+	protected void receive(ServerPlayNetworking.PlayPayloadHandler<?> payloadHandler, CustomPayload payload) {
 		this.server.execute(() -> {
 			((ServerPlayNetworking.PlayPayloadHandler) payloadHandler).receive(payload, ServerPlayNetworkAddon.this.context);
 		});
@@ -87,22 +87,22 @@ public final class ServerPlayNetworkAddon extends AbstractChanneledNetworkAddon<
 	}
 
 	@Override
-	public Packet<?> createPacket(CustomPacketPayload packet) {
+	public Packet<?> createPacket(CustomPayload packet) {
 		return ServerPlayNetworking.createS2CPacket(packet);
 	}
 
 	@Override
-	protected void invokeRegisterEvent(List<ResourceLocation> ids) {
+	protected void invokeRegisterEvent(List<Identifier> ids) {
 		S2CPlayChannelEvents.REGISTER.invoker().onChannelRegister(this.handler, this, this.server, ids);
 	}
 
 	@Override
-	protected void invokeUnregisterEvent(List<ResourceLocation> ids) {
+	protected void invokeUnregisterEvent(List<Identifier> ids) {
 		S2CPlayChannelEvents.UNREGISTER.invoker().onChannelUnregister(this.handler, this, this.server, ids);
 	}
 
 	@Override
-	protected void handleRegistration(ResourceLocation channelName) {
+	protected void handleRegistration(Identifier channelName) {
 		// If we can already send packets, immediately send the register packet for this channel
 		if (this.sentInitialRegisterPacket) {
 			RegistrationPayload registrationPayload = this.createRegistrationPayload(RegistrationPayload.REGISTER, Collections.singleton(channelName));
@@ -114,7 +114,7 @@ public final class ServerPlayNetworkAddon extends AbstractChanneledNetworkAddon<
 	}
 
 	@Override
-	protected void handleUnregistration(ResourceLocation channelName) {
+	protected void handleUnregistration(Identifier channelName) {
 		// If we can already send packets, immediately send the unregister packet for this channel
 		if (this.sentInitialRegisterPacket) {
 			RegistrationPayload registrationPayload = this.createRegistrationPayload(RegistrationPayload.UNREGISTER, Collections.singleton(channelName));
@@ -131,11 +131,11 @@ public final class ServerPlayNetworkAddon extends AbstractChanneledNetworkAddon<
 	}
 
 	@Override
-	protected boolean isReservedChannel(ResourceLocation channelName) {
+	protected boolean isReservedChannel(Identifier channelName) {
 		return NetworkingImpl.isReservedCommonChannel(channelName);
 	}
 
-	private record ContextImpl(MinecraftServer server, ServerGamePacketListenerImpl handler, PacketSender responseSender) implements ServerPlayNetworking.Context {
+	private record ContextImpl(MinecraftServer server, ServerPlayNetworkHandler handler, PacketSender responseSender) implements ServerPlayNetworking.Context {
 		private ContextImpl {
 			Objects.requireNonNull(server, "server");
 			Objects.requireNonNull(handler, "handler");
@@ -143,7 +143,7 @@ public final class ServerPlayNetworkAddon extends AbstractChanneledNetworkAddon<
 		}
 
 		@Override
-		public ServerPlayer player() {
+		public ServerPlayerEntity player() {
 			return handler.getPlayer();
 		}
 	}

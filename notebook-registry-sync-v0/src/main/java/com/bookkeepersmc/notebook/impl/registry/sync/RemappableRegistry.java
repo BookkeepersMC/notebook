@@ -24,7 +24,7 @@ package com.bookkeepersmc.notebook.impl.registry.sync;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public interface RemappableRegistry {
 
@@ -36,7 +36,7 @@ public interface RemappableRegistry {
 		EXACT
 	}
 
-	void remap(String name, Object2IntMap<ResourceLocation> remoteIndexedEntries, RemapMode mode) throws RemapException;
+	void remap(String name, Object2IntMap<Identifier> remoteIndexedEntries, RemapMode mode) throws RemapException;
 
 	void unmap(String name) throws RemapException;
 }

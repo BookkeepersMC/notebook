@@ -25,9 +25,9 @@ package com.bookkeepersmc.notebook.impl.networking;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-import net.minecraft.network.ConnectionProtocol;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.server.network.ConfigurationTask;
+import net.minecraft.network.NetworkPhase;
+import net.minecraft.network.configuration.ConfigurationTask;
+import net.minecraft.network.packet.Packet;
 
 import com.bookkeepersmc.notebook.api.networking.v1.PayloadTypeRegistry;
 import com.bookkeepersmc.notebook.api.networking.v1.ServerConfigurationConnectionEvents;
@@ -65,7 +65,7 @@ public class CommonPacketsImpl {
 				}
 
 				// Play phase hasnt started yet, add them to the pending names.
-				addon.getChannelInfoHolder().notebook_getPendingChannelsNames(ConnectionProtocol.PLAY).addAll(payload.channels());
+				addon.getChannelInfoHolder().fabric_getPendingChannelsNames(NetworkPhase.PLAY).addAll(payload.channels());
 				NetworkingImpl.LOGGER.debug("Received accepted channels from the client for play phase");
 			} else {
 				addon.onCommonRegisterPacket(payload);
@@ -99,7 +99,7 @@ public class CommonPacketsImpl {
 		}
 
 		@Override
-		public Type type() {
+		public Type getType() {
 			return KEY;
 		}
 	}
@@ -114,7 +114,7 @@ public class CommonPacketsImpl {
 		}
 
 		@Override
-		public Type type() {
+		public Type getType() {
 			return KEY;
 		}
 	}

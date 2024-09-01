@@ -22,15 +22,15 @@
  */
 package com.bookkeepersmc.notebook.api.event.registry;
 
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.registry.Registry;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 import com.bookkeepersmc.notebook.impl.registry.sync.ListenableRegistry;
 
 @FunctionalInterface
 public interface RegistryEntryAddedCallback<T> {
-	void onEntryAdded(int syncId, ResourceLocation id, T object);
+	void onEntryAdded(int syncId, Identifier id, T object);
 
 	static <T> Event<RegistryEntryAddedCallback<T>> event(Registry<T> registry) {
 		return ListenableRegistry.get(registry).notebook_getAddObjectEvent();

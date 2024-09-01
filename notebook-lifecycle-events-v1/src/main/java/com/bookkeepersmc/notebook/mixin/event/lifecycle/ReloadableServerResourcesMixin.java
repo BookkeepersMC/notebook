@@ -22,26 +22,36 @@
  */
 package com.bookkeepersmc.notebook.mixin.event.lifecycle;
 
-import org.spongepowered.asm.mixin.Final;
+import java.util.List;
+
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.server.ReloadableServerRegistries;
-import net.minecraft.server.ReloadableServerResources;
+import net.minecraft.feature_flags.FeatureFlagBitSet;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.registry.LayeredRegistryManager;
+import net.minecraft.registry.ServerRegistryLayer;
+import net.minecraft.server.ServerReloadableResources;
+import net.minecraft.server.command.CommandManager;
 
 import com.bookkeepersmc.notebook.api.event.lifecycle.v1.CommonLifecycleEvents;
 
-@Mixin(ReloadableServerResources.class)
+@Mixin(ServerReloadableResources.class)
 public class ReloadableServerResourcesMixin {
-	@Shadow
-	@Final
-	private ReloadableServerRegistries.Holder fullRegistryHolder;
+	@Unique
+	private DynamicRegistryManager dynamicRegistryManager;
 
-	@Inject(method = "updateRegistryTags()V", at = @At("TAIL"))
-	private void hookRefresh(CallbackInfo ci) {
-		CommonLifecycleEvents.TAGS_LOADED.invoker().onTagsLoaded(this.fullRegistryHolder.get(), false);
+	@Inject(method = "<init>", at = @At("TAIL"))
+	private void init(LayeredRegistryManager<ServerRegistryLayer> combinedDynamicRegistries, HolderLookup.Provider wrapperLookup, FeatureFlagBitSet featureSet, CommandManager.RegistrationEnvironment registrationEnvironment, List list, int i, CallbackInfo ci) {
+		dynamicRegistryManager = combinedDynamicRegistries.getCompositeManager();
+	}
+
+	@Inject(method = "method_61248", at = @At("TAIL"))
+	private void hookRefresh(CallbackInfo info) {
+		CommonLifecycleEvents.TAGS_LOADED.invoker().onTagsLoaded(dynamicRegistryManager, false);
 	}
 }

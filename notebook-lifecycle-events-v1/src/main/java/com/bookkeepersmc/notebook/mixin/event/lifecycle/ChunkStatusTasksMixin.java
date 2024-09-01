@@ -27,18 +27,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.server.level.GenerationChunkHolder;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.status.ChunkStatusTasks;
-import net.minecraft.world.level.chunk.status.WorldGenContext;
+import net.minecraft.unmapped.C_nclgamck;
+import net.minecraft.unmapped.C_noeozorr;
+import net.minecraft.unmapped.C_zltcyjrk;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.WorldChunk;
 
 import com.bookkeepersmc.notebook.api.event.lifecycle.v1.ServerChunkEvents;
 
-@Mixin(ChunkStatusTasks.class)
+@Mixin(C_zltcyjrk.class)
 abstract class ChunkStatusTasksMixin {
 	@Inject(method = "method_60553", at = @At("TAIL"))
-	private static void onChunkLoad(ChunkAccess chunk, WorldGenContext chunkGenerationContext, GenerationChunkHolder chunkHolder, CallbackInfoReturnable<ChunkAccess> callbackInfoReturnable) {
-		ServerChunkEvents.CHUNK_LOAD.invoker().onChunkLoad(chunkGenerationContext.level(), (LevelChunk) callbackInfoReturnable.getReturnValue());
+	private static void onChunkLoad(Chunk chunk, C_nclgamck chunkGenerationContext, C_noeozorr chunkHolder, CallbackInfoReturnable<Chunk> callbackInfoReturnable) {
+		ServerChunkEvents.CHUNK_LOAD.invoker().onChunkLoad(chunkGenerationContext.level(), (WorldChunk) callbackInfoReturnable.getReturnValue());
 	}
 }

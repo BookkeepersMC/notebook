@@ -29,36 +29,36 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.multiplayer.CommonListenerCookie;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.game.ClientboundLoginPacket;
+import net.minecraft.client.network.AbstractClientNetworkHandler;
+import net.minecraft.client.network.ClientConnectionState;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.network.ClientConnection;
+import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
 
 import com.bookkeepersmc.notebook.impl.networking.NetworkHandlerExtensions;
 import com.bookkeepersmc.notebook.impl.networking.client.ClientNetworkingImpl;
 import com.bookkeepersmc.notebook.impl.networking.client.ClientPlayNetworkAddon;
 
 // We want to apply a bit earlier than other mods which may not use us in order to prevent refCount issues
-@Mixin(value = ClientPacketListener.class, priority = 999)
-abstract class ClientPlayNetworkHandlerMixin extends ClientCommonPacketListenerImpl implements NetworkHandlerExtensions {
+@Mixin(value = ClientPlayNetworkHandler.class, priority = 999)
+abstract class ClientPlayNetworkHandlerMixin extends AbstractClientNetworkHandler implements NetworkHandlerExtensions {
 	@Unique
 	private ClientPlayNetworkAddon addon;
 
-	protected ClientPlayNetworkHandlerMixin(Minecraft client, Connection connection, CommonListenerCookie connectionState) {
+	protected ClientPlayNetworkHandlerMixin(Minecraft client, ClientConnection connection, ClientConnectionState connectionState) {
 		super(client, connection, connectionState);
 	}
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void initAddon(CallbackInfo ci) {
-		this.addon = new ClientPlayNetworkAddon((ClientPacketListener) (Object) this, this.minecraft);
+		this.addon = new ClientPlayNetworkAddon((ClientPlayNetworkHandler) (Object) this, this.client);
 		// A bit of a hack but it allows the field above to be set in case someone registers handlers during INIT event which refers to said field
 		ClientNetworkingImpl.setClientPlayAddon(this.addon);
 		this.addon.lateInit();
 	}
 
-	@Inject(method = "handleLogin", at = @At("RETURN"))
-	private void handleServerPlayReady(ClientboundLoginPacket packet, CallbackInfo ci) {
+	@Inject(method = "onGameJoin", at = @At("RETURN"))
+	private void handleServerPlayReady(GameJoinS2CPacket packet, CallbackInfo ci) {
 		this.addon.onServerReady();
 	}
 

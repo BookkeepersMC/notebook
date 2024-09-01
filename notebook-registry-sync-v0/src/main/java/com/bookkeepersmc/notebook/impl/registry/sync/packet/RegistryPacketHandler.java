@@ -30,9 +30,9 @@ import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.payload.CustomPayload;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.networking.v1.ByteBufUtils;
 import com.bookkeepersmc.notebook.impl.registry.sync.RegistrySyncManager;
@@ -41,9 +41,9 @@ public abstract class RegistryPacketHandler<T extends RegistryPacketHandler.Regi
 	private int rawBufSize = 0;
 	private int deflatedBufSize = 0;
 
-	public abstract CustomPacketPayload.Type<T> getPacketId();
+	public abstract CustomPayload.Id<T> getPacketId();
 
-	public abstract void sendPacket(Consumer<T> sender, Map<ResourceLocation, Object2IntMap<ResourceLocation>> registryMap);
+	public abstract void sendPacket(Consumer<T> sender, Map<Identifier, Object2IntMap<Identifier>> registryMap);
 
 	public abstract void receivePayload(T payload);
 
@@ -52,9 +52,9 @@ public abstract class RegistryPacketHandler<T extends RegistryPacketHandler.Regi
 	public abstract boolean isPacketFinished();
 
 	@Nullable
-	public abstract Map<ResourceLocation, Object2IntMap<ResourceLocation>> getSyncedRegistryMap();
+	public abstract Map<Identifier, Object2IntMap<Identifier>> getSyncedRegistryMap();
 
-	protected final void computeBufSize(FriendlyByteBuf buf) {
+	protected final void computeBufSize(PacketByteBuf buf) {
 		if (!RegistrySyncManager.DEBUG) {
 			return;
 		}
@@ -64,7 +64,7 @@ public abstract class RegistryPacketHandler<T extends RegistryPacketHandler.Regi
 		Deflater deflater = new Deflater();
 
 		int i = byteBuf.readableBytes();
-		FriendlyByteBuf deflatedBuf = ByteBufUtils.create();
+		PacketByteBuf deflatedBuf = ByteBufUtils.create();
 
 		if (i < 256) {
 			deflatedBuf.writeVarInt(0);
@@ -96,6 +96,6 @@ public abstract class RegistryPacketHandler<T extends RegistryPacketHandler.Regi
 		return deflatedBufSize;
 	}
 
-	public interface RegistrySyncPayload extends CustomPacketPayload {
+	public interface RegistrySyncPayload extends CustomPayload {
 	}
 }

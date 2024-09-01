@@ -22,14 +22,14 @@
  */
 package com.bookkeepersmc.notebook.api.resource;
 
-import net.minecraft.server.packs.PackResources;
+import net.minecraft.resource.pack.ResourcePack;
 
 import com.bookkeepersmc.loader.api.metadata.ModMetadata;
 
 /**
  * Interface implemented by mod-provided resource packs.
  */
-public interface ModResourcePack extends PackResources {
+public interface ModResourcePack extends ResourcePack {
 	/**
 	 * @return The ModMetadata object associated with the mod providing this
 	 * resource pack.

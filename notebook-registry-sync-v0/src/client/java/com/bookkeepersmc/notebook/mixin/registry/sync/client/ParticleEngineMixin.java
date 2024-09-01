@@ -30,22 +30,22 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.client.particle.ParticleFactory;
+import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.client.texture.TextureManager;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.registry.BuiltInRegistries;
 
 import com.bookkeepersmc.notebook.impl.registry.sync.trackers.Int2ObjectMapTracker;
 
-@Mixin(ParticleEngine.class)
+@Mixin(ParticleManager.class)
 public class ParticleEngineMixin {
 	@Final
 	@Shadow
-	private Int2ObjectMap<ParticleProvider<?>> providers;
+	private Int2ObjectMap<ParticleFactory<?>> factories;
 
 	@Inject(method = "<init>", at = @At("RETURN"))
-	public void onInit(ClientLevel world, TextureManager textureManager, CallbackInfo info) {
-		Int2ObjectMapTracker.register(BuiltInRegistries.PARTICLE_TYPE, "ParticleManager.factories", providers);
+	public void onInit(ClientWorld world, TextureManager textureManager, CallbackInfo info) {
+		Int2ObjectMapTracker.register(BuiltInRegistries.PARTICLE_TYPE, "ParticleManager.factories", factories);
 	}
 }

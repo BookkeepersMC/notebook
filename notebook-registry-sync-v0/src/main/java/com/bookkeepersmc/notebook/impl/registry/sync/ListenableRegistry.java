@@ -22,7 +22,7 @@
  */
 package com.bookkeepersmc.notebook.impl.registry.sync;
 
-import net.minecraft.core.Registry;
+import net.minecraft.registry.Registry;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 import com.bookkeepersmc.notebook.api.event.registry.RegistryEntryAddedCallback;
@@ -36,7 +36,7 @@ public interface ListenableRegistry<T> {
 	@SuppressWarnings("unchecked")
 	static <T> ListenableRegistry<T> get(Registry<T> registry) {
 		if (!(registry instanceof ListenableRegistry)) {
-			throw new IllegalArgumentException("Unsupported registry: " + registry.key().location());
+			throw new IllegalArgumentException("Unsupported registry: " + registry.getKey().getValue());
 		}
 
 		return (ListenableRegistry<T>) registry;

@@ -29,27 +29,27 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
 
 import com.bookkeepersmc.notebook.api.client.event.lifecycle.v1.ClientEntityEvents;
 
-@Mixin(targets = "net/minecraft/client/multiplayer/ClientLevel$EntityCallbacks")
+@Mixin(targets = "net/minecraft/client/world/ClientWorld$ClientEntityHandler")
 abstract class ClientLevelEntityCallbacksMixin {
 	// final synthetic Lnet/minecraft/client/world/ClientWorld; field_27735
 	@Shadow
 	@Final
-	private ClientLevel field_27735;
+	private ClientWorld world;
 
 	// Call our load event after vanilla has loaded the entity
-	@Inject(method = "onTrackingStart(Lnet/minecraft/world/entity/Entity;)V", at = @At("TAIL"))
+	@Inject(method = "startTracking(Lnet/minecraft/entity/Entity;)V", at = @At("TAIL"))
 	private void invokeLoadEntity(Entity entity, CallbackInfo ci) {
-		ClientEntityEvents.ENTITY_LOAD.invoker().onLoad(entity, this.field_27735);
+		ClientEntityEvents.ENTITY_LOAD.invoker().onLoad(entity, this.world);
 	}
 
 	// Call our unload event before vanilla does.
-	@Inject(method = "onTrackingEnd(Lnet/minecraft/world/entity/Entity;)V", at = @At("HEAD"))
+	@Inject(method = "stopTracking(Lnet/minecraft/entity/Entity;)V", at = @At("HEAD"))
 	private void invokeUnloadEntity(Entity entity, CallbackInfo ci) {
-		ClientEntityEvents.ENTITY_UNLOAD.invoker().onUnload(entity, this.field_27735);
+		ClientEntityEvents.ENTITY_UNLOAD.invoker().onUnload(entity, this.world);
 	}
 }

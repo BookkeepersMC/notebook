@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.DataResult;
@@ -37,13 +38,13 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagManager;
-import net.minecraft.world.flag.FeatureFlagSet;
-import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.feature_flags.FeatureFlagBitSet;
+import net.minecraft.feature_flags.FeatureFlags;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.registry.ResourceKey;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.api.ModInitializer;
 import com.bookkeepersmc.loader.api.NotebookLoader;
@@ -52,7 +53,7 @@ import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceConditions;
 
 public final class ResourceConditionsImpl implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("Notebook Resource Conditions");
-	public static FeatureFlagSet currentFeatures = null;
+	public static FeatureFlagBitSet currentFeatures = null;
 
 	@Override
 	public void onInitialize() {
@@ -67,7 +68,7 @@ public final class ResourceConditionsImpl implements ModInitializer {
 		ResourceConditions.register(DefaultResourceConditionTypes.REGISTRY_CONTAINS);
 	}
 
-	public static boolean applyResourceConditions(JsonObject obj, String dataType, ResourceLocation key, @Nullable HolderLookup.Provider registryLookup) {
+	public static boolean applyResourceConditions(JsonObject obj, String dataType, Identifier key, @Nullable RegistryOps.RegistryInfoLookup registryLookup) {
 		boolean debugLogEnabled = ResourceConditionsImpl.LOGGER.isDebugEnabled();
 
 		if (obj.has(ResourceConditions.CONDITIONS_KEY)) {
@@ -90,7 +91,7 @@ public final class ResourceConditionsImpl implements ModInitializer {
 		return true;
 	}
 
-	public static boolean conditionsMet(List<ResourceCondition> conditions, @Nullable HolderLookup.Provider registryLookup, boolean and) {
+	public static boolean conditionsMet(List<ResourceCondition> conditions, @Nullable RegistryOps.RegistryInfoLookup registryLookup, boolean and) {
 		for (ResourceCondition condition : conditions) {
 			if (condition.test(registryLookup) != and) {
 				return !and;
@@ -110,28 +111,28 @@ public final class ResourceConditionsImpl implements ModInitializer {
 		return and;
 	}
 
-	public static final ThreadLocal<Map<ResourceKey<?>, Set<ResourceLocation>>> LOADED_TAGS = new ThreadLocal<>();
+	public static final ThreadLocal<Map<ResourceKey<?>, Set<Identifier>>> LOADED_TAGS = new ThreadLocal<>();
 
-	public static void setTags(List<TagManager.LoadResult<?>> tags) {
-		Map<ResourceKey<?>, Set<ResourceLocation>> tagMap = new IdentityHashMap<>();
+	public static void setTags(List<Registry.TagPending<?>> tags) {
+		Map<ResourceKey<?>, Set<Identifier>> tagMap = new IdentityHashMap<>();
 
-		for (TagManager.LoadResult<?> registryTags : tags) {
-			tagMap.put(registryTags.key(), registryTags.tags().keySet());
+		for (Registry.TagPending<?> registryTags : tags) {
+			tagMap.put(registryTags.getKey(), registryTags.asLookup().streamTagKeys().map(TagKey::id).collect(Collectors.toSet()));
 		}
 
 		LOADED_TAGS.set(tagMap);
 	}
 
 	// Cannot use registry because tags are not loaded to the registry at this stage yet.
-	public static boolean tagsPopulated(ResourceLocation registryId, List<ResourceLocation> tags) {
-		Map<ResourceKey<?>, Set<ResourceLocation>> tagMap = LOADED_TAGS.get();
+	public static boolean tagsPopulated(Identifier registryId, List<Identifier> tags) {
+		Map<ResourceKey<?>, Set<Identifier>> tagMap = LOADED_TAGS.get();
 
 		if (tagMap == null) {
 			LOGGER.warn("Can't retrieve registry {}, failing tags_populated resource condition check", registryId);
 			return false;
 		}
 
-		Set<ResourceLocation> tagSet = tagMap.get(ResourceKey.createRegistryKey(registryId));
+		Set<Identifier> tagSet = tagMap.get(ResourceKey.ofRegistry(registryId));
 
 		if (tagSet == null) {
 			return tags.isEmpty();
@@ -140,9 +141,9 @@ public final class ResourceConditionsImpl implements ModInitializer {
 		}
 	}
 
-	public static boolean featuresEnabled(Collection<ResourceLocation> features) {
+	public static boolean featuresEnabled(Collection<Identifier> features) {
 		MutableBoolean foundUnknown = new MutableBoolean();
-		FeatureFlagSet set = FeatureFlags.REGISTRY.fromNames(features, (id) -> {
+		FeatureFlagBitSet set = FeatureFlags.MAIN_REGISTRY.checkedBitSetOf(features, (id) -> {
 			LOGGER.info("Found unknown feature {}, treating it as failure", id);
 			foundUnknown.setTrue();
 		});
@@ -156,22 +157,22 @@ public final class ResourceConditionsImpl implements ModInitializer {
 			return false;
 		}
 
-		return set.isSubsetOf(currentFeatures);
+		return set.isIn(currentFeatures);
 	}
 
-	public static boolean registryContains(@Nullable HolderLookup.Provider registryLookup, ResourceLocation registryId, List<ResourceLocation> entries) {
-		ResourceKey<? extends Registry<Object>> registryKey = ResourceKey.createRegistryKey(registryId);
+	public static boolean registryContains(@Nullable RegistryOps.RegistryInfoLookup registryLookup, Identifier registryId, List<Identifier> entries) {
+		ResourceKey<? extends Registry<Object>> registryKey = ResourceKey.ofRegistry(registryId);
 
 		if (registryLookup == null) {
 			LOGGER.warn("Can't retrieve registry {}, failing registry_contains resource condition check", registryId);
 			return false;
 		}
 
-		Optional<HolderLookup.RegistryLookup<Object>> wrapper = registryLookup.lookup(registryKey);
+		Optional<RegistryOps.RegistryInfo<Object>> wrapper = registryLookup.lookup(registryKey);
 
 		if (wrapper.isPresent()) {
-			for (ResourceLocation id : entries) {
-				if (wrapper.get().get(ResourceKey.create(registryKey, id)).isEmpty()) {
+			for (Identifier id : entries) {
+				if (wrapper.get().getter().getHolder(ResourceKey.of(registryKey, id)).isEmpty()) {
 					return false;
 				}
 			}

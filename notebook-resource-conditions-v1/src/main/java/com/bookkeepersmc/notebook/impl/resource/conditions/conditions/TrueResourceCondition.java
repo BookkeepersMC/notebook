@@ -25,7 +25,7 @@ package com.bookkeepersmc.notebook.impl.resource.conditions.conditions;
 import com.mojang.serialization.MapCodec;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.core.HolderLookup;
+import net.minecraft.registry.RegistryOps;
 
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceCondition;
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceConditionType;
@@ -40,7 +40,7 @@ public class TrueResourceCondition implements ResourceCondition {
 	}
 
 	@Override
-	public boolean test(@Nullable HolderLookup.Provider registryLookup) {
+	public boolean test(@Nullable RegistryOps.RegistryInfoLookup registryLookup) {
 		return true;
 	}
 }

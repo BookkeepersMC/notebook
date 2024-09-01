@@ -22,9 +22,8 @@
  */
 package com.bookkeepersmc.notebook.api.client.event.lifecycle.v1;
 
-
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 import com.bookkeepersmc.notebook.api.event.EventFactory;
@@ -47,11 +46,11 @@ public final class ClientEntityEvents {
 
 	@FunctionalInterface
 	public interface Load {
-		void onLoad(Entity entity, ClientLevel world);
+		void onLoad(Entity entity, ClientWorld world);
 	}
 
 	@FunctionalInterface
 	public interface Unload {
-		void onUnload(Entity entity, ClientLevel world);
+		void onUnload(Entity entity, ClientWorld world);
 	}
 }

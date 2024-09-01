@@ -24,12 +24,12 @@ package com.bookkeepersmc.notebook.impl.networking;
 
 import java.util.Collection;
 
-import net.minecraft.network.ConnectionProtocol;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.NetworkPhase;
+import net.minecraft.util.Identifier;
 
 public interface ChannelInfoHolder {
 	/**
 	 * @return Channels which are declared as receivable by the other side but have not been declared yet.
 	 */
-	Collection<ResourceLocation> notebook_getPendingChannelsNames(ConnectionProtocol state);
+	Collection<Identifier> fabric_getPendingChannelsNames(NetworkPhase state);
 }

@@ -25,11 +25,11 @@ package com.bookkeepersmc.notebook.mixin.networking.client.accessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import net.minecraft.client.gui.screens.ConnectScreen;
-import net.minecraft.network.Connection;
+import net.minecraft.client.gui.screen.ConnectScreen;
+import net.minecraft.network.ClientConnection;
 
 @Mixin(ConnectScreen.class)
 public interface ConnectScreenAccessor {
 	@Accessor
-	Connection getConnection();
+	ClientConnection getConnection();
 }

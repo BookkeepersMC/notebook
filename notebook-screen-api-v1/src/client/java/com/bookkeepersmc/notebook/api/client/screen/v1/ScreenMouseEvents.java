@@ -24,7 +24,7 @@ package com.bookkeepersmc.notebook.api.client.screen.v1;
 
 import java.util.Objects;
 
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screen.Screen;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 import com.bookkeepersmc.notebook.impl.client.screen.ScreenExtensions;

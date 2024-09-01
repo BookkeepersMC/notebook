@@ -22,7 +22,7 @@
  */
 package com.bookkeepersmc.notebook.impl.client.event.lifecycle;
 
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntity;
 
 import com.bookkeepersmc.api.ClientModInitializer;
 import com.bookkeepersmc.notebook.api.client.event.lifecycle.v1.ClientBlockEntityEvents;

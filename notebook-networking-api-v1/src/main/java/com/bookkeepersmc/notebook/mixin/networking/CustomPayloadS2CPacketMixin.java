@@ -29,29 +29,29 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.payload.CustomPayload;
+import net.minecraft.network.packet.s2c.common.CustomPayloadS2CPacket;
 
 import com.bookkeepersmc.notebook.impl.networking.NotebookCustomPayloadPacketCodec;
 import com.bookkeepersmc.notebook.impl.networking.PayloadTypeRegistryImpl;
 
-@Mixin(ClientboundCustomPayloadPacket.class)
+@Mixin(CustomPayloadS2CPacket.class)
 public class CustomPayloadS2CPacketMixin {
 	@WrapOperation(
 			method = "<clinit>",
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/network/protocol/common/custom/CustomPacketPayload;codec(Lnet/minecraft/network/protocol/common/custom/CustomPacketPayload$FallbackProvider;Ljava/util/List;)Lnet/minecraft/network/codec/StreamCodec;",
+					target = "Lnet/minecraft/network/packet/payload/CustomPayload;create(Lnet/minecraft/network/packet/payload/CustomPayload$CodecFactory;Ljava/util/List;)Lnet/minecraft/network/codec/PacketCodec;",
 					ordinal = 0
 			)
 	)
-	private static StreamCodec<RegistryFriendlyByteBuf, CustomPacketPayload> wrapPlayCodec(CustomPacketPayload.FallbackProvider<RegistryFriendlyByteBuf> unknownCodecFactory, List<CustomPacketPayload.TypeAndCodec<RegistryFriendlyByteBuf, ?>> types, Operation<StreamCodec<RegistryFriendlyByteBuf, CustomPacketPayload>> original) {
-		StreamCodec<RegistryFriendlyByteBuf, CustomPacketPayload> codec = original.call(unknownCodecFactory, types);
-		NotebookCustomPayloadPacketCodec<RegistryFriendlyByteBuf> notebookCodec = (NotebookCustomPayloadPacketCodec<RegistryFriendlyByteBuf>) codec;
-		notebookCodec.notebook_setPacketCodecProvider((packetByteBuf, identifier) -> PayloadTypeRegistryImpl.PLAY_S2C.get(identifier));
+	private static PacketCodec<RegistryByteBuf, CustomPayload> wrapPlayCodec(CustomPayload.CodecFactory<RegistryByteBuf> unknownCodecFactory, List<CustomPayload.Type<RegistryByteBuf, ?>> types, Operation<PacketCodec<RegistryByteBuf, CustomPayload>> original) {
+		PacketCodec<RegistryByteBuf, CustomPayload> codec = original.call(unknownCodecFactory, types);
+		NotebookCustomPayloadPacketCodec<RegistryByteBuf> fabricCodec = (NotebookCustomPayloadPacketCodec<RegistryByteBuf>) codec;
+		fabricCodec.fabric_setPacketCodecProvider((packetByteBuf, identifier) -> PayloadTypeRegistryImpl.PLAY_S2C.get(identifier));
 		return codec;
 	}
 
@@ -59,14 +59,14 @@ public class CustomPayloadS2CPacketMixin {
 			method = "<clinit>",
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/network/protocol/common/custom/CustomPacketPayload;codec(Lnet/minecraft/network/protocol/common/custom/CustomPacketPayload$FallbackProvider;Ljava/util/List;)Lnet/minecraft/network/codec/StreamCodec;",
+					target = "Lnet/minecraft/network/packet/payload/CustomPayload;create(Lnet/minecraft/network/packet/payload/CustomPayload$CodecFactory;Ljava/util/List;)Lnet/minecraft/network/codec/PacketCodec;",
 					ordinal = 1
 			)
 	)
-	private static StreamCodec<FriendlyByteBuf, CustomPacketPayload> wrapConfigCodec(CustomPacketPayload.FallbackProvider<FriendlyByteBuf> unknownCodecFactory, List<CustomPacketPayload.TypeAndCodec<FriendlyByteBuf, ?>> types, Operation<StreamCodec<FriendlyByteBuf, CustomPacketPayload>> original) {
-		StreamCodec<FriendlyByteBuf, CustomPacketPayload> codec = original.call(unknownCodecFactory, types);
-		NotebookCustomPayloadPacketCodec<FriendlyByteBuf> notebookCodec = (NotebookCustomPayloadPacketCodec<FriendlyByteBuf>) codec;
-		notebookCodec.notebook_setPacketCodecProvider((packetByteBuf, identifier) -> PayloadTypeRegistryImpl.CONFIGURATION_S2C.get(identifier));
+	private static PacketCodec<PacketByteBuf, CustomPayload> wrapConfigCodec(CustomPayload.CodecFactory<PacketByteBuf> unknownCodecFactory, List<CustomPayload.Type<PacketByteBuf, ?>> types, Operation<PacketCodec<PacketByteBuf, CustomPayload>> original) {
+		PacketCodec<PacketByteBuf, CustomPayload> codec = original.call(unknownCodecFactory, types);
+		NotebookCustomPayloadPacketCodec<PacketByteBuf> fabricCodec = (NotebookCustomPayloadPacketCodec<PacketByteBuf>) codec;
+		fabricCodec.fabric_setPacketCodecProvider((packetByteBuf, identifier) -> PayloadTypeRegistryImpl.CONFIGURATION_S2C.get(identifier));
 		return codec;
 	}
 }

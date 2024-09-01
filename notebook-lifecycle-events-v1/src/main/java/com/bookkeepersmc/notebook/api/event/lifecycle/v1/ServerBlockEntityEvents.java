@@ -22,8 +22,8 @@
  */
 package com.bookkeepersmc.notebook.api.event.lifecycle.v1;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.server.world.ServerWorld;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 import com.bookkeepersmc.notebook.api.event.EventFactory;
@@ -46,11 +46,11 @@ public final class ServerBlockEntityEvents {
 
 	@FunctionalInterface
 	public interface Load {
-		void onLoad(BlockEntity blockEntity, ServerLevel world);
+		void onLoad(BlockEntity blockEntity, ServerWorld world);
 	}
 
 	@FunctionalInterface
 	public interface Unload {
-		void onUnload(BlockEntity blockEntity, ServerLevel world);
+		void onUnload(BlockEntity blockEntity, ServerWorld world);
 	}
 }

@@ -27,9 +27,9 @@ import java.util.function.Consumer;
 
 import io.netty.channel.ChannelHandler;
 
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.network.ConfigurationTask;
+import net.minecraft.network.configuration.ConfigurationTask;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.api.ModInitializer;
 import com.bookkeepersmc.notebook.api.networking.v1.PayloadTypeRegistry;
@@ -38,9 +38,9 @@ import com.bookkeepersmc.notebook.api.networking.v1.ServerConfigurationNetworkin
 import com.bookkeepersmc.notebook.mixin.networking.accessor.ServerCommonNetworkHandlerAccessor;
 
 public class CustomIngredientSync implements ModInitializer {
-	public static final ResourceLocation PACKET_ID = ResourceLocation.fromNamespaceAndPath("notebook", "custom_ingredient_sync");
+	public static final Identifier PACKET_ID = Identifier.of("notebook", "custom_ingredient_sync");
 	public static final int PROTOCOL_VERSION_1 = 1;
-	public static final ThreadLocal<Set<ResourceLocation>> CURRENT_SUPPORTED_INGREDIENTS = new ThreadLocal<>();
+	public static final ThreadLocal<Set<Identifier>> CURRENT_SUPPORTED_INGREDIENTS = new ThreadLocal<>();
 
 	public static CustomIngredientPayloadC2S createResponsePayload(int serverProtocolVersion) {
 		if (serverProtocolVersion < PROTOCOL_VERSION_1) {
@@ -50,11 +50,11 @@ public class CustomIngredientSync implements ModInitializer {
 		return new CustomIngredientPayloadC2S(PROTOCOL_VERSION_1, CustomIngredientImpl.REGISTERED_SERIALIZERS.keySet());
 	}
 
-	public static Set<ResourceLocation> decodeResponsePayload(CustomIngredientPayloadC2S payload) {
+	public static Set<Identifier> decodeResponsePayload(CustomIngredientPayloadC2S payload) {
 		int protocolVersion = payload.protocolVersion();
 		switch (protocolVersion) {
 			case PROTOCOL_VERSION_1 -> {
-				Set<ResourceLocation> serializers = payload.registeredSerializers();
+				Set<Identifier> serializers = payload.registeredSerializers();
 				// Remove unknown keys to save memory
 				serializers.removeIf(id -> !CustomIngredientImpl.REGISTERED_SERIALIZERS.containsKey(id));
 				return serializers;
@@ -79,7 +79,7 @@ public class CustomIngredientSync implements ModInitializer {
 		});
 
 		ServerConfigurationNetworking.registerGlobalReceiver(CustomIngredientPayloadC2S.TYPE, (payload, context) -> {
-			Set<ResourceLocation> supportedCustomIngredients = decodeResponsePayload(payload);
+			Set<Identifier> supportedCustomIngredients = decodeResponsePayload(payload);
 			ChannelHandler packetEncoder = ((ServerCommonNetworkHandlerAccessor) context.networkHandler()).getConnection().channel.pipeline().get("encoder");
 
 			if (packetEncoder != null) { // Null in singleplayer
@@ -99,7 +99,7 @@ public class CustomIngredientSync implements ModInitializer {
 		}
 
 		@Override
-		public Type type() {
+		public Type getType() {
 			return KEY;
 		}
 	}

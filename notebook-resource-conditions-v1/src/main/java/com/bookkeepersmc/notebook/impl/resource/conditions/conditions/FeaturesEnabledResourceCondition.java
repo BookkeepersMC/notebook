@@ -29,27 +29,27 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.flag.FeatureFlag;
-import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.feature_flags.FeatureFlag;
+import net.minecraft.feature_flags.FeatureFlags;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceCondition;
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceConditionType;
 import com.bookkeepersmc.notebook.impl.resource.conditions.DefaultResourceConditionTypes;
 import com.bookkeepersmc.notebook.impl.resource.conditions.ResourceConditionsImpl;
 
-public record FeaturesEnabledResourceCondition(Collection<ResourceLocation> features) implements ResourceCondition {
+public record FeaturesEnabledResourceCondition(Collection<Identifier> features) implements ResourceCondition {
 	public static final MapCodec<FeaturesEnabledResourceCondition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			ResourceLocation.CODEC.listOf().fieldOf("features").forGetter(condition -> List.copyOf(condition.features))
+			Identifier.CODEC.listOf().fieldOf("features").forGetter(condition -> List.copyOf(condition.features))
 	).apply(instance, FeaturesEnabledResourceCondition::new));
 
-	public FeaturesEnabledResourceCondition(ResourceLocation... features) {
+	public FeaturesEnabledResourceCondition(Identifier... features) {
 		this(List.of(features));
 	}
 
 	public FeaturesEnabledResourceCondition(FeatureFlag... flags) {
-		this(FeatureFlags.REGISTRY.toNames(FeatureFlags.REGISTRY.subset(flags)));
+		this(FeatureFlags.MAIN_REGISTRY.getFlagIds(FeatureFlags.MAIN_REGISTRY.bitSetOf(flags)));
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public record FeaturesEnabledResourceCondition(Collection<ResourceLocation> feat
 	}
 
 	@Override
-	public boolean test(@Nullable HolderLookup.Provider registryLookup) {
+	public boolean test(@Nullable RegistryOps.RegistryInfoLookup registryLookup) {
 		return ResourceConditionsImpl.featuresEnabled(this.features());
 	}
 }

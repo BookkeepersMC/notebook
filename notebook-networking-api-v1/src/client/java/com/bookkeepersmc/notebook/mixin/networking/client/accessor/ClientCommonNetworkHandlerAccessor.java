@@ -25,11 +25,11 @@ package com.bookkeepersmc.notebook.mixin.networking.client.accessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
-import net.minecraft.network.Connection;
+import net.minecraft.client.network.AbstractClientNetworkHandler;
+import net.minecraft.network.ClientConnection;
 
-@Mixin(ClientCommonPacketListenerImpl.class)
+@Mixin(AbstractClientNetworkHandler.class)
 public interface ClientCommonNetworkHandlerAccessor {
 	@Accessor
-	Connection getConnection();
+	ClientConnection getConnection();
 }

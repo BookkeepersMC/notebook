@@ -27,17 +27,18 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.server.ServerAdvancementManager;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.server.ServerAdvancementLoader;
 
-@Mixin(ServerAdvancementManager.class)
+@Mixin(ServerAdvancementLoader.class)
 public class ServerAdvancementManagerMixin extends SimplePreparableReloadListenerMixin {
 	@Shadow
 	@Final
-	private HolderLookup.Provider registries;
+	private HolderLookup.Provider provider;
 
 	@Override
-	protected @Nullable HolderLookup.Provider notebook_getRegistryLookup() {
-		return this.registries;
+	protected @Nullable RegistryOps.RegistryInfoLookup notebook_getRegistryLookup() {
+		return new RegistryOps.C_tbnrbtat(this.provider);
 	}
 }

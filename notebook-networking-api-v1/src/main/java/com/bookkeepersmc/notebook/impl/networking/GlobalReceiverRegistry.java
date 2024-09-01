@@ -35,24 +35,24 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.minecraft.network.ConnectionProtocol;
-import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.NetworkPhase;
+import net.minecraft.network.NetworkSide;
+import net.minecraft.util.Identifier;
 
 public final class GlobalReceiverRegistry<H> {
 	public static final int DEFAULT_CHANNEL_NAME_MAX_LENGTH = 128;
 	private static final Logger LOGGER = LoggerFactory.getLogger(GlobalReceiverRegistry.class);
 
-	private final PacketFlow side;
-	private final ConnectionProtocol phase;
+	private final NetworkSide side;
+	private final NetworkPhase phase;
 	@Nullable
 	private final PayloadTypeRegistryImpl<?> payloadTypeRegistry;
 
 	private final ReadWriteLock lock = new ReentrantReadWriteLock();
-	private final Map<ResourceLocation, H> handlers = new HashMap<>();
+	private final Map<Identifier, H> handlers = new HashMap<>();
 	private final Set<AbstractNetworkAddon<H>> trackedAddons = new HashSet<>();
 
-	public GlobalReceiverRegistry(PacketFlow side, ConnectionProtocol phase, @Nullable PayloadTypeRegistryImpl<?> payloadTypeRegistry) {
+	public GlobalReceiverRegistry(NetworkSide side, NetworkPhase phase, @Nullable PayloadTypeRegistryImpl<?> payloadTypeRegistry) {
 		this.side = side;
 		this.phase = phase;
 		this.payloadTypeRegistry = payloadTypeRegistry;
@@ -64,7 +64,7 @@ public final class GlobalReceiverRegistry<H> {
 	}
 
 	@Nullable
-	public H getHandler(ResourceLocation channelName) {
+	public H getHandler(Identifier channelName) {
 		Lock lock = this.lock.readLock();
 		lock.lock();
 
@@ -75,7 +75,7 @@ public final class GlobalReceiverRegistry<H> {
 		}
 	}
 
-	public boolean registerGlobalReceiver(ResourceLocation channelName, H handler) {
+	public boolean registerGlobalReceiver(Identifier channelName, H handler) {
 		Objects.requireNonNull(channelName, "Channel name cannot be null");
 		Objects.requireNonNull(handler, "Channel handler cannot be null");
 
@@ -102,7 +102,7 @@ public final class GlobalReceiverRegistry<H> {
 	}
 
 	@Nullable
-	public H unregisterGlobalReceiver(ResourceLocation channelName) {
+	public H unregisterGlobalReceiver(Identifier channelName) {
 		Objects.requireNonNull(channelName, "Channel name cannot be null");
 
 		if (NetworkingImpl.isReservedCommonChannel(channelName)) {
@@ -125,7 +125,7 @@ public final class GlobalReceiverRegistry<H> {
 		}
 	}
 
-	public Map<ResourceLocation, H> getHandlers() {
+	public Map<Identifier, H> getHandlers() {
 		Lock lock = this.lock.writeLock();
 		lock.lock();
 
@@ -136,7 +136,7 @@ public final class GlobalReceiverRegistry<H> {
 		}
 	}
 
-	public Set<ResourceLocation> getChannels() {
+	public Set<Identifier> getChannels() {
 		Lock lock = this.lock.readLock();
 		lock.lock();
 
@@ -181,11 +181,11 @@ public final class GlobalReceiverRegistry<H> {
 	 */
 	private void logTrackedAddonSize() {
 		if (LOGGER.isTraceEnabled() && this.trackedAddons.size() > 1) {
-			LOGGER.trace("{} receiver registry tracks {} addon instances", phase.id(), trackedAddons.size());
+			LOGGER.trace("{} receiver registry tracks {} addon instances", phase.getPhaseId(), trackedAddons.size());
 		}
 	}
 
-	private void handleRegistration(ResourceLocation channelName, H handler) {
+	private void handleRegistration(Identifier channelName, H handler) {
 		Lock lock = this.lock.writeLock();
 		lock.lock();
 
@@ -200,7 +200,7 @@ public final class GlobalReceiverRegistry<H> {
 		}
 	}
 
-	private void handleUnregistration(ResourceLocation channelName) {
+	private void handleUnregistration(Identifier channelName) {
 		Lock lock = this.lock.writeLock();
 		lock.lock();
 
@@ -215,7 +215,7 @@ public final class GlobalReceiverRegistry<H> {
 		}
 	}
 
-	public void assertPayloadType(ResourceLocation channelName) {
+	public void assertPayloadType(Identifier channelName) {
 		if (payloadTypeRegistry == null) {
 			return;
 		}
@@ -229,7 +229,7 @@ public final class GlobalReceiverRegistry<H> {
 		}
 	}
 
-	public ConnectionProtocol getPhase() {
+	public NetworkPhase getPhase() {
 		return phase;
 	}
 }

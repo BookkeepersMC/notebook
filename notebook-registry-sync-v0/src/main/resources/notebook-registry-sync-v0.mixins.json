@@ -3,6 +3,7 @@
   "package": "com.bookkeepersmc.notebook.mixin.registry.sync",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "BlocksMixin",
     "BootstrapMixin",
     "BuiltInRegistriesMixin",
     "ChunkSerializerMixin",

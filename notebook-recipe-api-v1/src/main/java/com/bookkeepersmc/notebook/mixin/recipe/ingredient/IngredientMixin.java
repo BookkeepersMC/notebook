@@ -25,46 +25,55 @@ package com.bookkeepersmc.notebook.mixin.recipe.ingredient;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.recipe.Ingredient;
 
 import com.bookkeepersmc.notebook.api.recipe.v1.CustomIngredient;
+import com.bookkeepersmc.notebook.api.recipe.v1.CustomIngredientSerializer;
 import com.bookkeepersmc.notebook.api.recipe.v1.NotebookIngredient;
 import com.bookkeepersmc.notebook.impl.recipe.CustomIngredientImpl;
 import com.bookkeepersmc.notebook.impl.recipe.CustomIngredientStreamCodec;
 
 @Mixin(Ingredient.class)
 public class IngredientMixin implements NotebookIngredient {
-	@Inject(method = "codec", at = @At("RETURN"), cancellable = true)
-	private static void injectCodec(boolean allowEmpty, CallbackInfoReturnable<Codec<Ingredient>> cir) {
+	@Shadow
+	@Mutable
+	@Final
+	public static Codec<Ingredient> ALLOW_EMPTY_CODEC;
+
+	@Inject(method = "<clinit>", at = @At("TAIL"), cancellable = true)
+	private static void injectCodec(CallbackInfo info) {
 		Codec<CustomIngredient> customIngredientCodec = CustomIngredientImpl.CODEC.dispatch(
 				CustomIngredientImpl.TYPE_KEY,
 				CustomIngredient::getSerializer,
-				serializer -> serializer.getCodec(allowEmpty));
+				CustomIngredientSerializer::getCodec);
 
-		cir.setReturnValue(Codec.either(customIngredientCodec, cir.getReturnValue()).xmap(
+		ALLOW_EMPTY_CODEC = Codec.either(customIngredientCodec, ALLOW_EMPTY_CODEC).xmap(
 				either -> either.map(CustomIngredient::toVanilla, ingredient -> ingredient),
 				ingredient -> {
 					CustomIngredient customIngredient = ingredient.getCustomIngredient();
 					return customIngredient == null ? Either.right(ingredient) : Either.left(customIngredient);
 				}
-		));
+		);
 	}
 
 	@ModifyExpressionValue(
 			method = "<clinit>",
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/network/codec/StreamCodec;map(Ljava/util/function/Function;Ljava/util/function/Function;)Lnet/minecraft/network/codec/StreamCodec;"
+					target = "Lnet/minecraft/network/codec/PacketCodec;map(Ljava/util/function/Function;Ljava/util/function/Function;)Lnet/minecraft/network/codec/PacketCodec;", ordinal = 0
 			)
 	)
-	private static StreamCodec<RegistryFriendlyByteBuf, Ingredient> useCustomIngredientPacketCodec(StreamCodec<RegistryFriendlyByteBuf, Ingredient> original) {
+	private static PacketCodec<RegistryByteBuf, Ingredient> useCustomIngredientPacketCodec(PacketCodec<RegistryByteBuf, Ingredient> original) {
 		return new CustomIngredientStreamCodec(original);
 	}
 }

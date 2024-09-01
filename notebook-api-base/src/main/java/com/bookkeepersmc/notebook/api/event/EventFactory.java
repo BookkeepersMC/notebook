@@ -24,7 +24,7 @@ package com.bookkeepersmc.notebook.api.event;
 
 import java.util.function.Function;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.impl.base.event.EventFactoryImpl;
 
@@ -47,7 +47,7 @@ public final class EventFactory {
 		});
 	}
 
-	public static <T> Event<T> createWithPhases(Class<? super T> type, Function<T[], T> invokerFactory, ResourceLocation... defaultPhases) {
+	public static <T> Event<T> createWithPhases(Class<? super T> type, Function<T[], T> invokerFactory, Identifier... defaultPhases) {
 		EventFactoryImpl.ensureContainsDefault(defaultPhases);
 		EventFactoryImpl.ensureNoDuplicates(defaultPhases);
 

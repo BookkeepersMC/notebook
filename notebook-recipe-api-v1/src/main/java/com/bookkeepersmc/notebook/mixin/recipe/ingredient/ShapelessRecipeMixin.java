@@ -34,13 +34,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.core.NonNullList;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.CraftingInput;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
-import net.minecraft.world.level.Level;
+import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.CraftingCategory;
+import net.minecraft.recipe.CraftingRecipeInput;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.ShapelessRecipe;
+import net.minecraft.world.World;
 
 import com.bookkeepersmc.notebook.impl.recipe.ShapelessMatch;
 
@@ -48,14 +47,14 @@ import com.bookkeepersmc.notebook.impl.recipe.ShapelessMatch;
 public class ShapelessRecipeMixin {
 	@Final
 	@Shadow
-	NonNullList<Ingredient> ingredients;
+	List<Ingredient> ingredients;
 
 	@Unique
 	private boolean notebook_requiresTesting = false;
 
 	@Inject(at = @At("RETURN"), method = "<init>")
-	private void cacheRequiresTesting(String group, CraftingBookCategory category, ItemStack output, NonNullList<Ingredient> input, CallbackInfo ci) {
-		for (Ingredient ingredient : input) {
+	private void cacheRequiresTesting(String group, CraftingCategory category, ItemStack stack, List<Ingredient> ingredients, CallbackInfo ci) {
+		for (Ingredient ingredient : ingredients) {
 			if (ingredient.requiresTesting()) {
 				notebook_requiresTesting = true;
 				break;
@@ -63,13 +62,13 @@ public class ShapelessRecipeMixin {
 		}
 	}
 
-	@Inject(at = @At("HEAD"), method = "matches(Lnet/minecraft/world/item/crafting/CraftingInput;Lnet/minecraft/world/level/Level;)Z", cancellable = true)
-	public void customIngredientMatch(CraftingInput recipeInput, Level world, CallbackInfoReturnable<Boolean> cir) {
+	@Inject(at = @At("HEAD"), method = "matches(Lnet/minecraft/recipe/CraftingRecipeInput;Lnet/minecraft/world/World;)Z", cancellable = true)
+	public void customIngredientMatch(CraftingRecipeInput recipeInput, World world, CallbackInfoReturnable<Boolean> cir) {
 		if (notebook_requiresTesting) {
-			List<ItemStack> nonEmptyStacks = new ArrayList<>(recipeInput.ingredientCount());
+			List<ItemStack> nonEmptyStacks = new ArrayList<>(recipeInput.getInputCount());
 
-			for (int i = 0; i < recipeInput.ingredientCount(); ++i) {
-				ItemStack stack = recipeInput.getItem(i);
+			for (int i = 0; i < recipeInput.getInputCount(); ++i) {
+				ItemStack stack = recipeInput.get(i);
 
 				if (!stack.isEmpty()) {
 					nonEmptyStacks.add(stack);

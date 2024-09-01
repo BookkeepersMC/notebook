@@ -32,23 +32,23 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.resource.pack.PackManager;
+import net.minecraft.resource.pack.PackProfile;
 
 import com.bookkeepersmc.notebook.impl.resource.loader.NotebookResourcePackProfile;
 
 /**
  * Mixins to the anonymous class in #write method.
  */
-@Mixin(targets = "net/minecraft/client/Options$3")
+@Mixin(targets = "net/minecraft/client/option/GameOptions$C_runhizzk")
 public class GameOptionsWriteVisitorMixin {
 	@Unique
 	private static List<String> toPackListString(List<String> packs) {
 		List<String> copy = new ArrayList<>(packs.size());
-		PackRepository manager = Minecraft.getInstance().getResourcePackRepository();
+		PackManager manager = Minecraft.getInstance().getResourcePackManager();
 
 		for (String pack : packs) {
-			Pack profile = manager.getPack(pack);
+			PackProfile profile = manager.getProfile(pack);
 
 			// Nonexistent pack profiles should be handled in the same way as vanilla
 			if (profile == null || !((NotebookResourcePackProfile) profile).notebook_isHidden()) copy.add(pack);
@@ -58,7 +58,7 @@ public class GameOptionsWriteVisitorMixin {
 	}
 
 	@SuppressWarnings("unchecked")
-	@ModifyArg(method = "process(Ljava/lang/String;Ljava/lang/Object;Ljava/util/function/Function;Ljava/util/function/Function;)Ljava/lang/Object;", at = @At(value = "INVOKE", target = "Ljava/util/function/Function;apply(Ljava/lang/Object;)Ljava/lang/Object;"))
+	@ModifyArg(method = "visitObject(Ljava/lang/String;Ljava/lang/Object;Ljava/util/function/Function;Ljava/util/function/Function;)Ljava/lang/Object;", at = @At(value = "INVOKE", target = "Ljava/util/function/Function;apply(Ljava/lang/Object;)Ljava/lang/Object;"))
 	private <T> T skipHiddenPacks(T value, @Local String key) {
 		if ("resourcePacks".equals(key) && value instanceof List) {
 			return (T) toPackListString((List<String>) value);

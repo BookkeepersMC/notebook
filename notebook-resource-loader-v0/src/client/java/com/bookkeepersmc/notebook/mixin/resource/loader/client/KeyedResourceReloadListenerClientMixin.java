@@ -28,43 +28,43 @@ import java.util.Locale;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.resources.language.LanguageManager;
-import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.sounds.SoundManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.client.render.block.BlockRenderManager;
+import net.minecraft.client.render.item.ItemRenderer;
+import net.minecraft.client.render.model.BakedModelManager;
+import net.minecraft.client.resource.language.LanguageManager;
+import net.minecraft.client.sound.SoundManager;
+import net.minecraft.client.texture.TextureManager;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.resource.IdentifiableResourceReloadListener;
 import com.bookkeepersmc.notebook.api.resource.ResourceReloadListenerKeys;
 
 @Mixin({
 		/* public */
-		SoundManager.class, ModelManager.class, LanguageManager.class, TextureManager.class,
+		SoundManager.class, BakedModelManager.class, LanguageManager.class, TextureManager.class,
 		/* private */
-		LevelRenderer.class, BlockRenderDispatcher.class, ItemRenderer.class
+		WorldRenderer.class, BlockRenderManager.class, ItemRenderer.class
 })
 public abstract class KeyedResourceReloadListenerClientMixin implements IdentifiableResourceReloadListener {
-	private ResourceLocation notebook$id;
-	private Collection<ResourceLocation> notebook$depdencies;
+	private Identifier notebook$id;
+	private Collection<Identifier> notebook$depdencies;
 
 	@Override
-	public ResourceLocation getNotebookId() {
+	public Identifier getNotebookId() {
 		if (this.notebook$id == null) {
 			Object self = this;
 
 			if (self instanceof SoundManager) {
 				this.notebook$id = ResourceReloadListenerKeys.SOUNDS;
-			} else if (self instanceof ModelManager) {
+			} else if (self instanceof BakedModelManager) {
 				this.notebook$id = ResourceReloadListenerKeys.MODELS;
 			} else if (self instanceof LanguageManager) {
 				this.notebook$id = ResourceReloadListenerKeys.LANGUAGES;
 			} else if (self instanceof TextureManager) {
 				this.notebook$id = ResourceReloadListenerKeys.TEXTURES;
 			} else {
-				this.notebook$id = ResourceLocation.withDefaultNamespace("private/" + self.getClass().getSimpleName().toLowerCase(Locale.ROOT));
+				this.notebook$id = Identifier.ofDefault("private/" + self.getClass().getSimpleName().toLowerCase(Locale.ROOT));
 			}
 		}
 
@@ -73,13 +73,13 @@ public abstract class KeyedResourceReloadListenerClientMixin implements Identifi
 
 	@Override
 	@SuppressWarnings({"ConstantConditions"})
-	public Collection<ResourceLocation> getNotebookDependencies() {
+	public Collection<Identifier> getNotebookDependencies() {
 		if (this.notebook$depdencies == null) {
 			Object self = this;
 
-			if (self instanceof ModelManager || self instanceof LevelRenderer) {
+			if (self instanceof BakedModelManager || self instanceof WorldRenderer) {
 				this.notebook$depdencies = Collections.singletonList(ResourceReloadListenerKeys.TEXTURES);
-			} else if (self instanceof ItemRenderer || self instanceof BlockRenderDispatcher) {
+			} else if (self instanceof ItemRenderer || self instanceof BlockRenderManager) {
 				this.notebook$depdencies = Collections.singletonList(ResourceReloadListenerKeys.MODELS);
 			} else {
 				this.notebook$depdencies = Collections.emptyList();

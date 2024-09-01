@@ -31,17 +31,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.resource.pack.PackProfile;
+import net.minecraft.resource.pack.ResourcePack;
 
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.OverlayConditionsMetadata;
 
-@Mixin(Pack.class)
+@Mixin(PackProfile.class)
 public class PackMixin {
-	@ModifyVariable(method = "readPackMetadata", at = @At("STORE"))
-	private static List<String> applyOverlayConditions(List<String> overlays, @Local PackResources resourcePack) throws IOException {
+	@ModifyVariable(method = "loadMetadata", at = @At("STORE"))
+	private static List<String> applyOverlayConditions(List<String> overlays, @Local ResourcePack resourcePack) throws IOException {
 		List<String> appliedOverlays = new ArrayList<>(overlays);
-		OverlayConditionsMetadata overlayMetadata = resourcePack.getMetadataSection(OverlayConditionsMetadata.SERIALIZER);
+		OverlayConditionsMetadata overlayMetadata = resourcePack.parseMetadata(OverlayConditionsMetadata.SERIALIZER);
 
 		if (overlayMetadata != null) {
 			appliedOverlays.addAll(overlayMetadata.appliedOverlays());

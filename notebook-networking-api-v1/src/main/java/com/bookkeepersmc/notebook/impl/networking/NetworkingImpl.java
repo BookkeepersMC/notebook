@@ -25,25 +25,25 @@ package com.bookkeepersmc.notebook.impl.networking;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.networking.v1.PayloadTypeRegistry;
 
 public final class NetworkingImpl {
-	public static final String MOD_ID = "notebook-networking-api-v1";
+	public static final String MOD_ID = "fabric-networking-api-v1";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	/**
 	 * Id of packet used to register supported channels.
 	 */
-	public static final ResourceLocation REGISTER_CHANNEL = ResourceLocation.withDefaultNamespace("register");
+	public static final Identifier REGISTER_CHANNEL = Identifier.ofDefault("register");
 
 	/**
 	 * Id of packet used to unregister supported channels.
 	 */
-	public static final ResourceLocation UNREGISTER_CHANNEL = ResourceLocation.withDefaultNamespace("unregister");
+	public static final Identifier UNREGISTER_CHANNEL = Identifier.ofDefault("unregister");
 
-	public static boolean isReservedCommonChannel(ResourceLocation channelName) {
+	public static boolean isReservedCommonChannel(Identifier channelName) {
 		return channelName.equals(REGISTER_CHANNEL) || channelName.equals(UNREGISTER_CHANNEL);
 	}
 

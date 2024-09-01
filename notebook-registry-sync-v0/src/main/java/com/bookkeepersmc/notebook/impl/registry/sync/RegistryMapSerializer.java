@@ -28,44 +28,44 @@ import java.util.Map;
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.Identifier;
 
 public class RegistryMapSerializer {
 	public static final int VERSION = 1;
 
-	public static Map<ResourceLocation, Object2IntMap<ResourceLocation>> fromNbt(CompoundTag nbt) {
-		CompoundTag mainNbt = nbt.getCompound("registries");
-		Map<ResourceLocation, Object2IntMap<ResourceLocation>> map = new LinkedHashMap<>();
+	public static Map<Identifier, Object2IntMap<Identifier>> fromNbt(NbtCompound nbt) {
+		NbtCompound mainNbt = nbt.getCompound("registries");
+		Map<Identifier, Object2IntMap<Identifier>> map = new LinkedHashMap<>();
 
-		for (String registryId : mainNbt.getAllKeys()) {
-			Object2IntMap<ResourceLocation> idMap = new Object2IntLinkedOpenHashMap<>();
-			CompoundTag idNbt = mainNbt.getCompound(registryId);
+		for (String registryId : mainNbt.getKeys()) {
+			Object2IntMap<Identifier> idMap = new Object2IntLinkedOpenHashMap<>();
+			NbtCompound idNbt = mainNbt.getCompound(registryId);
 
-			for (String id : idNbt.getAllKeys()) {
-				idMap.put(ResourceLocation.parse(id), idNbt.getInt(id));
+			for (String id : idNbt.getKeys()) {
+				idMap.put(Identifier.parse(id), idNbt.getInt(id));
 			}
 
-			map.put(ResourceLocation.parse(registryId), idMap);
+			map.put(Identifier.parse(registryId), idMap);
 		}
 
 		return map;
 	}
 
-	public static CompoundTag toNbt(Map<ResourceLocation, Object2IntMap<ResourceLocation>> map) {
-		CompoundTag mainNbt = new CompoundTag();
+	public static NbtCompound toNbt(Map<Identifier, Object2IntMap<Identifier>> map) {
+		NbtCompound mainNbt = new NbtCompound();
 
 		map.forEach((registryId, idMap) -> {
-			CompoundTag registryNbt = new CompoundTag();
+			NbtCompound registryNbt = new NbtCompound();
 
-			for (Object2IntMap.Entry<ResourceLocation> idPair : idMap.object2IntEntrySet()) {
+			for (Object2IntMap.Entry<Identifier> idPair : idMap.object2IntEntrySet()) {
 				registryNbt.putInt(idPair.getKey().toString(), idPair.getIntValue());
 			}
 
 			mainNbt.put(registryId.toString(), registryNbt);
 		});
 
-		CompoundTag nbt = new CompoundTag();
+		NbtCompound nbt = new NbtCompound();
 		nbt.putInt("version", VERSION);
 		nbt.put("registries", mainNbt);
 		return nbt;

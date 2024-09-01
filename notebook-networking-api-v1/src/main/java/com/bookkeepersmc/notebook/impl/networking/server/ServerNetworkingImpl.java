@@ -24,15 +24,15 @@ package com.bookkeepersmc.notebook.impl.networking.server;
 
 import java.util.Objects;
 
-import net.minecraft.network.ConnectionProtocol;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.network.protocol.common.ClientCommonPacketListener;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import net.minecraft.network.NetworkPhase;
+import net.minecraft.network.NetworkSide;
+import net.minecraft.network.listener.ClientCommonPacketListener;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.payload.CustomPayload;
+import net.minecraft.network.packet.s2c.common.CustomPayloadS2CPacket;
+import net.minecraft.server.network.ServerConfigurationNetworkHandler;
+import net.minecraft.server.network.ServerLoginNetworkHandler;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
 
 import com.bookkeepersmc.notebook.api.networking.v1.ServerConfigurationNetworking;
 import com.bookkeepersmc.notebook.api.networking.v1.ServerLoginNetworking;
@@ -42,26 +42,26 @@ import com.bookkeepersmc.notebook.impl.networking.NetworkHandlerExtensions;
 import com.bookkeepersmc.notebook.impl.networking.PayloadTypeRegistryImpl;
 
 public final class ServerNetworkingImpl {
-	public static final GlobalReceiverRegistry<ServerLoginNetworking.LoginQueryResponseHandler> LOGIN = new GlobalReceiverRegistry<>(PacketFlow.SERVERBOUND, ConnectionProtocol.LOGIN, null);
-	public static final GlobalReceiverRegistry<ServerConfigurationNetworking.ConfigurationPacketHandler<?>> CONFIGURATION = new GlobalReceiverRegistry<>(PacketFlow.SERVERBOUND, ConnectionProtocol.CONFIGURATION, PayloadTypeRegistryImpl.CONFIGURATION_C2S);
-	public static final GlobalReceiverRegistry<ServerPlayNetworking.PlayPayloadHandler<?>> PLAY = new GlobalReceiverRegistry<>(PacketFlow.SERVERBOUND, ConnectionProtocol.PLAY, PayloadTypeRegistryImpl.PLAY_C2S);
+	public static final GlobalReceiverRegistry<ServerLoginNetworking.LoginQueryResponseHandler> LOGIN = new GlobalReceiverRegistry<>(NetworkSide.C2S, NetworkPhase.LOGIN, null);
+	public static final GlobalReceiverRegistry<ServerConfigurationNetworking.ConfigurationPacketHandler<?>> CONFIGURATION = new GlobalReceiverRegistry<>(NetworkSide.C2S, NetworkPhase.CONFIGURATION, PayloadTypeRegistryImpl.CONFIGURATION_C2S);
+	public static final GlobalReceiverRegistry<ServerPlayNetworking.PlayPayloadHandler<?>> PLAY = new GlobalReceiverRegistry<>(NetworkSide.C2S, NetworkPhase.PLAY, PayloadTypeRegistryImpl.PLAY_C2S);
 
-	public static ServerPlayNetworkAddon getAddon(ServerGamePacketListenerImpl handler) {
+	public static ServerPlayNetworkAddon getAddon(ServerPlayNetworkHandler handler) {
 		return (ServerPlayNetworkAddon) ((NetworkHandlerExtensions) handler).getAddon();
 	}
 
-	public static ServerLoginNetworkAddon getAddon(ServerLoginPacketListenerImpl handler) {
+	public static ServerLoginNetworkAddon getAddon(ServerLoginNetworkHandler handler) {
 		return (ServerLoginNetworkAddon) ((NetworkHandlerExtensions) handler).getAddon();
 	}
 
-	public static ServerConfigurationNetworkAddon getAddon(ServerConfigurationPacketListenerImpl handler) {
+	public static ServerConfigurationNetworkAddon getAddon(ServerConfigurationNetworkHandler handler) {
 		return (ServerConfigurationNetworkAddon) ((NetworkHandlerExtensions) handler).getAddon();
 	}
 
-	public static Packet<ClientCommonPacketListener> createS2CPacket(CustomPacketPayload payload) {
+	public static Packet<ClientCommonPacketListener> createS2CPacket(CustomPayload payload) {
 		Objects.requireNonNull(payload, "Payload cannot be null");
-		Objects.requireNonNull(payload.type(), "CustomPayload#getId() cannot return null for payload class: " + payload.getClass());
+		Objects.requireNonNull(payload.getId(), "CustomPayload#getId() cannot return null for payload class: " + payload.getClass());
 
-		return new ClientboundCustomPayloadPacket(payload);
+		return new CustomPayloadS2CPacket(payload);
 	}
 }

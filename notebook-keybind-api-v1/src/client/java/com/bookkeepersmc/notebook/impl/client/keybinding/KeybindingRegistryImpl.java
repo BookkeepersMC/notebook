@@ -29,13 +29,13 @@ import java.util.Optional;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.option.KeyBind;
 
 import com.bookkeepersmc.notebook.mixin.client.keybind.KeyMappingAccessor;
 
 public final class KeybindingRegistryImpl {
-	private static final List<KeyMapping> MODDED_KEYBINDS = new ReferenceArrayList<>();
+	private static final List<KeyBind> MODDED_KEYBINDS = new ReferenceArrayList<>();
 
 	private KeybindingRegistryImpl() {
 	}
@@ -57,16 +57,16 @@ public final class KeybindingRegistryImpl {
 		return true;
 	}
 
-	public static KeyMapping registerKeybind(KeyMapping binding) {
+	public static KeyBind registerKeybind(KeyBind binding) {
 		if (Minecraft.getInstance().options != null) {
 			throw new IllegalStateException("GameOptions has already been initialised");
 		}
 
-		for (KeyMapping existingKeyBindings : MODDED_KEYBINDS) {
+		for (KeyBind existingKeyBindings : MODDED_KEYBINDS) {
 			if (existingKeyBindings == binding) {
-				throw new IllegalArgumentException("Attempted to register a key binding twice: " + binding.getTranslatedKeyMessage());
-			} else if (existingKeyBindings.getTranslatedKeyMessage().equals(binding.getTranslatedKeyMessage())) {
-				throw new IllegalArgumentException("Attempted to register two key bindings with equal ID: " + binding.getTranslatedKeyMessage() + "!");
+				throw new IllegalArgumentException("Attempted to register a key binding twice: " + binding.getKeyName());
+			} else if (existingKeyBindings.getKeyName().equals(binding.getKeyName())) {
+				throw new IllegalArgumentException("Attempted to register two key bindings with equal ID: " + binding.getKeyName() + "!");
 			}
 		}
 
@@ -76,10 +76,10 @@ public final class KeybindingRegistryImpl {
 		return binding;
 	}
 
-	public static KeyMapping[] process(KeyMapping[] keysAll) {
-		List<KeyMapping> newKeysAll = Lists.newArrayList(keysAll);
+	public static KeyBind[] process(KeyBind[] keysAll) {
+		List<KeyBind> newKeysAll = Lists.newArrayList(keysAll);
 		newKeysAll.removeAll(MODDED_KEYBINDS);
 		newKeysAll.addAll(MODDED_KEYBINDS);
-		return newKeysAll.toArray(new KeyMapping[0]);
+		return newKeysAll.toArray(new KeyBind[0]);
 	}
 }

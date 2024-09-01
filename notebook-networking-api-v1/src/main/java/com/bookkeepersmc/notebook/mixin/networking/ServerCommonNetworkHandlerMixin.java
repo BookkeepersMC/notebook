@@ -27,19 +27,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.ServerboundPongPacket;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.server.network.ServerCommonPacketListenerImpl;
+import net.minecraft.network.listener.AbstractServerPacketHandler;
+import net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket;
+import net.minecraft.network.packet.c2s.common.PongC2SPacket;
+import net.minecraft.network.packet.payload.CustomPayload;
 
 import com.bookkeepersmc.notebook.impl.networking.NetworkHandlerExtensions;
 import com.bookkeepersmc.notebook.impl.networking.server.ServerConfigurationNetworkAddon;
 
-@Mixin(ServerCommonPacketListenerImpl.class)
+@Mixin(AbstractServerPacketHandler.class)
 public abstract class ServerCommonNetworkHandlerMixin implements NetworkHandlerExtensions {
-	@Inject(method = "handleCustomPayload", at = @At("HEAD"), cancellable = true)
-	private void handleCustomPayloadReceivedAsync(ServerboundCustomPayloadPacket packet, CallbackInfo ci) {
-		final CustomPacketPayload payload = packet.payload();
+	@Inject(method = "onCustomPayload", at = @At("HEAD"), cancellable = true)
+	private void handleCustomPayloadReceivedAsync(CustomPayloadC2SPacket packet, CallbackInfo ci) {
+		final CustomPayload payload = packet.payload();
 
 		boolean handled;
 
@@ -55,10 +55,10 @@ public abstract class ServerCommonNetworkHandlerMixin implements NetworkHandlerE
 		}
 	}
 
-	@Inject(method = "handlePong", at = @At("HEAD"))
-	private void onPlayPong(ServerboundPongPacket packet, CallbackInfo ci) {
+	@Inject(method = "onPlayPong", at = @At("HEAD"))
+	private void onPlayPong(PongC2SPacket packet, CallbackInfo ci) {
 		if (getAddon() instanceof ServerConfigurationNetworkAddon addon) {
-			addon.onPong(packet.getId());
+			addon.onPong(packet.getParameter());
 		}
 	}
 }

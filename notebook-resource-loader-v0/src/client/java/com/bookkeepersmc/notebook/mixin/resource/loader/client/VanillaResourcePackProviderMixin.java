@@ -29,19 +29,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.resources.ClientPackSource;
-import net.minecraft.server.packs.repository.BuiltInPackSource;
-import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.client.resource.ClientBuiltinResourcePackProvider;
+import net.minecraft.resource.pack.BuiltinPackProvider;
+import net.minecraft.resource.pack.PackProfile;
 
 import com.bookkeepersmc.notebook.impl.resource.loader.ModResourcePackCreator;
 
-@Mixin(BuiltInPackSource.class)
+@Mixin(BuiltinPackProvider.class)
 public class VanillaResourcePackProviderMixin {
 	@Inject(method = "loadPacks", at = @At("RETURN"))
-	private void addBuiltinResourcePacks(Consumer<Pack> consumer, CallbackInfo ci) {
+	private void addBuiltinResourcePacks(Consumer<PackProfile> consumer, CallbackInfo ci) {
 		// Register mod and built-in resource packs after the vanilla built-in resource packs are registered.
 		// noinspection ConstantConditions
-		if ((Object) this instanceof ClientPackSource) {
+		if ((Object) this instanceof ClientBuiltinResourcePackProvider) {
 			ModResourcePackCreator.CLIENT_RESOURCE_PACK_PROVIDER.loadPacks(consumer);
 		}
 	}

@@ -26,13 +26,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-import net.minecraft.network.protocol.configuration.ServerboundSelectKnownPacks;
+import net.minecraft.network.packet.c2s.configuration.SelectKnownPacksC2SPacket;
 
 import com.bookkeepersmc.notebook.impl.resource.loader.ModResourcePackCreator;
 
-@Mixin(ServerboundSelectKnownPacks.class)
+@Mixin(SelectKnownPacksC2SPacket.class)
 public class SelectKnownPacksC2SPacketMixin {
-	@ModifyArg(method = "<clinit>", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/codec/ByteBufCodecs;list(I)Lnet/minecraft/network/codec/StreamCodec$CodecOperation;"))
+	@ModifyArg(method = "<clinit>", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/codec/PacketCodecs;toCollection(I)Lnet/minecraft/network/codec/PacketCodec$ResultFunction;"))
 	private static int setMaxKnownPacks(int constant) {
 		return ModResourcePackCreator.MAX_KNOWN_PACKS;
 	}

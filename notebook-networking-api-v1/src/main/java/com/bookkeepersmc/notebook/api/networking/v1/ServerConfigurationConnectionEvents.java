@@ -23,7 +23,7 @@
 package com.bookkeepersmc.notebook.api.networking.v1;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
+import net.minecraft.server.network.ServerConfigurationNetworkHandler;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 import com.bookkeepersmc.notebook.api.event.EventFactory;
@@ -73,8 +73,8 @@ public final class ServerConfigurationConnectionEvents {
 	 *
 	 * <p>No packets should be sent when this event is invoked.
 	 */
-	public static final Event<Disconnect> DISCONNECT = EventFactory.createArrayBacked(Disconnect.class, callbacks -> (handler, server) -> {
-		for (Disconnect callback : callbacks) {
+	public static final Event<ServerConfigurationConnectionEvents.Disconnect> DISCONNECT = EventFactory.createArrayBacked(ServerConfigurationConnectionEvents.Disconnect.class, callbacks -> (handler, server) -> {
+		for (ServerConfigurationConnectionEvents.Disconnect callback : callbacks) {
 			callback.onConfigureDisconnect(handler, server);
 		}
 	});
@@ -84,11 +84,11 @@ public final class ServerConfigurationConnectionEvents {
 
 	@FunctionalInterface
 	public interface Configure {
-		void onSendConfiguration(ServerConfigurationPacketListenerImpl handler, MinecraftServer server);
+		void onSendConfiguration(ServerConfigurationNetworkHandler handler, MinecraftServer server);
 	}
 
 	@FunctionalInterface
 	public interface Disconnect {
-		void onConfigureDisconnect(ServerConfigurationPacketListenerImpl handler, MinecraftServer server);
+		void onConfigureDisconnect(ServerConfigurationNetworkHandler handler, MinecraftServer server);
 	}
 }

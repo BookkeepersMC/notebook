@@ -23,31 +23,26 @@
 package com.bookkeepersmc.notebook.impl.recipe.builtin;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.registry.Holder;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.recipe.v1.CustomIngredientSerializer;
 
 public class AnyIngredient extends CombinedIngredient {
-	private static final MapCodec<AnyIngredient> ALLOW_EMPTY_CODEC = createCodec(Ingredient.CODEC);
-	private static final MapCodec<AnyIngredient> DISALLOW_EMPTY_CODEC = createCodec(Ingredient.CODEC_NONEMPTY);
-
-	private static MapCodec<AnyIngredient> createCodec(Codec<Ingredient> ingredientCodec) {
-		return ingredientCodec
-				.listOf()
-				.fieldOf("ingredients")
-				.xmap(AnyIngredient::new, AnyIngredient::getIngredients);
-	}
+	private static final MapCodec<AnyIngredient> CODEC = Ingredient.ALLOW_EMPTY_CODEC
+			.listOf()
+			.fieldOf("ingredients")
+			.xmap(AnyIngredient::new, AnyIngredient::getIngredients);
 
 	public static final CustomIngredientSerializer<AnyIngredient> SERIALIZER =
-			new CombinedIngredient.Serializer<>(ResourceLocation.fromNamespaceAndPath("notebook", "any"), AnyIngredient::new, ALLOW_EMPTY_CODEC, DISALLOW_EMPTY_CODEC);
+			new CombinedIngredient.Serializer<>(Identifier.of("notebook", "any"), AnyIngredient::new, CODEC);
 
 	public AnyIngredient(List<Ingredient> ingredients) {
 		super(ingredients);
@@ -65,11 +60,11 @@ public class AnyIngredient extends CombinedIngredient {
 	}
 
 	@Override
-	public List<ItemStack> getMatchingStacks() {
-		List<ItemStack> previewStacks = new ArrayList<>();
+	public List<Holder<Item>> getMatchingStacks() {
+		List<Holder<Item>> previewStacks = new ArrayList<>();
 
 		for (Ingredient ingredient : ingredients) {
-			previewStacks.addAll(Arrays.asList(ingredient.getItems()));
+			previewStacks.addAll(ingredient.method_8105());
 		}
 
 		return previewStacks;

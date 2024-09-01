@@ -33,27 +33,27 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.MouseHandler;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.Mouse;
+import net.minecraft.client.gui.screen.Screen;
 
 import com.bookkeepersmc.notebook.api.client.screen.v1.ScreenMouseEvents;
 
-@Mixin(MouseHandler.class)
+@Mixin(Mouse.class)
 abstract class MouseHandlerMixin {
 	@Shadow
 	@Final
-	private Minecraft minecraft;
+	private Minecraft client;
 	@Unique
 	private Screen currentScreen;
 
 	// private synthetic method_1611([ZDDI)V
-	@Inject(method = "method_1611([ZLnet/minecraft/client/gui/screens/Screen;DDI)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;mouseClicked(DDI)Z"), cancellable = true)
+	@Inject(method = "method_1611([ZLnet/minecraft/client/gui/screen/Screen;DDI)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseClicked(DDI)Z"), cancellable = true)
 	private static void beforeMouseClickedEvent(boolean[] resultHack, Screen screen, double mouseX, double mouseY, int button, CallbackInfo ci) {
 		@SuppressWarnings("resource")
-		MouseHandlerMixin thisRef = (MouseHandlerMixin) (Object) Minecraft.getInstance().mouseHandler;
+		MouseHandlerMixin thisRef = (MouseHandlerMixin) (Object) Minecraft.getInstance().mouse;
 		// Store the screen in a variable in case someone tries to change the screen during this before event.
 		// If someone changes the screen, the after event will likely have class cast exceptions or throw a NPE.
-		thisRef.currentScreen = thisRef.minecraft.screen;
+		thisRef.currentScreen = thisRef.client.currentScreen;
 
 		if (thisRef.currentScreen == null) {
 			return;
@@ -70,10 +70,10 @@ abstract class MouseHandlerMixin {
 	}
 
 	// private synthetic method_1611([ZDDI)V
-	@Inject(method = "method_1611([ZLnet/minecraft/client/gui/screens/Screen;DDI)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;mouseClicked(DDI)Z", shift = At.Shift.AFTER))
+	@Inject(method = "method_1611([ZLnet/minecraft/client/gui/screen/Screen;DDI)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseClicked(DDI)Z", shift = At.Shift.AFTER))
 	private static void afterMouseClickedEvent(boolean[] resultHack, Screen screen, double mouseX, double mouseY, int button, CallbackInfo ci) {
 		@SuppressWarnings("resource")
-		MouseHandlerMixin thisRef = (MouseHandlerMixin) (Object) Minecraft.getInstance().mouseHandler;
+		MouseHandlerMixin thisRef = (MouseHandlerMixin) (Object) Minecraft.getInstance().mouse;
 
 		if (thisRef.currentScreen == null) {
 			return;
@@ -84,14 +84,14 @@ abstract class MouseHandlerMixin {
 	}
 
 	// private synthetic method_1605([ZDDI)V
-	@Inject(method = "method_1605([ZLnet/minecraft/client/gui/screens/Screen;DDI)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;mouseReleased(DDI)Z"), cancellable = true)
+	@Inject(method = "method_1605([ZLnet/minecraft/client/gui/screen/Screen;DDI)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseReleased(DDI)Z"), cancellable = true)
 	private static void beforeMouseReleasedEvent(boolean[] resultHack, Screen screen, double mouseX, double mouseY, int button, CallbackInfo ci) {
 		@SuppressWarnings("resource")
-		MouseHandlerMixin thisRef = (MouseHandlerMixin) (Object) Minecraft.getInstance().mouseHandler;
+		MouseHandlerMixin thisRef = (MouseHandlerMixin) (Object) Minecraft.getInstance().mouse;
 
 		// Store the screen in a variable in case someone tries to change the screen during this before event.
 		// If someone changes the screen, the after event will likely have class cast exceptions or throw a NPE.
-		thisRef.currentScreen = thisRef.minecraft.screen;
+		thisRef.currentScreen = thisRef.client.currentScreen;
 
 		if (thisRef.currentScreen == null) {
 			return;
@@ -108,10 +108,10 @@ abstract class MouseHandlerMixin {
 	}
 
 	// private synthetic method_1605([ZDDI)V
-	@Inject(method = "method_1605([ZLnet/minecraft/client/gui/screens/Screen;DDI)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;mouseReleased(DDI)Z", shift = At.Shift.AFTER))
+	@Inject(method = "method_1605([ZLnet/minecraft/client/gui/screen/Screen;DDI)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseReleased(DDI)Z", shift = At.Shift.AFTER))
 	private static void afterMouseReleasedEvent(boolean[] resultHack, Screen screen, double mouseX, double mouseY, int button, CallbackInfo ci) {
 		@SuppressWarnings("resource")
-		MouseHandlerMixin thisRef = (MouseHandlerMixin) (Object) Minecraft.getInstance().mouseHandler;
+		MouseHandlerMixin thisRef = (MouseHandlerMixin) (Object) Minecraft.getInstance().mouse;
 
 		if (thisRef.currentScreen == null) {
 			return;
@@ -121,11 +121,11 @@ abstract class MouseHandlerMixin {
 		thisRef.currentScreen = null;
 	}
 
-	@Inject(method = "onScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;mouseScrolled(DDDD)Z"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
+	@Inject(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseScrolled(DDDD)Z"), locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
 	private void beforeMouseScrollEvent(long window, double horizontal, double vertical, CallbackInfo ci, @Local(ordinal = 1) double horizontalAmount, @Local(ordinal = 2) double verticalAmount, @Local(ordinal = 3) double mouseX, @Local(ordinal = 4) double mouseY) {
 		// Store the screen in a variable in case someone tries to change the screen during this before event.
 		// If someone changes the screen, the after event will likely have class cast exceptions or throw a NPE.
-		this.currentScreen = this.minecraft.screen;
+		this.currentScreen = this.client.currentScreen;
 
 		if (this.currentScreen == null) {
 			return;
@@ -140,7 +140,7 @@ abstract class MouseHandlerMixin {
 		ScreenMouseEvents.beforeMouseScroll(this.currentScreen).invoker().beforeMouseScroll(this.currentScreen, mouseX, mouseY, horizontalAmount, verticalAmount);
 	}
 
-	@Inject(method = "onScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;mouseScrolled(DDDD)Z", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
+	@Inject(method = "onMouseScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;mouseScrolled(DDDD)Z", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
 	private void afterMouseScrollEvent(long l, double d, double e, CallbackInfo ci, @Local(ordinal = 1) double horizontalAmount, @Local(ordinal = 2) double verticalAmount, @Local(ordinal = 3) double mouseX, @Local(ordinal = 4) double mouseY) {
 		if (this.currentScreen == null) {
 			return;

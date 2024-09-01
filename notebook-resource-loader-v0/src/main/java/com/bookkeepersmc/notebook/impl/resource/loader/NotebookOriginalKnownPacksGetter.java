@@ -24,7 +24,7 @@ package com.bookkeepersmc.notebook.impl.resource.loader;
 
 import java.util.List;
 
-import net.minecraft.server.packs.repository.KnownPack;
+import net.minecraft.resource.pack.KnownPack;
 
 public interface NotebookOriginalKnownPacksGetter {
 	/**

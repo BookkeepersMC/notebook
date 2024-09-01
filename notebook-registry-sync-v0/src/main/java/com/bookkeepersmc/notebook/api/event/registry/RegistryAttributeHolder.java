@@ -22,8 +22,8 @@
  */
 package com.bookkeepersmc.notebook.api.event.registry;
 
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.ResourceKey;
 
 import com.bookkeepersmc.notebook.impl.registry.sync.RegistryAttributeImpl;
 
@@ -33,7 +33,7 @@ public interface RegistryAttributeHolder {
 	}
 
 	static RegistryAttributeHolder get(Registry<?> registry) {
-		return get(registry.key());
+		return get(registry.getKey());
 	}
 
 	RegistryAttributeHolder addAttribute(RegistryAttribute attribute);

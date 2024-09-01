@@ -39,11 +39,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.commands.DataPackCommand;
-import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.resource.pack.PackManager;
+import net.minecraft.resource.pack.PackProfile;
+import net.minecraft.server.command.DataPackCommand;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
 
 import com.bookkeepersmc.notebook.impl.resource.loader.NotebookResourcePackProfile;
 
@@ -55,20 +55,20 @@ import com.bookkeepersmc.notebook.impl.resource.loader.NotebookResourcePackProfi
 public class DatapackCommandMixin {
 	@Unique
 	private static final DynamicCommandExceptionType INTERNAL_PACK_EXCEPTION = new DynamicCommandExceptionType(
-			packName -> Component.translatableEscape("commands.datapack.notebook.internal", packName));
+			packName -> Text.stringifiedTranslatable("commands.datapack.notebook.internal", packName));
 
-	@Redirect(method = "method_13136", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/repository/PackRepository;getSelectedIds()Ljava/util/Collection;"))
-	private static Collection<String> filterEnabledPackSuggestions(PackRepository dataPackManager) {
-		return dataPackManager.getSelectedPacks().stream().filter(profile -> !((NotebookResourcePackProfile) profile).notebook_isHidden()).map(Pack::getId).toList();
+	@Redirect(method = "method_13136", at = @At(value = "INVOKE", target = "Lnet/minecraft/resource/pack/PackManager;getEnabledNames()Ljava/util/Collection;"))
+	private static Collection<String> filterEnabledPackSuggestions(PackManager dataPackManager) {
+		return dataPackManager.getEnabledProfiles().stream().filter(profile -> !((NotebookResourcePackProfile) profile).notebook_isHidden()).map(PackProfile::getName).toList();
 	}
 
 	@WrapOperation(method = "method_13120", at = @At(value = "INVOKE", target = "Ljava/util/stream/Stream;filter(Ljava/util/function/Predicate;)Ljava/util/stream/Stream;", ordinal = 0))
-	private static Stream<Pack> filterDisabledPackSuggestions(Stream<Pack> instance, Predicate<? super Pack> predicate, Operation<Stream<Pack>> original) {
+	private static Stream<PackProfile> filterDisabledPackSuggestions(Stream<PackProfile> instance, Predicate<? super PackProfile> predicate, Operation<Stream<PackProfile>> original) {
 		return original.call(instance, predicate).filter(profile -> !((NotebookResourcePackProfile) profile).notebook_isHidden());
 	}
 
-	@Inject(method = "getPack", at = @At(value = "INVOKE", target = "Ljava/util/Collection;contains(Ljava/lang/Object;)Z", shift = At.Shift.BEFORE))
-	private static void errorOnInternalPack(CommandContext<CommandSourceStack> context, String name, boolean enable, CallbackInfoReturnable<Pack> cir, @Local Pack profile) throws CommandSyntaxException {
-		if (((NotebookResourcePackProfile) profile).notebook_isHidden()) throw INTERNAL_PACK_EXCEPTION.create(profile.getId());
+	@Inject(method = "getPackContainer", at = @At(value = "INVOKE", target = "Ljava/util/Collection;contains(Ljava/lang/Object;)Z", shift = At.Shift.BEFORE))
+	private static void errorOnInternalPack(CommandContext<ServerCommandSource> context, String name, boolean enable, CallbackInfoReturnable<PackProfile> cir, @Local PackProfile profile) throws CommandSyntaxException {
+		if (((NotebookResourcePackProfile) profile).notebook_isHidden()) throw INTERNAL_PACK_EXCEPTION.create(profile.getName());
 	}
 }

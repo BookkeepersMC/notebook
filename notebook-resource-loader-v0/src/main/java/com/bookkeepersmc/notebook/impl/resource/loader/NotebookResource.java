@@ -24,7 +24,7 @@ package com.bookkeepersmc.notebook.impl.resource.loader;
 
 import org.slf4j.LoggerFactory;
 
-import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.resource.pack.PackSource;
 
 /**
  * Extensions to {@link net.minecraft.server.packs.resources.Resource}.
@@ -42,6 +42,6 @@ public interface NotebookResource {
 	 */
 	default PackSource getNotebookPackSource() {
 		LoggerFactory.getLogger(NotebookResource.class).error("Unknown Resource implementation {}, returning PACK_SOURCE_NONE as the source", getClass().getName());
-		return PackSource.DEFAULT;
+		return PackSource.PACK_SOURCE_NONE;
 	}
 }

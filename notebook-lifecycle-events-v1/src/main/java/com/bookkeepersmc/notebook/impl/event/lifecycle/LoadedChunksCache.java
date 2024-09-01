@@ -24,21 +24,21 @@ package com.bookkeepersmc.notebook.impl.event.lifecycle;
 
 import java.util.Set;
 
-import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.chunk.WorldChunk;
 
 /**
  * A simple marker interface which holds references to chunks which block entities may be loaded or unloaded from.
  */
 public interface LoadedChunksCache {
-	Set<LevelChunk> notebook_getLoadedChunks();
+	Set<WorldChunk> notebook_getLoadedChunks();
 
 	/**
 	 * Marks a chunk as loaded in a world.
 	 */
-	void notebook_markLoaded(LevelChunk chunk);
+	void notebook_markLoaded(WorldChunk chunk);
 
 	/**
 	 * Marks a chunk as unloaded in a world.
 	 */
-	void notebook_markUnloaded(LevelChunk chunk);
+	void notebook_markUnloaded(WorldChunk chunk);
 }

@@ -22,20 +22,20 @@
  */
 package com.bookkeepersmc.notebook.impl.registry.sync;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.payload.CustomPayload;
+import net.minecraft.util.Identifier;
 
-public class SyncCompletePayload implements CustomPacketPayload {
+public class SyncCompletePayload implements CustomPayload {
 	public static final SyncCompletePayload INSTANCE = new SyncCompletePayload();
-	public static final CustomPacketPayload.Type<SyncCompletePayload> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath("notebook", "registry/sync/complete"));
-	public static final StreamCodec<FriendlyByteBuf, SyncCompletePayload> CODEC = StreamCodec.unit(INSTANCE);
+	public static final CustomPayload.Id<SyncCompletePayload> TYPE = new CustomPayload.Id<>(Identifier.of("notebook", "registry/sync/complete"));
+	public static final PacketCodec<PacketByteBuf, SyncCompletePayload> CODEC = PacketCodec.unit(INSTANCE);
 
 	private SyncCompletePayload() { }
 
 	@Override
-	public Type<? extends CustomPacketPayload> type() {
+	public Id<? extends CustomPayload> getId() {
 		return TYPE;
 	}
 }

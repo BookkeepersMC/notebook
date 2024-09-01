@@ -25,34 +25,34 @@ package com.bookkeepersmc.notebook.impl.networking;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.payload.CustomPayload;
+import net.minecraft.util.Identifier;
 
-public record CommonRegisterPayload(int version, String phase, Set<ResourceLocation> channels) implements CustomPacketPayload {
-	public static final Type<CommonRegisterPayload> ID = new Type<>(ResourceLocation.parse("c:register"));
-	public static final StreamCodec<FriendlyByteBuf, CommonRegisterPayload> CODEC = CustomPacketPayload.codec(CommonRegisterPayload::write, CommonRegisterPayload::new);
+public record CommonRegisterPayload(int version, String phase, Set<Identifier> channels) implements CustomPayload {
+	public static final CustomPayload.Id<CommonRegisterPayload> ID = new Id<>(Identifier.parse("c:register"));
+	public static final PacketCodec<PacketByteBuf, CommonRegisterPayload> CODEC = CustomPayload.create(CommonRegisterPayload::write, CommonRegisterPayload::new);
 
 	public static final String PLAY_PHASE = "play";
 	public static final String CONFIGURATION_PHASE = "configuration";
 
-	private CommonRegisterPayload(FriendlyByteBuf buf) {
+	private CommonRegisterPayload(PacketByteBuf buf) {
 		this(
 				buf.readVarInt(),
-				buf.readUtf(),
-				buf.readCollection(HashSet::new, FriendlyByteBuf::readResourceLocation)
+				buf.readString(),
+				buf.readCollection(HashSet::new, PacketByteBuf::readIdentifier)
 		);
 	}
 
-	public void write(FriendlyByteBuf buf) {
+	public void write(PacketByteBuf buf) {
 		buf.writeVarInt(version);
-		buf.writeUtf(phase);
-		buf.writeCollection(channels, FriendlyByteBuf::writeResourceLocation);
+		buf.writeString(phase);
+		buf.writeCollection(channels, PacketByteBuf::writeIdentifier);
 	}
 
 	@Override
-	public Type<CommonRegisterPayload> type() {
+	public Id<CommonRegisterPayload> getId() {
 		return ID;
 	}
 }

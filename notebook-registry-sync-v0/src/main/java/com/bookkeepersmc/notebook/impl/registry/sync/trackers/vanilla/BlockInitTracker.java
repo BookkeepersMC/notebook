@@ -24,12 +24,12 @@ package com.bookkeepersmc.notebook.impl.registry.sync.trackers.vanilla;
 
 import java.util.List;
 
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.registry.BuiltInRegistries;
+import net.minecraft.registry.Registry;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 
 import com.bookkeepersmc.notebook.api.event.registry.RegistryEntryAddedCallback;
 import com.bookkeepersmc.notebook.mixin.registry.sync.DebugChunkGeneratorAccessor;
@@ -47,23 +47,23 @@ public final class BlockInitTracker implements RegistryEntryAddedCallback<Block>
 	}
 
 	@Override
-	public void onEntryAdded(int rawId, ResourceLocation id, Block object) {
+	public void onEntryAdded(int rawId, Identifier id, Block object) {
 		// if false, getLootTableKey() will generate an invalid loot table key
 		assert id.equals(registry.getKey(object));
 
-		object.getLootTable();
+		object.getLootTableId();
 	}
 
 	public static void postFreeze() {
 		final List<BlockState> blockStateList = BuiltInRegistries.BLOCK.stream()
-				.flatMap((block) -> block.getStateDefinition().getPossibleStates().stream())
+				.flatMap((block) -> block.getStateManager().getStates().stream())
 				.toList();
 
-		final int xLength = Mth.ceil(Mth.sqrt(blockStateList.size()));
-		final int zLength = Mth.ceil(blockStateList.size() / (float) xLength);
+		final int xLength = MathHelper.ceil(MathHelper.sqrt(blockStateList.size()));
+		final int zLength = MathHelper.ceil(blockStateList.size() / (float) xLength);
 
-		DebugChunkGeneratorAccessor.setALL_BLOCKS(blockStateList);
-		DebugChunkGeneratorAccessor.setGRID_WIDTH(xLength);
-		DebugChunkGeneratorAccessor.setGRID_HEIGHT(zLength);
+		DebugChunkGeneratorAccessor.setBLOCK_STATES(blockStateList);
+		DebugChunkGeneratorAccessor.setX_SIDE_LENGTH(xLength);
+		DebugChunkGeneratorAccessor.setZ_SIDE_LENGTH(zLength);
 	}
 }

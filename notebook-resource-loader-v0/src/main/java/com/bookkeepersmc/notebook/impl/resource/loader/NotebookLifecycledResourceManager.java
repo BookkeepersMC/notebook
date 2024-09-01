@@ -22,8 +22,8 @@
  */
 package com.bookkeepersmc.notebook.impl.resource.loader;
 
-import net.minecraft.server.packs.PackType;
+import net.minecraft.resource.ResourceType;
 
 public interface NotebookLifecycledResourceManager {
-	PackType notebook_getResourceType();
+	ResourceType notebook_getResourceType();
 }

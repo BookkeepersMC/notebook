@@ -52,13 +52,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.core.Holder;
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.RegistrationInfo;
-import net.minecraft.core.Registry;
-import net.minecraft.core.WritableRegistry;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.registry.Holder;
+import net.minecraft.registry.MutableRegistry;
+import net.minecraft.registry.RegistrationInfo;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.ResourceKey;
+import net.minecraft.registry.SimpleRegistry;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 import com.bookkeepersmc.notebook.api.event.EventFactory;
@@ -72,32 +72,35 @@ import com.bookkeepersmc.notebook.impl.registry.sync.RemapException;
 import com.bookkeepersmc.notebook.impl.registry.sync.RemapStateImpl;
 import com.bookkeepersmc.notebook.impl.registry.sync.RemappableRegistry;
 
-@Mixin(MappedRegistry.class)
-public abstract class MappedRegistryMixin<T> implements WritableRegistry<T>, RemappableRegistry, ListenableRegistry<T> {
+@Mixin(SimpleRegistry.class)
+public abstract class MappedRegistryMixin<T> implements MutableRegistry<T>, RemappableRegistry, ListenableRegistry<T> {
 	@Unique
 	private static final Set<String> VANILLA_NAMESPACES = Set.of("minecraft", "brigadier");
 
 	@Shadow
 	@Final
-	private ObjectList<Holder.Reference<T>> byId;
+	private ObjectList<Holder.Reference<T>> rawIdToEntry;
 	@Shadow
 	@Final
-	private Reference2IntMap<T> toId;
+	private Reference2IntMap<T> entryToRawId;
 	@Shadow
 	@Final
-	private Map<ResourceLocation, Holder.Reference<T>> byLocation;
+	private Map<Identifier, Holder.Reference<T>> byId;
 	@Shadow
 	@Final
 	private Map<ResourceKey<T>, Holder.Reference<T>> byKey;
 
 	@Shadow
-	public abstract Optional<ResourceKey<T>> getResourceKey(T entry);
+	public abstract Optional<ResourceKey<T>> getKey(T entry);
 
 	@Shadow
-	public abstract @Nullable T get(@Nullable ResourceLocation id);
+	public abstract @Nullable T get(@Nullable Identifier id);
 
 	@Shadow
-	public abstract ResourceKey<? extends Registry<T>> key();
+	public abstract ResourceKey<? extends Registry<T>> getKey();
+
+	@Shadow
+	public abstract int getRawId(@Nullable T entry);
 
 	@Unique
 	private static final Logger NOTEBOOK_LOGGER = LoggerFactory.getLogger(MappedRegistryMixin.class);
@@ -109,9 +112,9 @@ public abstract class MappedRegistryMixin<T> implements WritableRegistry<T>, Rem
 	private Event<RegistryIdRemapCallback<T>> notebook_postRemapEvent;
 
 	@Unique
-	private Object2IntMap<ResourceLocation> notebook_prevIndexedEntries;
+	private Object2IntMap<Identifier> notebook_prevIndexedEntries;
 	@Unique
-	private BiMap<ResourceLocation, Holder.Reference<T>> notebook_prevEntries;
+	private BiMap<Identifier, Holder.Reference<T>> notebook_prevEntries;
 
 	@Override
 	public Event<RegistryEntryAddedCallback<T>> notebook_getAddObjectEvent() {
@@ -123,7 +126,7 @@ public abstract class MappedRegistryMixin<T> implements WritableRegistry<T>, Rem
 		return notebook_postRemapEvent;
 	}
 
-	@Inject(method = "<init>(Lnet/minecraft/resources/ResourceKey;Lcom/mojang/serialization/Lifecycle;Z)V", at = @At("RETURN"))
+	@Inject(method = "<init>(Lnet/minecraft/registry/ResourceKey;Lcom/mojang/serialization/Lifecycle;Z)V", at = @At("RETURN"))
 	private void init(ResourceKey key, Lifecycle lifecycle, boolean intrusive, CallbackInfo ci) {
 		notebook_addObjectEvent = EventFactory.createArrayBacked(RegistryEntryAddedCallback.class,
 				(callbacks) -> (rawId, id, object) -> {
@@ -143,13 +146,13 @@ public abstract class MappedRegistryMixin<T> implements WritableRegistry<T>, Rem
 
 	@Unique
 	private void onChange(ResourceKey<T> registryKey) {
-		if (RegistrySyncManager.postBootstrap || !VANILLA_NAMESPACES.contains(registryKey.location().getNamespace())) {
-			RegistryAttributeHolder holder = RegistryAttributeHolder.get(key());
+		if (RegistrySyncManager.postBootstrap || !VANILLA_NAMESPACES.contains(registryKey.getValue().getNamespace())) {
+			RegistryAttributeHolder holder = RegistryAttributeHolder.get(getKey());
 
 			if (!holder.hasAttribute(RegistryAttribute.MODDED)) {
-				ResourceLocation id = key().location();
-				NOTEBOOK_LOGGER.debug("Registry {} has been marked as modded, registry entry {} was changed", id, registryKey.location());
-				RegistryAttributeHolder.get(key()).addAttribute(RegistryAttribute.MODDED);
+				Identifier id = getKey().getValue();
+				NOTEBOOK_LOGGER.debug("Registry {} has been marked as modded, registry entry {} was changed", id, registryKey.getValue());
+				RegistryAttributeHolder.get(getKey()).addAttribute(RegistryAttribute.MODDED);
 			}
 		}
 	}
@@ -159,14 +162,14 @@ public abstract class MappedRegistryMixin<T> implements WritableRegistry<T>, Rem
 		// We need to restore the 1.19 behavior of binding the value to references immediately.
 		// Unfrozen registries cannot be interacted with otherwise, because the references would throw when
 		// trying to access their values.
-		info.getReturnValue().bindValue(entry);
+		info.getReturnValue().setValue(entry);
 
-		notebook_addObjectEvent.invoker().onEntryAdded(toId.getInt(entry), key.location(), entry);
+		notebook_addObjectEvent.invoker().onEntryAdded(entryToRawId.getInt(entry), key.getValue(), entry);
 		onChange(key);
 	}
 
 	@Override
-	public void remap(String name, Object2IntMap<ResourceLocation> remoteIndexedEntries, RemapMode mode) throws RemapException {
+	public void remap(String name, Object2IntMap<Identifier> remoteIndexedEntries, RemapMode mode) throws RemapException {
 		// Throw on invalid conditions.
 		switch (mode) {
 			case AUTHORITATIVE:
@@ -174,8 +177,8 @@ public abstract class MappedRegistryMixin<T> implements WritableRegistry<T>, Rem
 			case REMOTE: {
 				List<String> strings = null;
 
-				for (ResourceLocation remoteId : remoteIndexedEntries.keySet()) {
-					if (!byLocation.containsKey(remoteId)) {
+				for (Identifier remoteId : remoteIndexedEntries.keySet()) {
+					if (!byId.containsKey(remoteId)) {
 						if (strings == null) {
 							strings = new ArrayList<>();
 						}
@@ -197,16 +200,16 @@ public abstract class MappedRegistryMixin<T> implements WritableRegistry<T>, Rem
 				break;
 			}
 			case EXACT: {
-				if (!byLocation.keySet().equals(remoteIndexedEntries.keySet())) {
+				if (!byId.keySet().equals(remoteIndexedEntries.keySet())) {
 					List<String> strings = new ArrayList<>();
 
-					for (ResourceLocation remoteId : remoteIndexedEntries.keySet()) {
-						if (!byLocation.containsKey(remoteId)) {
+					for (Identifier remoteId : remoteIndexedEntries.keySet()) {
+						if (!byId.containsKey(remoteId)) {
 							strings.add(" - " + remoteId + " (missing on local)");
 						}
 					}
 
-					for (ResourceLocation localId : keySet()) {
+					for (Identifier localId : getIds()) {
 						if (!remoteIndexedEntries.containsKey(localId)) {
 							strings.add(" - " + localId + " (missing on remote)");
 						}
@@ -233,17 +236,17 @@ public abstract class MappedRegistryMixin<T> implements WritableRegistry<T>, Rem
 		// compatibility.
 		if (notebook_prevIndexedEntries == null) {
 			notebook_prevIndexedEntries = new Object2IntOpenHashMap<>();
-			notebook_prevEntries = HashBiMap.create(byLocation);
+			notebook_prevEntries = HashBiMap.create(byId);
 
 			for (T o : this) {
-				notebook_prevIndexedEntries.put(getKey(o), getId(o));
+				notebook_prevIndexedEntries.put(getId(o), getRawId(o));
 			}
 		}
 
-		Int2ObjectMap<ResourceLocation> oldIdMap = new Int2ObjectOpenHashMap<>();
+		Int2ObjectMap<Identifier> oldIdMap = new Int2ObjectOpenHashMap<>();
 
 		for (T o : this) {
-			oldIdMap.put(getId(o), getKey(o));
+			oldIdMap.put(getRawId(o), getId(o));
 		}
 
 		// If we're AUTHORITATIVE, we append entries which only exist on the
@@ -252,16 +255,16 @@ public abstract class MappedRegistryMixin<T> implements WritableRegistry<T>, Rem
 			case AUTHORITATIVE: {
 				int maxValue = 0;
 
-				Object2IntMap<ResourceLocation> oldRemoteIndexedEntries = remoteIndexedEntries;
+				Object2IntMap<Identifier> oldRemoteIndexedEntries = remoteIndexedEntries;
 				remoteIndexedEntries = new Object2IntOpenHashMap<>();
 
-				for (ResourceLocation id : oldRemoteIndexedEntries.keySet()) {
+				for (Identifier id : oldRemoteIndexedEntries.keySet()) {
 					int v = oldRemoteIndexedEntries.getInt(id);
 					remoteIndexedEntries.put(id, v);
 					if (v > maxValue) maxValue = v;
 				}
 
-				for (ResourceLocation id : keySet()) {
+				for (Identifier id : getIds()) {
 					if (!remoteIndexedEntries.containsKey(id)) {
 						NOTEBOOK_LOGGER.warn("Adding " + id + " to saved/remote registry.");
 						remoteIndexedEntries.put(id, ++maxValue);
@@ -273,7 +276,7 @@ public abstract class MappedRegistryMixin<T> implements WritableRegistry<T>, Rem
 			case REMOTE: {
 				int maxId = -1;
 
-				for (ResourceLocation id : keySet()) {
+				for (Identifier id : getIds()) {
 					if (!remoteIndexedEntries.containsKey(id)) {
 						if (maxId < 0) {
 							for (int value : remoteIndexedEntries.values()) {
@@ -289,7 +292,7 @@ public abstract class MappedRegistryMixin<T> implements WritableRegistry<T>, Rem
 
 						maxId++;
 
-						NOTEBOOK_LOGGER.debug("An ID for {} was not sent by the server, assuming client only registry entry and assigning a new id ({}) in {}", id.toString(), maxId, key().location().toString());
+						NOTEBOOK_LOGGER.debug("An ID for {} was not sent by the server, assuming client only registry entry and assigning a new id ({}) in {}", id.toString(), maxId, getKey().getValue().toString());
 						remoteIndexedEntries.put(id, maxId);
 					}
 				}
@@ -300,15 +303,15 @@ public abstract class MappedRegistryMixin<T> implements WritableRegistry<T>, Rem
 
 		Int2IntMap idMap = new Int2IntOpenHashMap();
 
-		for (int i = 0; i < byId.size(); i++) {
-			Holder.Reference<T> reference = byId.get(i);
+		for (int i = 0; i < rawIdToEntry.size(); i++) {
+			Holder.Reference<T> reference = rawIdToEntry.get(i);
 
 			// Unused id, can happen if there are holes in the registry.
 			if (reference == null) {
-				throw new RemapException("Unused id " + i + " in registry " + key().location());
+				throw new RemapException("Unused id " + i + " in registry " + getKey().getValue());
 			}
 
-			ResourceLocation id = reference.key().location();
+			Identifier id = reference.getRegistryKey().getValue();
 
 			// see above note
 			if (remoteIndexedEntries.containsKey(id)) {
@@ -317,15 +320,15 @@ public abstract class MappedRegistryMixin<T> implements WritableRegistry<T>, Rem
 		}
 
 		// entries was handled above, if it was necessary.
-		byId.clear();
-		toId.clear();
+		rawIdToEntry.clear();
+		entryToRawId.clear();
 
-		List<ResourceLocation> orderedRemoteEntries = new ArrayList<>(remoteIndexedEntries.keySet());
+		List<Identifier> orderedRemoteEntries = new ArrayList<>(remoteIndexedEntries.keySet());
 		orderedRemoteEntries.sort(Comparator.comparingInt(remoteIndexedEntries::getInt));
 
-		for (ResourceLocation identifier : orderedRemoteEntries) {
+		for (Identifier identifier : orderedRemoteEntries) {
 			int id = remoteIndexedEntries.getInt(identifier);
-			Holder.Reference<T> object = byLocation.get(identifier);
+			Holder.Reference<T> object = byId.get(identifier);
 
 			// Warn if an object is missing from the local registry.
 			// This should only happen in AUTHORITATIVE mode, and as such we
@@ -341,10 +344,10 @@ public abstract class MappedRegistryMixin<T> implements WritableRegistry<T>, Rem
 			}
 
 			// Add the new object
-			byId.size(Math.max(this.byId.size(), id + 1));
-			assert byId.get(id) == null;
-			byId.set(id, object);
-			toId.put(object.value(), id);
+			rawIdToEntry.size(Math.max(this.rawIdToEntry.size(), id + 1));
+			assert rawIdToEntry.get(id) == null;
+			rawIdToEntry.set(id, object);
+			entryToRawId.put(object.value(), id);
 		}
 
 		notebook_getRemapEvent().invoker().onRemap(new RemapStateImpl<>(this, oldIdMap, idMap));
@@ -353,30 +356,30 @@ public abstract class MappedRegistryMixin<T> implements WritableRegistry<T>, Rem
 	@Override
 	public void unmap(String name) throws RemapException {
 		if (notebook_prevIndexedEntries != null) {
-			List<ResourceLocation> addedIds = new ArrayList<>();
+			List<Identifier> addedIds = new ArrayList<>();
 
 			// Emit AddObject events for previously culled objects.
-			for (ResourceLocation id : notebook_prevEntries.keySet()) {
-				if (!byLocation.containsKey(id)) {
+			for (Identifier id : notebook_prevEntries.keySet()) {
+				if (!byId.containsKey(id)) {
 					assert notebook_prevIndexedEntries.containsKey(id);
 					addedIds.add(id);
 				}
 			}
 
-			byLocation.clear();
+			byId.clear();
 			byKey.clear();
 
-			byLocation.putAll(notebook_prevEntries);
+			byId.putAll(notebook_prevEntries);
 
-			for (Map.Entry<ResourceLocation, Holder.Reference<T>> entry : notebook_prevEntries.entrySet()) {
-				ResourceKey<T> entryKey = ResourceKey.create(key(), entry.getKey());
+			for (Map.Entry<Identifier, Holder.Reference<T>> entry : notebook_prevEntries.entrySet()) {
+				ResourceKey<T> entryKey = ResourceKey.of(getKey(), entry.getKey());
 				byKey.put(entryKey, entry.getValue());
 			}
 
 			remap(name, notebook_prevIndexedEntries, RemapMode.AUTHORITATIVE);
 
-			for (ResourceLocation id : addedIds) {
-				notebook_getAddObjectEvent().invoker().onEntryAdded(toId.getInt(byLocation.get(id)), id, get(id));
+			for (Identifier id : addedIds) {
+				notebook_getAddObjectEvent().invoker().onEntryAdded(entryToRawId.getInt(byId.get(id)), id, get(id));
 			}
 
 			notebook_prevIndexedEntries = null;

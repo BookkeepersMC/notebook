@@ -30,18 +30,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ChunkMap;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.server.world.ChunkHolder;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.world.ThreadedChunkManager;
+import net.minecraft.world.chunk.WorldChunk;
 
 import com.bookkeepersmc.notebook.api.event.lifecycle.v1.ServerChunkEvents;
 
-@Mixin(ChunkMap.class)
+@Mixin(ThreadedChunkManager.class)
 public abstract class ChunkMapMixin {
 	@Shadow
 	@Final
-	private ServerLevel level;
+	private ServerWorld world;
 
 	// Chunk (Un)Load events, An explanation:
 	// Must of this code is wrapped inside of futures and consumers, so it's generally a mess.
@@ -50,8 +50,8 @@ public abstract class ChunkMapMixin {
 	 * Injection is inside of tryUnloadChunk.
 	 * We inject just after "setLoadedToWorld" is made false, since here the WorldChunk is guaranteed to be unloaded.
 	 */
-	@Inject(method = "method_60440", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setLoaded(Z)V", shift = At.Shift.AFTER))
-	private void onChunkUnload(ChunkHolder chunkHolder, long l, CallbackInfo ci, @Local LevelChunk chunk) {
-		ServerChunkEvents.CHUNK_UNLOAD.invoker().onChunkUnload(this.level, chunk);
+	@Inject(method = "method_60440", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/WorldChunk;setLoadedToWorld(Z)V", shift = At.Shift.AFTER))
+	private void onChunkUnload(ChunkHolder chunkHolder, long l, CallbackInfo ci, @Local WorldChunk chunk) {
+		ServerChunkEvents.CHUNK_UNLOAD.invoker().onChunkUnload(this.world, chunk);
 	}
 }

@@ -36,51 +36,47 @@ import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.RegistryDataLoader;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryLoader;
+import net.minecraft.registry.ResourceKey;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.event.registry.DynamicRegistrySetupCallback;
 import com.bookkeepersmc.notebook.impl.registry.sync.DynamicRegistriesImpl;
 import com.bookkeepersmc.notebook.impl.registry.sync.DynamicRegistryViewImpl;
 
-@Mixin(RegistryDataLoader.class)
+@Mixin(RegistryLoader.class)
 public class RegistryDataLoaderMixin {
 	@Unique
 	private static final ThreadLocal<Boolean> IS_SERVER = ThreadLocal.withInitial(() -> false);
 
-	@WrapOperation(
-			method = "load(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess;Ljava/util/List;)Lnet/minecraft/core/RegistryAccess$Frozen;",
-			at = @At(value = "INVOKE",
-					target = "Lnet/minecraft/resources/RegistryDataLoader;load(Lnet/minecraft/resources/RegistryDataLoader$LoadingFunction;Lnet/minecraft/core/RegistryAccess;Ljava/util/List;)Lnet/minecraft/core/RegistryAccess$Frozen;"
-			)
-	)
-	private static RegistryAccess.Frozen wrapIsServerCall(@Coerce Object registryLoadable, RegistryAccess baseRegistryManager, List<RegistryDataLoader.RegistryData<?>> entries, Operation<RegistryAccess.Frozen> original) {
+	@WrapOperation(method = "method_56515", at = @At(value = "INVOKE", target = "Lnet/minecraft/registry/RegistryLoader;method_45121(Lnet/minecraft/registry/RegistryLoader$LoadingFunction;Ljava/util/List;Ljava/util/List;)Lnet/minecraft/registry/DynamicRegistryManager$Frozen;"))
+	private static DynamicRegistryManager.Frozen wrapIsServerCall(@Coerce Object registryLoadable, List<HolderLookup.RegistryLookup<?>> baseRegistries, List<RegistryLoader.DecodingData<?>> entries, Operation<DynamicRegistryManager.Frozen> original) {
 		try {
 			IS_SERVER.set(true);
-			return original.call(registryLoadable, baseRegistryManager, entries);
+			return original.call(registryLoadable, baseRegistries, entries);
 		} finally {
 			IS_SERVER.set(false);
 		}
 	}
 
 	@Inject(
-			method = "load(Lnet/minecraft/resources/RegistryDataLoader$LoadingFunction;Lnet/minecraft/core/RegistryAccess;Ljava/util/List;)Lnet/minecraft/core/RegistryAccess$Frozen;",
+			method = "method_45121",
 			at = @At(
 					value = "INVOKE",
 					target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V",
-			ordinal = 0
+					ordinal = 0
 			)
 	)
-	private static void beforeLoad(@Coerce Object registryLoadable, RegistryAccess baseRegistryManager, List<RegistryDataLoader.RegistryData<?>> entries, CallbackInfoReturnable<RegistryAccess.Frozen> cir, @Local(ordinal = 1) List<RegistryDataLoader.Loader<?>> registriesList) {
+	private static void beforeLoad(@Coerce Object registryLoadable, List<HolderLookup.RegistryLookup<?>> baseRegistries, List<RegistryLoader.DecodingData<?>> entries, CallbackInfoReturnable<DynamicRegistryManager.Frozen> cir, @Local(ordinal = 2) List<RegistryLoader.ContentLoader<?>> registriesList) {
 		if (!IS_SERVER.get()) return;
 
 		Map<ResourceKey<? extends Registry<?>>, Registry<?>> registries = new IdentityHashMap<>(registriesList.size());
 
-		for (RegistryDataLoader.Loader<?> entry : registriesList) {
-			registries.put(entry.registry().key(), entry.registry());
+		for (RegistryLoader.ContentLoader<?> entry : registriesList) {
+			registries.put(entry.registry().getKey(), entry.registry());
 		}
 
 		DynamicRegistrySetupCallback.EVENT.invoker().onRegistrySetup(new DynamicRegistryViewImpl(registries));
@@ -88,17 +84,18 @@ public class RegistryDataLoaderMixin {
 
 	@WrapOperation(
 			method = {
-					"loadContentsFromManager",
-					"loadContentsFromNetwork"
+					"loadFromManager",
+					"loadFromNetwork"
 			},
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/core/registries/Registries;elementsDirPath(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/String;")
+					target = "Lnet/minecraft/registry/Registries;getDirectory(Lnet/minecraft/registry/ResourceKey;)Ljava/lang/String;"
+			)
 	)
 	private static String prependDirectoryWithNamespace(ResourceKey<? extends Registry<?>> registryKey, Operation<String> original) {
 		String originalDirectory = original.call(registryKey);
-		ResourceLocation id = registryKey.location();
-		if (!id.getNamespace().equals(ResourceLocation.DEFAULT_NAMESPACE)
+		Identifier id = registryKey.getValue();
+		if (!id.getNamespace().equals(Identifier.DEFAULT_NAMESPACE)
 				&& DynamicRegistriesImpl.NOTEBOOK_DYNAMIC_REGISTRY_KEYS.contains(registryKey)) {
 			return id.getNamespace() + "/" + originalDirectory;
 		}

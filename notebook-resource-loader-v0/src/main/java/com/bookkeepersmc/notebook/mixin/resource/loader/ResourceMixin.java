@@ -24,8 +24,8 @@ package com.bookkeepersmc.notebook.mixin.resource.loader;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-import net.minecraft.server.packs.repository.PackSource;
-import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.resource.Resource;
+import net.minecraft.resource.pack.PackSource;
 
 import com.bookkeepersmc.notebook.impl.resource.loader.NotebookResource;
 import com.bookkeepersmc.notebook.impl.resource.loader.ResourcePackSourceTracker;
@@ -40,6 +40,6 @@ class ResourceMixin implements NotebookResource {
 	@Override
 	public PackSource getNotebookPackSource() {
 		Resource self = (Resource) (Object) this;
-		return ResourcePackSourceTracker.getSource(self.source());
+		return ResourcePackSourceTracker.getSource(self.getResourcePack());
 	}
 }

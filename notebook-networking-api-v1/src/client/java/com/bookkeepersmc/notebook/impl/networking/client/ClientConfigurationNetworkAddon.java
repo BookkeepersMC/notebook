@@ -26,12 +26,12 @@ import java.util.List;
 import java.util.Objects;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientConfigurationPacketListenerImpl;
-import net.minecraft.network.ConnectionProtocol;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.custom.BrandPayload;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.network.ClientConfigurationNetworkHandler;
+import net.minecraft.network.NetworkPhase;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.payload.CustomPayload;
+import net.minecraft.network.packet.s2c.payload.BrandPayload;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.client.networking.v1.C2SConfigurationChannelEvents;
 import com.bookkeepersmc.notebook.api.client.networking.v1.ClientConfigurationConnectionEvents;
@@ -43,17 +43,17 @@ import com.bookkeepersmc.notebook.impl.networking.RegistrationPayload;
 import com.bookkeepersmc.notebook.mixin.networking.client.accessor.ClientCommonNetworkHandlerAccessor;
 import com.bookkeepersmc.notebook.mixin.networking.client.accessor.ClientConfigurationNetworkHandlerAccessor;
 
-public final class ClientConfigurationNetworkAddon extends ClientCommonNetworkAddon<ClientConfigurationNetworking.ConfigurationPayloadHandler<?>, ClientConfigurationPacketListenerImpl> {
+public final class ClientConfigurationNetworkAddon extends ClientCommonNetworkAddon<ClientConfigurationNetworking.ConfigurationPayloadHandler<?>, ClientConfigurationNetworkHandler> {
 	private final ContextImpl context;
 	private boolean sentInitialRegisterPacket;
 	private boolean hasStarted;
 
-	public ClientConfigurationNetworkAddon(ClientConfigurationPacketListenerImpl handler, Minecraft client) {
+	public ClientConfigurationNetworkAddon(ClientConfigurationNetworkHandler handler, Minecraft client) {
 		super(ClientNetworkingImpl.CONFIGURATION, ((ClientCommonNetworkHandlerAccessor) handler).getConnection(), "ClientPlayNetworkAddon for " + ((ClientConfigurationNetworkHandlerAccessor) handler).getProfile().getName(), handler, client);
 		this.context = new ContextImpl(client, this);
 
 		// Must register pending channels via lateinit
-		this.registerPendingChannels((ChannelInfoHolder) this.connection, ConnectionProtocol.CONFIGURATION);
+		this.registerPendingChannels((ChannelInfoHolder) this.connection, NetworkPhase.CONFIGURATION);
 	}
 
 	@Override
@@ -80,7 +80,7 @@ public final class ClientConfigurationNetworkAddon extends ClientCommonNetworkAd
 	}
 
 	@Override
-	public boolean handle(CustomPacketPayload payload) {
+	public boolean handle(CustomPayload payload) {
 		boolean result = super.handle(payload);
 
 		if (payload instanceof BrandPayload) {
@@ -99,23 +99,23 @@ public final class ClientConfigurationNetworkAddon extends ClientCommonNetworkAd
 	}
 
 	@Override
-	protected void receive(ClientConfigurationNetworking.ConfigurationPayloadHandler<?> handler, CustomPacketPayload payload) {
+	protected void receive(ClientConfigurationNetworking.ConfigurationPayloadHandler<?> handler, CustomPayload payload) {
 		((ClientConfigurationNetworking.ConfigurationPayloadHandler) handler).receive(payload, this.context);
 	}
 
 	// impl details
 	@Override
-	public Packet<?> createPacket(CustomPacketPayload packet) {
+	public Packet<?> createPacket(CustomPayload packet) {
 		return ClientPlayNetworking.createC2SPacket(packet);
 	}
 
 	@Override
-	protected void invokeRegisterEvent(List<ResourceLocation> ids) {
+	protected void invokeRegisterEvent(List<Identifier> ids) {
 		C2SConfigurationChannelEvents.REGISTER.invoker().onChannelRegister(this.handler, this, this.client, ids);
 	}
 
 	@Override
-	protected void invokeUnregisterEvent(List<ResourceLocation> ids) {
+	protected void invokeUnregisterEvent(List<Identifier> ids) {
 		C2SConfigurationChannelEvents.UNREGISTER.invoker().onChannelUnregister(this.handler, this, this.client, ids);
 	}
 

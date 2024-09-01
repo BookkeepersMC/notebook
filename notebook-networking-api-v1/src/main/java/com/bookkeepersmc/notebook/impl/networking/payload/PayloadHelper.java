@@ -22,25 +22,25 @@
  */
 package com.bookkeepersmc.notebook.impl.networking.payload;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.PacketByteBuf;
 
 import com.bookkeepersmc.notebook.api.networking.v1.ByteBufUtils;
 
 public class PayloadHelper {
-	public static void write(FriendlyByteBuf byteBuf, FriendlyByteBuf data) {
+	public static void write(PacketByteBuf byteBuf, PacketByteBuf data) {
 		byteBuf.writeBytes(data.copy());
 	}
 
-	public static FriendlyByteBuf read(FriendlyByteBuf byteBuf, int maxSize) {
+	public static PacketByteBuf read(PacketByteBuf byteBuf, int maxSize) {
 		assertSize(byteBuf, maxSize);
 
-		FriendlyByteBuf newBuf = ByteBufUtils.create();
+		PacketByteBuf newBuf = ByteBufUtils.create();
 		newBuf.writeBytes(byteBuf.copy());
 		byteBuf.skipBytes(byteBuf.readableBytes());
 		return newBuf;
 	}
 
-	private static void assertSize(FriendlyByteBuf buf, int maxSize) {
+	private static void assertSize(PacketByteBuf buf, int maxSize) {
 		int size = buf.readableBytes();
 
 		if (size < 0 || size > maxSize) {

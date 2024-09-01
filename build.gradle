@@ -214,10 +214,15 @@ allprojects {
 			sourceSet p.sourceSets.testmodClient
 		}
 	}
+	repositories {
+		maven {
+			url = "https://maven.quiltmc.org/repository/release/"
+		}
+	}
 
 	dependencies {
 		minecraft "com.mojang:minecraft:$rootProject.minecraft_version"
-		mappings loom.officialMojangMappings()
+		mappings "com.bookkeepersmc:book-mappings:24w34a+build.2:intermediary-v2"
 		modApi "com.bookkeepersmc:notebook-loader:${project.loader_version}"
 
 		testmodImplementation sourceSets.main.output

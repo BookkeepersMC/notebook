@@ -22,7 +22,7 @@
  */
 package com.bookkeepersmc.notebook.impl.registry.sync;
 
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.registry.BuiltInRegistries;
 
 import com.bookkeepersmc.api.ModInitializer;
 import com.bookkeepersmc.notebook.api.event.registry.RegistryAttribute;
@@ -52,7 +52,7 @@ public class RegistrySyncInit implements ModInitializer {
 				.addAttribute(RegistryAttribute.SYNCED);
 
 		// StatusEffectInstance serialises with raw id.
-		RegistryAttributeHolder.get(BuiltInRegistries.MOB_EFFECT)
+		RegistryAttributeHolder.get(BuiltInRegistries.STATUS_EFFECT)
 				.addAttribute(RegistryAttribute.SYNCED);
 
 		// Synced in ChunkDeltaUpdateS2CPacket among other places, a pallet is used when saving.
@@ -78,7 +78,7 @@ public class RegistrySyncInit implements ModInitializer {
 		RegistryAttributeHolder.get(BuiltInRegistries.FEATURE);
 
 		// Serialised by string, doesnt seem to be synced
-		RegistryAttributeHolder.get(BuiltInRegistries.BLOCKSTATE_PROVIDER_TYPE);
+		RegistryAttributeHolder.get(BuiltInRegistries.BLOCK_STATE_PROVIDER_TYPE);
 
 		// Serialised by string, doesnt seem to be synced
 		RegistryAttributeHolder.get(BuiltInRegistries.FOLIAGE_PLACER_TYPE);
@@ -114,18 +114,18 @@ public class RegistrySyncInit implements ModInitializer {
 		RegistryAttributeHolder.get(BuiltInRegistries.STRUCTURE_TYPE);
 
 		// Serialised by string, doesnt seem to be synced
-		RegistryAttributeHolder.get(BuiltInRegistries.STRUCTURE_PIECE);
+		RegistryAttributeHolder.get(BuiltInRegistries.STRUCTURE_PIECE_TYPE);
 
 		// Serialised by string, doesnt seem to be synced
-		RegistryAttributeHolder.get(BuiltInRegistries.RULE_TEST);
+		RegistryAttributeHolder.get(BuiltInRegistries.RULE_TEST_TYPE);
 
 		// Serialised by string, doesnt seem to be synced
-		RegistryAttributeHolder.get(BuiltInRegistries.POS_RULE_TEST);
+		RegistryAttributeHolder.get(BuiltInRegistries.POS_RULE_TEST_TYPE);
 
-		RegistryAttributeHolder.get(BuiltInRegistries.STRUCTURE_PROCESSOR);
+		RegistryAttributeHolder.get(BuiltInRegistries.STRUCTURE_PROCESSOR_TYPE);
 
 		// Serialised by string, doesnt seem to be synced
-		RegistryAttributeHolder.get(BuiltInRegistries.STRUCTURE_POOL_ELEMENT);
+		RegistryAttributeHolder.get(BuiltInRegistries.STRUCTURE_POOL_ELEMENT_TYPE);
 
 		// Uses a data tracker (and thus, raw IDs) to sync cat entities to the client
 		RegistryAttributeHolder.get(BuiltInRegistries.CAT_VARIANT)
@@ -140,7 +140,7 @@ public class RegistrySyncInit implements ModInitializer {
 				.addAttribute(RegistryAttribute.SYNCED);
 
 		// Synced in OpenScreenS2CPacket
-		RegistryAttributeHolder.get(BuiltInRegistries.MENU)
+		RegistryAttributeHolder.get(BuiltInRegistries.SCREEN_HANDLER_TYPE)
 				.addAttribute(RegistryAttribute.SYNCED);
 
 		// Does not seem to be serialised, only queried by id. Not synced
@@ -151,7 +151,7 @@ public class RegistrySyncInit implements ModInitializer {
 				.addAttribute(RegistryAttribute.SYNCED);
 
 		// Synced by rawID in 24w03a+
-		RegistryAttributeHolder.get(BuiltInRegistries.ATTRIBUTE)
+		RegistryAttributeHolder.get(BuiltInRegistries.ENTITY_ATTRIBUTE)
 				.addAttribute(RegistryAttribute.SYNCED);
 
 		// Synced in StatisticsS2CPacket

@@ -24,7 +24,7 @@ package com.bookkeepersmc.notebook.impl.base.event;
 
 import java.util.function.Function;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 
@@ -36,8 +36,8 @@ public final class EventFactoryImpl {
 		return new ArrayBackedEvent<>(type, invokerFactory);
 	}
 
-	public static void ensureContainsDefault(ResourceLocation[] defaultPhases) {
-		for (ResourceLocation id : defaultPhases) {
+	public static void ensureContainsDefault(Identifier[] defaultPhases) {
+		for (Identifier id : defaultPhases) {
 			if (id.equals(Event.DEFAULT_PHASE)) {
 				return;
 			}
@@ -46,7 +46,7 @@ public final class EventFactoryImpl {
 		throw new IllegalArgumentException("The event phases must contain Event.DEFAULT_PHASE.");
 	}
 
-	public static void ensureNoDuplicates(ResourceLocation[] defaultPhases) {
+	public static void ensureNoDuplicates(Identifier[] defaultPhases) {
 		for (int i = 0; i < defaultPhases.length; ++i) {
 			for (int j = i+1; j < defaultPhases.length; ++j) {
 				if (defaultPhases[i].equals(defaultPhases[j])) {

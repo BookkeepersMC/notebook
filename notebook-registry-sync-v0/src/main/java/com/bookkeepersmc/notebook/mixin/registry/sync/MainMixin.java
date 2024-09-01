@@ -30,9 +30,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.item.ItemGroups;
+import net.minecraft.registry.BuiltInRegistries;
 import net.minecraft.server.Main;
-import net.minecraft.world.item.CreativeModeTabs;
 
 import com.bookkeepersmc.api.EnvType;
 import com.bookkeepersmc.loader.api.NotebookLoader;
@@ -44,14 +44,14 @@ public class MainMixin {
 	@Final
 	private static Logger LOGGER;
 
-	@Inject(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;startTimerHackThread()V"))
+	@Inject(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;startTimerHack()V"))
 	private static void afterModInitialize(CallbackInfo info) {
 		if (NotebookLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
 			LOGGER.debug("Freezing registries");
 
-			BuiltInRegistries.bootStrap();
+			BuiltInRegistries.bootstrap();
 			BlockInitTracker.postFreeze();
-			CreativeModeTabs.validate();
+			ItemGroups.bootstrap();
 		}
 	}
 }

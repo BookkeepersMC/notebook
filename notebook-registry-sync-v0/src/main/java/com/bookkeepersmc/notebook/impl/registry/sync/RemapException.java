@@ -24,24 +24,24 @@ package com.bookkeepersmc.notebook.impl.registry.sync;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.network.chat.Component;
+import net.minecraft.text.Text;
 
 public class RemapException extends Exception {
 	@Nullable
-	private final Component component;
+	private final Text component;
 
 	public RemapException(String message) {
 		super(message);
 		this.component = null;
 	}
 
-	public RemapException(Component component) {
+	public RemapException(Text component) {
 		super(component.getString());
 		this.component = component;
 	}
 
 	@Nullable
-	public Component getComponent() {
+	public Text getComponent() {
 		return component;
 	}
 }

@@ -23,7 +23,7 @@
 package com.bookkeepersmc.notebook.api.event.lifecycle.v1;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.world.ServerWorld;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 import com.bookkeepersmc.notebook.api.event.EventFactory;
@@ -68,11 +68,11 @@ public final class ServerTickEvents {
 
 	@FunctionalInterface
 	public interface StartWorldTick {
-		void onStartTick(ServerLevel world);
+		void onStartTick(ServerWorld world);
 	}
 
 	@FunctionalInterface
 	public interface EndWorldTick {
-		void onEndTick(ServerLevel world);
+		void onEndTick(ServerWorld world);
 	}
 }

@@ -24,8 +24,8 @@ package com.bookkeepersmc.notebook.impl.recipe;
 
 import java.util.Set;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 public interface SupportedIngredientsPacketEncoder {
-	void notebook_setSupportedCustomIngredients(Set<ResourceLocation> supportedCustomIngredients);
+	void notebook_setSupportedCustomIngredients(Set<Identifier> supportedCustomIngredients);
 }

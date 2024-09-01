@@ -25,17 +25,18 @@ package com.bookkeepersmc.notebook.mixin.event.lifecycle.client;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.client.multiplayer.TagCollector;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.client.network.ClientConfigurationNetworkHandler;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.resource.ResourceFactory;
 
 import com.bookkeepersmc.notebook.api.event.lifecycle.v1.CommonLifecycleEvents;
 
-@Mixin(TagCollector.class)
+@Mixin(ClientConfigurationNetworkHandler.class)
 public class TagCollectorMixin {
-	@Inject(method = "updateTags", at = @At("TAIL"))
-	private void invokeTagsLoaded(RegistryAccess registryManager, boolean local, CallbackInfo ci) {
-		CommonLifecycleEvents.TAGS_LOADED.invoker().onTagsLoaded(registryManager, true);
+	@Inject(method = "method_57043", at = @At("RETURN"))
+	private void invokeTagsLoaded(ResourceFactory resourceFactory, CallbackInfoReturnable<DynamicRegistryManager.Frozen> cir) {
+		CommonLifecycleEvents.TAGS_LOADED.invoker().onTagsLoaded(cir.getReturnValue(), true);
 	}
 }

@@ -23,32 +23,35 @@
 package com.bookkeepersmc.notebook.api.resource.conditions.v1;
 
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
+import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.Optionull;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
+
 
 public interface ResourceConditionType<T extends ResourceCondition> {
 
-	Codec<ResourceConditionType<?>> TYPE_CODEC = ResourceLocation.CODEC.comapFlatMap(id ->
-					Optionull.mapOrElse(ResourceConditions.getConditionType(id), DataResult::success, () -> DataResult.error(() -> "Unknown resource condition key: "+ id)),
+	Codec<ResourceConditionType<?>> TYPE_CODEC = Identifier.CODEC.comapFlatMap(id ->
+					CustomNull.mapOrDefault(ResourceConditions.getConditionType(id), DataResult::success, () -> DataResult.error(() -> "Unknown resource condition key: "+ id)),
 			ResourceConditionType::id
 	);
 
-	ResourceLocation id();
+	Identifier id();
 
 	MapCodec<T> codec();
 
-	static <T extends ResourceCondition> ResourceConditionType<T> create(ResourceLocation id, MapCodec<T> codec) {
+	static <T extends ResourceCondition> ResourceConditionType<T> create(Identifier id, MapCodec<T> codec) {
 		Objects.requireNonNull(id, "id cannot be null");
 		Objects.requireNonNull(codec, "codec cannot be null");
 
 		return new ResourceConditionType<>() {
 			@Override
-			public ResourceLocation id() {
+			public Identifier id() {
 				return id;
 			}
 
@@ -57,5 +60,12 @@ public interface ResourceConditionType<T extends ResourceCondition> {
 				return codec;
 			}
 		};
+	}
+
+	class CustomNull {
+		// WHY DOES THE OTHER ONE NOT WORK??????????????????
+		public static <T, R> R mapOrDefault(@Nullable T value, Function<T, R> func, Supplier<R> rSupplier) {
+			return value == null ? rSupplier.get() : func.apply(value);
+		}
 	}
 }

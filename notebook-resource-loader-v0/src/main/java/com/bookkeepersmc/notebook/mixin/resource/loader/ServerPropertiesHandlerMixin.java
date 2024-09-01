@@ -26,15 +26,15 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import net.minecraft.server.dedicated.DedicatedServerProperties;
-import net.minecraft.world.level.WorldDataConfiguration;
+import net.minecraft.server.dedicated.ServerPropertiesHandler;
+import net.minecraft.server.world.FeatureAndDataSettings;
 
 import com.bookkeepersmc.notebook.impl.resource.loader.ModResourcePackUtil;
 
-@Mixin(DedicatedServerProperties.class)
+@Mixin(ServerPropertiesHandler.class)
 public class ServerPropertiesHandlerMixin {
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/WorldDataConfiguration;DEFAULT:Lnet/minecraft/world/level/WorldDataConfiguration;"))
-	private WorldDataConfiguration replaceDefaultDataConfiguration() {
+	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/server/world/FeatureAndDataSettings;MINIMAL:Lnet/minecraft/server/world/FeatureAndDataSettings;"))
+	private FeatureAndDataSettings replaceDefaultDataConfiguration() {
 		return ModResourcePackUtil.createDefaultDataConfiguration();
 	}
 }

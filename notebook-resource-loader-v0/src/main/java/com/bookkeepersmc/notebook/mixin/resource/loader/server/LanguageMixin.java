@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
@@ -39,7 +38,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import net.minecraft.locale.Language;
+import net.minecraft.util.Language;
 
 import com.bookkeepersmc.notebook.impl.resource.loader.ServerLanguageUtil;
 
@@ -49,9 +48,8 @@ class LanguageMixin {
 	@Final
 	private static Logger LOGGER;
 
-	@Redirect(method = "loadDefault", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/ImmutableMap$Builder;build()Lcom/google/common/collect/ImmutableMap;", remap = false))
-	private static ImmutableMap<String, String> create(ImmutableMap.Builder<String, String> cir) {
-		Map<String, String> map = new HashMap<>(cir.buildOrThrow());
+	@Redirect(method = "create", at = @At(value = "INVOKE", target = "Ljava/util/Map;copyOf(Ljava/util/Map;)Ljava/util/Map;", remap = false))
+	private static Map<String, String> create(Map<String, String> map) {
 
 		for (Path path : ServerLanguageUtil.getModLanguageFiles()) {
 			loadFromPath(path, map::put);
@@ -63,13 +61,13 @@ class LanguageMixin {
 	private static void loadFromPath(Path path, BiConsumer<String, String> entryConsumer) {
 		try (InputStream stream = Files.newInputStream(path)) {
 			LOGGER.debug("Loading translations from {}", path);
-			loadFromJson(stream, entryConsumer);
+			load(stream, entryConsumer);
 		} catch (JsonParseException | IOException e) {
 			LOGGER.error("Couldn't read strings from {}", path, e);
 		}
 	}
 
 	@Shadow
-	public static void loadFromJson(InputStream inputStream, BiConsumer<String, String> entryConsumer) {
+	public static void load(InputStream inputStream, BiConsumer<String, String> entryConsumer) {
 	}
 }

@@ -30,7 +30,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.server.packs.metadata.MetadataSectionType;
+import net.minecraft.resource.pack.metadata.MetadataSectionType;
 
 public record OverlayConditionsMetadata(List<Entry> overlays) {
 	public static final Codec<OverlayConditionsMetadata> CODEC = Entry.CODEC.listOf().fieldOf("entries").xmap(OverlayConditionsMetadata::new, OverlayConditionsMetadata::overlays).codec();

@@ -26,31 +26,31 @@ import java.util.List;
 import java.util.Objects;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ClickableWidget;
 
 import com.bookkeepersmc.notebook.impl.client.screen.ScreenExtensions;
 import com.bookkeepersmc.notebook.mixin.screen.ScreenAccessor;
 
 public final class Screens {
 
-	public static List<AbstractWidget> getWidgets(Screen screen) {
+	public static List<ClickableWidget> getWidgets(Screen screen) {
 		Objects.requireNonNull(screen, "Screen cannot be null");
 
 		return ScreenExtensions.getExtensions(screen).notebook_getButtons();
 	}
 
-	public static Font getFont(Screen screen) {
+	public static TextRenderer getFont(Screen screen) {
 		Objects.requireNonNull(screen, "Screen cannot be null");
 
-		return ((ScreenAccessor) screen).getFont();
+		return ((ScreenAccessor) screen).getTextRenderer();
 	}
 
 	public static Minecraft getClient(Screen screen) {
 		Objects.requireNonNull(screen, "Screen cannot be null");
 
-		return ((ScreenAccessor) screen).getMinecraft();
+		return ((ScreenAccessor) screen).getClient();
 	}
 
 	private Screens() {

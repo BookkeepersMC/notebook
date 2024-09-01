@@ -22,7 +22,7 @@
  */
 package com.bookkeepersmc.notebook.api.event.lifecycle.v1;
 
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.registry.DynamicRegistryManager;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 import com.bookkeepersmc.notebook.api.event.EventFactory;
@@ -38,6 +38,6 @@ public final class CommonLifecycleEvents {
 	});
 
 	public interface TagsLoaded {
-		void onTagsLoaded(RegistryAccess registries, boolean client);
+		void onTagsLoaded(DynamicRegistryManager registries, boolean client);
 	}
 }

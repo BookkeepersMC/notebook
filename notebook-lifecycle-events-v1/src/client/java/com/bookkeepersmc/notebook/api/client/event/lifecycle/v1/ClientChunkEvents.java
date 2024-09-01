@@ -22,8 +22,8 @@
  */
 package com.bookkeepersmc.notebook.api.client.event.lifecycle.v1;
 
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.world.chunk.WorldChunk;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 import com.bookkeepersmc.notebook.api.event.EventFactory;
@@ -46,11 +46,11 @@ public final class ClientChunkEvents {
 
 	@FunctionalInterface
 	public interface Load {
-		void onChunkLoad(ClientLevel world, LevelChunk chunk);
+		void onChunkLoad(ClientWorld world, WorldChunk chunk);
 	}
 
 	@FunctionalInterface
 	public interface Unload {
-		void onChunkUnload(ClientLevel world, LevelChunk chunk);
+		void onChunkUnload(ClientWorld world, WorldChunk chunk);
 	}
 }

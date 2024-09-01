@@ -41,17 +41,17 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackLocationInfo;
-import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.PackSelectionConfig;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
-import net.minecraft.util.Tuple;
-import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.recipe.RecipeManager;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.resource.PackPosition;
+import net.minecraft.resource.ResourceReloader;
+import net.minecraft.resource.ResourceType;
+import net.minecraft.resource.pack.PackLocationInfo;
+import net.minecraft.resource.pack.PackProfile;
+import net.minecraft.resource.pack.ResourcePack;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.Pair;
 
 import com.bookkeepersmc.loader.api.ModContainer;
 import com.bookkeepersmc.notebook.api.resource.IdentifiableResourceReloadListener;
@@ -59,20 +59,20 @@ import com.bookkeepersmc.notebook.api.resource.ResourceManagerHelper;
 import com.bookkeepersmc.notebook.api.resource.ResourcePackActivationType;
 
 public class ResourceManagerHelperImpl implements ResourceManagerHelper {
-	private static final Map<PackType, ResourceManagerHelperImpl> registryMap = new HashMap<>();
-	private static final Set<Tuple<Component, ModNioResourcePack>> builtinResourcePacks = new HashSet<>();
+	private static final Map<ResourceType, ResourceManagerHelperImpl> registryMap = new HashMap<>();
+	private static final Set<Pair<Text, ModNioResourcePack>> builtinResourcePacks = new HashSet<>();
 	private static final Logger LOGGER = LoggerFactory.getLogger(ResourceManagerHelperImpl.class);
 
-	private final Set<ResourceLocation> addedListenerIds = new HashSet<>();
+	private final Set<Identifier> addedListenerIds = new HashSet<>();
 	private final Set<ListenerFactory> listenerFactories = new LinkedHashSet<>();
 	private final Set<IdentifiableResourceReloadListener> addedListeners = new LinkedHashSet<>();
-	private final PackType type;
+	private final ResourceType type;
 
-	private ResourceManagerHelperImpl(PackType type) {
+	private ResourceManagerHelperImpl(ResourceType type) {
 		this.type = type;
 	}
 
-	public static ResourceManagerHelperImpl get(PackType type) {
+	public static ResourceManagerHelperImpl get(ResourceType type) {
 		return registryMap.computeIfAbsent(type, ResourceManagerHelperImpl::new);
 	}
 
@@ -85,24 +85,24 @@ public class ResourceManagerHelperImpl implements ResourceManagerHelper {
 	 * @param displayName    the display name of the resource pack
 	 * @param activationType the activation type of the resource pack
 	 * @return {@code true} if successfully registered the resource pack, else {@code false}
-	 * @see ResourceManagerHelper#registerBuiltinResourcePack(ResourceLocation, ModContainer, Component, ResourcePackActivationType)
-	 * @see ResourceManagerHelper#registerBuiltinResourcePack(ResourceLocation, ModContainer, ResourcePackActivationType)
+	 * @see ResourceManagerHelper#registerBuiltinResourcePack(Identifier, ModContainer, Text, ResourcePackActivationType)
+	 * @see ResourceManagerHelper#registerBuiltinResourcePack(Identifier, ModContainer, ResourcePackActivationType)
 	 */
-	public static boolean registerBuiltinResourcePack(ResourceLocation id, String subPath, ModContainer container, Component displayName, ResourcePackActivationType activationType) {
+	public static boolean registerBuiltinResourcePack(Identifier id, String subPath, ModContainer container, Text displayName, ResourcePackActivationType activationType) {
 		// Assuming the mod has multiple paths, we simply "hope" that the  file separator is *not* different across them
 		List<Path> paths = container.getRootPaths();
 		String separator = paths.getFirst().getFileSystem().getSeparator();
 		subPath = subPath.replace("/", separator);
-		ModNioResourcePack resourcePack = ModNioResourcePack.create(id.toString(), container, subPath, PackType.CLIENT_RESOURCES, activationType, false);
-		ModNioResourcePack dataPack = ModNioResourcePack.create(id.toString(), container, subPath, PackType.SERVER_DATA, activationType, false);
+		ModNioResourcePack resourcePack = ModNioResourcePack.create(id.toString(), container, subPath, ResourceType.CLIENT_RESOURCES, activationType, false);
+		ModNioResourcePack dataPack = ModNioResourcePack.create(id.toString(), container, subPath, ResourceType.SERVER_DATA, activationType, false);
 		if (resourcePack == null && dataPack == null) return false;
 
 		if (resourcePack != null) {
-			builtinResourcePacks.add(new Tuple<>(displayName, resourcePack));
+			builtinResourcePacks.add(new Pair<>(displayName, resourcePack));
 		}
 
 		if (dataPack != null) {
-			builtinResourcePacks.add(new Tuple<>(displayName, dataPack));
+			builtinResourcePacks.add(new Pair<>(displayName, dataPack));
 		}
 
 		return true;
@@ -116,43 +116,43 @@ public class ResourceManagerHelperImpl implements ResourceManagerHelper {
 	 * @param container      the mod container
 	 * @param activationType the activation type of the resource pack
 	 * @return {@code true} if successfully registered the resource pack, else {@code false}
-	 * @see ResourceManagerHelper#registerBuiltinResourcePack(ResourceLocation, ModContainer, ResourcePackActivationType)
-	 * @see ResourceManagerHelper#registerBuiltinResourcePack(ResourceLocation, ModContainer, Component, ResourcePackActivationType)
+	 * @see ResourceManagerHelper#registerBuiltinResourcePack(Identifier, ModContainer, ResourcePackActivationType)
+	 * @see ResourceManagerHelper#registerBuiltinResourcePack(Identifier, ModContainer, Text, ResourcePackActivationType)
 	 */
-	public static boolean registerBuiltinResourcePack(ResourceLocation id, String subPath, ModContainer container, ResourcePackActivationType activationType) {
-		return registerBuiltinResourcePack(id, subPath, container, Component.literal(id.getNamespace() + "/" + id.getPath()), activationType);
+	public static boolean registerBuiltinResourcePack(Identifier id, String subPath, ModContainer container, ResourcePackActivationType activationType) {
+		return registerBuiltinResourcePack(id, subPath, container, Text.literal(id.getNamespace() + "/" + id.getPath()), activationType);
 	}
 
-	public static void registerBuiltinResourcePacks(PackType resourceType, Consumer<Pack> consumer) {
+	public static void registerBuiltinResourcePacks(ResourceType resourceType, Consumer<PackProfile> consumer) {
 		// Loop through each registered built-in resource packs and add them if valid.
-		for (Tuple<Component, ModNioResourcePack> entry : builtinResourcePacks) {
-			ModNioResourcePack pack = entry.getB();
+		for (Pair<Text, ModNioResourcePack> entry : builtinResourcePacks) {
+			ModNioResourcePack pack = entry.getRight();
 
 			// Add the built-in pack only if namespaces for the specified resource type are present.
 			if (!pack.getNamespaces(resourceType).isEmpty()) {
 				// Make the resource pack profile for built-in pack, should never be always enabled.
 				PackLocationInfo info = new PackLocationInfo(
-						entry.getB().packId(),
-						entry.getA(),
+						entry.getRight().getName(),
+						entry.getLeft(),
 						new BuiltinModResourcePackSource(pack.getNotebookModMetadata().getName()),
-						entry.getB().knownPackInfo()
+						entry.getRight().getKnownPackInfo()
 				);
-				PackSelectionConfig info2 = new PackSelectionConfig(
+				PackPosition info2 = new PackPosition(
 						pack.getActivationType() == ResourcePackActivationType.ALWAYS_ENABLED,
-						Pack.Position.TOP,
+						PackProfile.InsertionPosition.TOP,
 						false
 				);
 
-				Pack profile = Pack.readMetaAndCreate(info, new Pack.ResourcesSupplier() {
+				PackProfile profile = PackProfile.of(info, new PackProfile.PackFactory() {
 					@Override
-					public PackResources openPrimary(PackLocationInfo var1) {
-						return entry.getB();
+					public ResourcePack openPrimary(PackLocationInfo var1) {
+						return entry.getRight();
 					}
 
 					@Override
-					public PackResources openFull(PackLocationInfo var1, Pack.Metadata metadata) {
+					public ResourcePack open(PackLocationInfo var1, PackProfile.Metadata metadata) {
 						// Don't support overlays in builtin res packs.
-						return entry.getB();
+						return entry.getRight();
 					}
 				}, resourceType, info2);
 				consumer.accept(profile);
@@ -160,7 +160,7 @@ public class ResourceManagerHelperImpl implements ResourceManagerHelper {
 		}
 	}
 
-	public static List<PreparableReloadListener> sort(PackType type, List<PreparableReloadListener> listeners) {
+	public static List<ResourceReloader> sort(ResourceType type, List<ResourceReloader> listeners) {
 		if (type == null) {
 			return listeners;
 		}
@@ -168,7 +168,7 @@ public class ResourceManagerHelperImpl implements ResourceManagerHelper {
 		ResourceManagerHelperImpl instance = get(type);
 
 		if (instance != null) {
-			List<PreparableReloadListener> mutable = new ArrayList<>(listeners);
+			List<ResourceReloader> mutable = new ArrayList<>(listeners);
 			instance.sort(mutable);
 			return Collections.unmodifiableList(mutable);
 		}
@@ -176,7 +176,7 @@ public class ResourceManagerHelperImpl implements ResourceManagerHelper {
 		return listeners;
 	}
 
-	protected void sort(List<PreparableReloadListener> listeners) {
+	protected void sort(List<ResourceReloader> listeners) {
 		listeners.removeAll(addedListeners);
 
 		// General rules:
@@ -195,9 +195,9 @@ public class ResourceManagerHelperImpl implements ResourceManagerHelper {
 		addedListeners.clear();
 		addedListeners.addAll(listenersToAdd);
 
-		Set<ResourceLocation> resolvedIds = new HashSet<>();
+		Set<Identifier> resolvedIds = new HashSet<>();
 
-		for (PreparableReloadListener listener : listeners) {
+		for (ResourceReloader listener : listeners) {
 			if (listener instanceof IdentifiableResourceReloadListener) {
 				resolvedIds.add(((IdentifiableResourceReloadListener) listener).getNotebookId());
 			}
@@ -228,15 +228,15 @@ public class ResourceManagerHelperImpl implements ResourceManagerHelper {
 
 	// A bit of a hack to get the registry, but it works.
 	@Nullable
-	private HolderLookup.Provider getWrapperLookup(List<PreparableReloadListener> listeners) {
-		if (type == PackType.CLIENT_RESOURCES) {
+	private HolderLookup.Provider getWrapperLookup(List<ResourceReloader> listeners) {
+		if (type == ResourceType.CLIENT_RESOURCES) {
 			// We don't need the registry for client resources.
 			return null;
 		}
 
-		for (PreparableReloadListener resourceReloader : listeners) {
+		for (ResourceReloader resourceReloader : listeners) {
 			if (resourceReloader instanceof RecipeManager recipeManager) {
-				return recipeManager.registries;
+				return recipeManager.lookupProvider;
 			}
 		}
 
@@ -249,8 +249,8 @@ public class ResourceManagerHelperImpl implements ResourceManagerHelper {
 	}
 
 	@Override
-	public void registerReloadListener(ResourceLocation identifier, Function<HolderLookup.Provider, IdentifiableResourceReloadListener> listenerFactory) {
-		if (type == PackType.CLIENT_RESOURCES) {
+	public void registerReloadListener(Identifier identifier, Function<HolderLookup.Provider, IdentifiableResourceReloadListener> listenerFactory) {
+		if (type == ResourceType.CLIENT_RESOURCES) {
 			throw new IllegalArgumentException("Cannot register a registry listener for the client resource type!");
 		}
 
@@ -269,14 +269,14 @@ public class ResourceManagerHelperImpl implements ResourceManagerHelper {
 	}
 
 	private sealed interface ListenerFactory permits SimpleResourceReloaderFactory, RegistryResourceReloaderFactory {
-		ResourceLocation id();
+		Identifier id();
 
 		IdentifiableResourceReloadListener get(HolderLookup.Provider registry);
 	}
 
 	private record SimpleResourceReloaderFactory(IdentifiableResourceReloadListener listener) implements ListenerFactory {
 		@Override
-		public ResourceLocation id() {
+		public Identifier id() {
 			return listener.getNotebookId();
 		}
 
@@ -286,7 +286,7 @@ public class ResourceManagerHelperImpl implements ResourceManagerHelper {
 		}
 	}
 
-	private record RegistryResourceReloaderFactory(ResourceLocation id, Function<HolderLookup.Provider, IdentifiableResourceReloadListener> listenerFactory) implements ListenerFactory {
+	private record RegistryResourceReloaderFactory(Identifier id, Function<HolderLookup.Provider, IdentifiableResourceReloadListener> listenerFactory) implements ListenerFactory {
 		private RegistryResourceReloaderFactory {
 			Objects.requireNonNull(listenerFactory);
 		}

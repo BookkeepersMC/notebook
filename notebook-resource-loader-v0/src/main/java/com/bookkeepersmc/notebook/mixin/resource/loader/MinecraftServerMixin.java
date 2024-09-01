@@ -33,15 +33,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.minecraft.resource.pack.KnownPack;
+import net.minecraft.resource.pack.PackManager;
+import net.minecraft.resource.pack.PackProfile;
+import net.minecraft.resource.pack.ResourcePack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.Services;
+import net.minecraft.server.WorldGenerationProgressListenerFactory;
 import net.minecraft.server.WorldStem;
-import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
-import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.repository.KnownPack;
-import net.minecraft.server.packs.repository.Pack;
-import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.storage.WorldSaveStorage;
 
 import com.bookkeepersmc.notebook.impl.resource.loader.BuiltinModResourcePackSource;
 import com.bookkeepersmc.notebook.impl.resource.loader.ModNioResourcePack;
@@ -53,12 +53,12 @@ public class MinecraftServerMixin implements NotebookOriginalKnownPacksGetter {
 	private List<KnownPack> notebook_originalKnownPacks;
 
 	@Inject(method = "<init>", at = @At("TAIL"))
-	private void init(Thread serverThread, LevelStorageSource.LevelStorageAccess session, PackRepository dataPackManager, WorldStem saveLoader, Proxy proxy, DataFixer dataFixer, Services apiServices, ChunkProgressListenerFactory worldGenerationProgressListenerFactory, CallbackInfo ci) {
-		this.notebook_originalKnownPacks = saveLoader.resourceManager().listPacks().flatMap(pack -> pack.location().knownPackInfo().stream()).toList();
+	private void init(Thread serverThread, WorldSaveStorage.Session session, PackManager dataPackManager, WorldStem saveLoader, Proxy proxy, DataFixer dataFixer, Services apiServices, WorldGenerationProgressListenerFactory worldGenerationProgressListenerFactory, CallbackInfo ci) {
+		this.notebook_originalKnownPacks = saveLoader.resourceManager().streamResourcePacks().flatMap(pack -> pack.getLocationInfo().knownPackInfo().stream()).toList();
 	}
 
-	@Redirect(method = "configurePackRepository", at = @At(value = "INVOKE", target = "Ljava/util/List;contains(Ljava/lang/Object;)Z"))
-	private static boolean onCheckDisabled(List<String> list, Object o, PackRepository resourcePackManager) {
+	@Redirect(method = "loadDataPacks", at = @At(value = "INVOKE", target = "Ljava/util/List;contains(Ljava/lang/Object;)Z"))
+	private static boolean onCheckDisabled(List<String> list, Object o, PackManager resourcePackManager) {
 		String profileId = (String) o;
 		boolean contains = list.contains(profileId);
 
@@ -66,10 +66,10 @@ public class MinecraftServerMixin implements NotebookOriginalKnownPacksGetter {
 			return true;
 		}
 
-		Pack profile = resourcePackManager.getPack(profileId);
+		PackProfile profile = resourcePackManager.getProfile(profileId);
 
-		if (profile.getPackSource() instanceof BuiltinModResourcePackSource) {
-			try (PackResources pack = profile.open()) {
+		if (profile.getSource() instanceof BuiltinModResourcePackSource) {
+			try (ResourcePack pack = profile.createPack()) {
 				// Prevents automatic load for built-in data packs provided by mods.
 				return pack instanceof ModNioResourcePack modPack && !modPack.getActivationType().isEnabledByDefault();
 			}

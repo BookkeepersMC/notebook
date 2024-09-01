@@ -28,34 +28,34 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.network.protocol.game.ClientboundLoginPacket;
-import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
+import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerRespawnS2CPacket;
+import net.minecraft.world.chunk.WorldChunk;
 
 import com.bookkeepersmc.notebook.api.client.event.lifecycle.v1.ClientBlockEntityEvents;
 import com.bookkeepersmc.notebook.api.client.event.lifecycle.v1.ClientEntityEvents;
 import com.bookkeepersmc.notebook.impl.event.lifecycle.LoadedChunksCache;
 
-@Mixin(ClientPacketListener.class)
+@Mixin(ClientPlayNetworkHandler.class)
 abstract class ClientPacketListenerMixin {
 	@Shadow
-	private ClientLevel level;
+	private ClientWorld world;
 
-	@Inject(method = "handleRespawn", at = @At(value = "NEW", target = "net/minecraft/client/multiplayer/ClientLevel"))
-	private void onPlayerRespawn(ClientboundRespawnPacket packet, CallbackInfo ci) {
+	@Inject(method = "onPlayerRespawn", at = @At(value = "NEW", target = "net/minecraft/client/world/ClientWorld"))
+	private void onPlayerRespawn(PlayerRespawnS2CPacket packet, CallbackInfo ci) {
 		// If a world already exists, we need to unload all (block)entities in the world.
-		if (this.level != null) {
-			for (Entity entity : this.level.entitiesForRendering()) {
-				ClientEntityEvents.ENTITY_UNLOAD.invoker().onUnload(entity, this.level);
+		if (this.world != null) {
+			for (Entity entity : this.world.getEntities()) {
+				ClientEntityEvents.ENTITY_UNLOAD.invoker().onUnload(entity, this.world);
 			}
 
-			for (LevelChunk chunk : ((LoadedChunksCache) this.level).notebook_getLoadedChunks()) {
+			for (WorldChunk chunk : ((LoadedChunksCache) this.world).notebook_getLoadedChunks()) {
 				for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
-					ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.invoker().onUnload(blockEntity, this.level);
+					ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.invoker().onUnload(blockEntity, this.world);
 				}
 			}
 		}
@@ -67,34 +67,34 @@ abstract class ClientPacketListenerMixin {
 	 * Velocity by default will send a Game Join packet when the player changes servers, which will create a new client world.
 	 * Also anyone can send another GameJoinPacket at any time, so we need to watch out.
 	 */
-	@Inject(method = "handleLogin", at = @At(value = "NEW", target = "net/minecraft/client/multiplayer/ClientLevel"))
-	private void onGameJoin(ClientboundLoginPacket packet, CallbackInfo ci) {
+	@Inject(method = "onGameJoin", at = @At(value = "NEW", target = "net/minecraft/client/world/ClientWorld"))
+	private void onGameJoin(GameJoinS2CPacket packet, CallbackInfo ci) {
 		// If a world already exists, we need to unload all (block)entities in the world.
-		if (this.level != null) {
-			for (Entity entity : level.entitiesForRendering()) {
-				ClientEntityEvents.ENTITY_UNLOAD.invoker().onUnload(entity, this.level);
+		if (this.world != null) {
+			for (Entity entity : world.getEntities()) {
+				ClientEntityEvents.ENTITY_UNLOAD.invoker().onUnload(entity, this.world);
 			}
 
-			for (LevelChunk chunk : ((LoadedChunksCache) this.level).notebook_getLoadedChunks()) {
+			for (WorldChunk chunk : ((LoadedChunksCache) this.world).notebook_getLoadedChunks()) {
 				for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
-					ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.invoker().onUnload(blockEntity, this.level);
+					ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.invoker().onUnload(blockEntity, this.world);
 				}
 			}
 		}
 	}
 
 	// Called when the client disconnects from a server or enters reconfiguration.
-	@Inject(method = "clearLevel", at = @At("HEAD"))
+	@Inject(method = "clearWorld", at = @At("HEAD"))
 	private void onClearWorld(CallbackInfo ci) {
 		// If a world already exists, we need to unload all (block)entities in the world.
-		if (this.level != null) {
-			for (Entity entity : this.level.entitiesForRendering()) {
-				ClientEntityEvents.ENTITY_UNLOAD.invoker().onUnload(entity, this.level);
+		if (this.world != null) {
+			for (Entity entity : this.world.getEntities()) {
+				ClientEntityEvents.ENTITY_UNLOAD.invoker().onUnload(entity, this.world);
 			}
 
-			for (LevelChunk chunk : ((LoadedChunksCache) this.level).notebook_getLoadedChunks()) {
+			for (WorldChunk chunk : ((LoadedChunksCache) this.world).notebook_getLoadedChunks()) {
 				for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
-					ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.invoker().onUnload(blockEntity, this.level);
+					ClientBlockEntityEvents.BLOCK_ENTITY_UNLOAD.invoker().onUnload(blockEntity, this.world);
 				}
 			}
 		}

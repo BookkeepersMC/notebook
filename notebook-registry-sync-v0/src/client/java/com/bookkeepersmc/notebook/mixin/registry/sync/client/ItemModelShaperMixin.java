@@ -30,26 +30,26 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.renderer.ItemModelShaper;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.client.render.item.ItemModels;
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.BakedModelManager;
+import net.minecraft.client.util.ModelIdentifier;
+import net.minecraft.registry.BuiltInRegistries;
 
 import com.bookkeepersmc.notebook.impl.registry.sync.trackers.Int2ObjectMapTracker;
 
-@Mixin(ItemModelShaper.class)
+@Mixin(ItemModels.class)
 public class ItemModelShaperMixin {
 	@Final
 	@Shadow
-	public Int2ObjectMap<ModelResourceLocation> shapes;
+	public Int2ObjectMap<ModelIdentifier> modelIds;
 	@Final
 	@Shadow
-	private Int2ObjectMap<BakedModel> shapesCache;
+	private Int2ObjectMap<BakedModel> models;
 
 	@Inject(method = "<init>", at = @At("RETURN"))
-	public void onInit(ModelManager bakedModelManager, CallbackInfo info) {
-		Int2ObjectMapTracker.register(BuiltInRegistries.ITEM, "ItemModels.modelIds", shapes);
-		Int2ObjectMapTracker.register(BuiltInRegistries.ITEM, "ItemModels.models", shapesCache);
+	public void onInit(BakedModelManager bakedModelManager, CallbackInfo info) {
+		Int2ObjectMapTracker.register(BuiltInRegistries.ITEM, "ItemModels.modelIds", modelIds);
+		Int2ObjectMapTracker.register(BuiltInRegistries.ITEM, "ItemModels.models", models);
 	}
 }

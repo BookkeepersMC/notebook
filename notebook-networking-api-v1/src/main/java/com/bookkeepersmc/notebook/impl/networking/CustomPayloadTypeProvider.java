@@ -22,10 +22,10 @@
  */
 package com.bookkeepersmc.notebook.impl.networking;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.payload.CustomPayload;
+import net.minecraft.util.Identifier;
 
-public interface CustomPayloadTypeProvider<B extends FriendlyByteBuf> {
-	CustomPacketPayload.TypeAndCodec<B, ? extends CustomPacketPayload> get(B packetByteBuf, ResourceLocation identifier);
+public interface CustomPayloadTypeProvider<B extends PacketByteBuf> {
+	CustomPayload.Type<B, ? extends CustomPayload> get(B packetByteBuf, Identifier identifier);
 }

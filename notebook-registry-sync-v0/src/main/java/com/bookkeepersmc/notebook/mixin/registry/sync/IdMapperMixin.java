@@ -33,41 +33,41 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
-import net.minecraft.core.IdMapper;
+import net.minecraft.util.collection.IdList;
 
 import com.bookkeepersmc.notebook.impl.registry.sync.RemovableIdList;
 
-@Mixin(IdMapper.class)
+@Mixin(IdList.class)
 public class IdMapperMixin<T> implements RemovableIdList<T> {
 	@Shadow
 	private int nextId;
 	@Final
 	@Shadow
-	private Reference2IntMap<T> tToId;
+	private Reference2IntMap<T> idMap;
 	@Final
 	@Shadow
-	private List<T> idToT;
+	private List<T> list;
 
 	@Override
 	public void notebook_clear() {
 		nextId = 0;
-		tToId.clear();
-		idToT.clear();
+		idMap.clear();
+		list.clear();
 	}
 
 	@Unique
 	private void notebook_removeInner(T o) {
-		int value = tToId.removeInt(o);
-		idToT.set(value, null);
+		int value = idMap.removeInt(o);
+		list.set(value, null);
 
-		while (nextId > 1 && idToT.get(nextId - 1) == null) {
+		while (nextId > 1 && list.get(nextId - 1) == null) {
 			nextId--;
 		}
 	}
 
 	@Override
 	public void notebook_remove(T o) {
-		if (tToId.containsKey(o)) {
+		if (idMap.containsKey(o)) {
 			notebook_removeInner(o);
 		}
 	}
@@ -76,8 +76,8 @@ public class IdMapperMixin<T> implements RemovableIdList<T> {
 	public void notebook_removeId(int i) {
 		List<T> removals = new ArrayList<>();
 
-		for (T o : tToId.keySet()) {
-			int j = tToId.getInt(o);
+		for (T o : idMap.keySet()) {
+			int j = idMap.getInt(o);
 
 			if (i == j) {
 				removals.add(o);
@@ -95,12 +95,12 @@ public class IdMapperMixin<T> implements RemovableIdList<T> {
 	@Override
 	public void notebook_remapIds(Int2IntMap map) {
 		// remap idMap
-		tToId.replaceAll((a, b) -> map.get((int) b));
+		idMap.replaceAll((a, b) -> map.get((int) b));
 
 		// remap list
 		nextId = 0;
-		List<T> oldList = new ArrayList<>(idToT);
-		idToT.clear();
+		List<T> oldList = new ArrayList<>(list);
+		list.clear();
 
 		for (int k = 0; k < oldList.size(); k++) {
 			T o = oldList.get(k);
@@ -108,11 +108,11 @@ public class IdMapperMixin<T> implements RemovableIdList<T> {
 			if (o != null) {
 				int i = map.getOrDefault(k, k);
 
-				while (idToT.size() <= i) {
-					idToT.add(null);
+				while (list.size() <= i) {
+					list.add(null);
 				}
 
-				idToT.set(i, o);
+				list.set(i, o);
 
 				if (nextId <= i) {
 					nextId = i + 1;

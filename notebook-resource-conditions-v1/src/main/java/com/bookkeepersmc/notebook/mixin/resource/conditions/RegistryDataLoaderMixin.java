@@ -24,67 +24,55 @@ package com.bookkeepersmc.notebook.mixin.resource.conditions;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.List;
+import java.util.Map;
 
 import com.google.gson.JsonElement;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.serialization.Decoder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.core.RegistrationInfo;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.WritableRegistry;
-import net.minecraft.resources.RegistryDataLoader;
-import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.registry.MutableRegistry;
+import net.minecraft.registry.RegistrationInfo;
+import net.minecraft.registry.RegistryLoader;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.registry.ResourceKey;
+import net.minecraft.resource.Resource;
+import net.minecraft.resource.ResourceManager;
 
 import com.bookkeepersmc.notebook.impl.resource.conditions.ResourceConditionsImpl;
 
-@Mixin(RegistryDataLoader.class)
+@Mixin(RegistryLoader.class)
 public class RegistryDataLoaderMixin {
 	@Unique
-	private static final ThreadLocal<RegistryAccess> REGISTRIES = new ThreadLocal<>();
+	private static final ThreadLocal<RegistryOps.RegistryInfoLookup> REGISTRIES = new ThreadLocal<>();
 
-	@WrapOperation(
-			method = "load(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess;Ljava/util/List;)Lnet/minecraft/core/RegistryAccess$Frozen;",
-			at = @At(
-					value = "INVOKE",
-					target = "Lnet/minecraft/resources/RegistryDataLoader;load(Lnet/minecraft/resources/RegistryDataLoader$LoadingFunction;Lnet/minecraft/core/RegistryAccess;Ljava/util/List;)Lnet/minecraft/core/RegistryAccess$Frozen;"
-			)
-	)
-	private static RegistryAccess.Frozen captureRegistries(@Coerce Object registryLoadable, RegistryAccess baseManager, List<RegistryDataLoader.RegistryData<?>> entries, Operation<RegistryAccess.Frozen> original) {
-		try {
-			REGISTRIES.set(baseManager);
-			return original.call(registryLoadable, baseManager, entries);
-		} finally {
-			REGISTRIES.remove();
-		}
+	@Inject(method = "loadFromManager", at = @At("HEAD"))
+	private static <E> void captureRegistries(ResourceManager resourceManager, RegistryOps.RegistryInfoLookup infoGetter, MutableRegistry<E> registry, Decoder<E> elementDecoder, Map<ResourceKey<?>, Exception> errors, CallbackInfo ci) {
+		REGISTRIES.set(infoGetter);
+	}
+
+	@Inject(method = "loadFromManager", at = @At("RETURN"))
+	private static <E> void releaseRegistries(ResourceManager resourceManager, RegistryOps.RegistryInfoLookup infoGetter, MutableRegistry<E> registry, Decoder<E> elementDecoder, Map<ResourceKey<?>, Exception> errors, CallbackInfo ci) {
+		REGISTRIES.remove();
 	}
 
 	@Inject(
 			method = "loadElementFromResource",
-			at = @At(
-					value = "INVOKE_ASSIGN",
-					target = "Lcom/google/gson/JsonParser;parseReader(Ljava/io/Reader;)Lcom/google/gson/JsonElement;", remap = false),
+			at = @At(value = "INVOKE_ASSIGN", target = "Lcom/google/gson/JsonParser;parseReader(Ljava/io/Reader;)Lcom/google/gson/JsonElement;", remap = false),
 			cancellable = true
 	)
 	private static <E> void checkResourceCondition(
-			WritableRegistry<E> registry, Decoder<E> decoder, RegistryOps<JsonElement> ops, ResourceKey<E> key, Resource resource, RegistrationInfo info,
+			MutableRegistry<E> registry, Decoder<E> decoder, RegistryOps<JsonElement> ops, ResourceKey<E> key, Resource resource, RegistrationInfo entryInfo,
 			CallbackInfo ci, @Local Reader reader, @Local JsonElement jsonElement
-			) throws IOException {
+	) throws IOException {
+		RegistryOps.RegistryInfoLookup registryInfoLookup = REGISTRIES.get();
+		if (registryInfoLookup == null) return;
 
-		RegistryAccess registryAccess = REGISTRIES.get();
-		if (registryAccess == null) return;
-
-		if (jsonElement.isJsonObject() && !ResourceConditionsImpl.applyResourceConditions(jsonElement.getAsJsonObject(), key.registry().toString(), key.location(), registryAccess)) {
+		if (jsonElement.isJsonObject() && !ResourceConditionsImpl.applyResourceConditions(jsonElement.getAsJsonObject(), key.getRegistry().toString(), key.getValue(), registryInfoLookup)) {
 			reader.close();
 			ci.cancel();
 		}

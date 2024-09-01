@@ -24,8 +24,8 @@ package com.bookkeepersmc.notebook.api.event.registry;
 
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.registry.Registry;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 import com.bookkeepersmc.notebook.impl.registry.sync.ListenableRegistry;
@@ -37,9 +37,9 @@ public interface RegistryIdRemapCallback<T> {
 	interface RemapState<T> {
 		Int2IntMap getSyncIdChangeMap();
 
-		ResourceLocation getIdFromOld(int oldSyncId);
+		Identifier getIdFromOld(int oldSyncId);
 
-		ResourceLocation getIdFromNew(int newSyncId);
+		Identifier getIdFromNew(int newSyncId);
 	}
 
 	static <T> Event<RegistryIdRemapCallback<T>> event(Registry<T> registry) {

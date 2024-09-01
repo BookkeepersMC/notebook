@@ -24,19 +24,19 @@ package com.bookkeepersmc.notebook.mixin.client.keybind;
 
 import java.util.Map;
 
-import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.InputUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import net.minecraft.client.KeyMapping;
+import net.minecraft.client.option.KeyBind;
 
-@Mixin(KeyMapping.class)
+@Mixin(KeyBind.class)
 public interface KeyMappingAccessor {
-	@Accessor("CATEGORY_SORT_ORDER")
+	@Accessor("ORDER_BY_CATEGORIES")
 	static Map<String, Integer> notebook_getCategoryMap() {
 		throw new AssertionError();
 	}
 
-	@Accessor("key")
-	InputConstants.Key notebook_getKey();
+	@Accessor("boundKey")
+	InputUtil.Key notebook_getKey();
 }
