@@ -25,7 +25,7 @@ package com.bookkeepersmc.notebook.mixin.datagen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-import net.minecraft.tags.TagBuilder;
+import net.minecraft.registry.tag.TagBuilder;
 
 import com.bookkeepersmc.notebook.impl.datagen.NotebookTagBuilder;
 

@@ -29,12 +29,12 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.locale.Language;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Item;
+import net.minecraft.item.Item;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.Language;
 
 import com.bookkeepersmc.api.ModInitializer;
 import com.bookkeepersmc.loader.api.NotebookLoader;
@@ -78,16 +78,16 @@ public class TranslationConventionLogWarnings implements ModInitializer {
 		// Log missing item tag translations only when world is started.
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
 			Language language = Language.getInstance();
-			Registry<Item> itemRegistry = server.registryAccess().registryOrThrow(Registries.ITEM);
+			Registry<Item> itemRegistry = server.getRegistryManager().get(Registries.ITEM);
 			List<TagKey<Item>> untranslatedItemTags = new ObjectArrayList<>();
-			itemRegistry.getTagNames().forEach(itemTagKey -> {
+			itemRegistry.getTags().forEach(itemTagKey -> {
 				// We do not translate vanilla's tags at this moment.
-				if (itemTagKey.location().getNamespace().equals(ResourceLocation.DEFAULT_NAMESPACE)) {
+				if (itemTagKey.getKey().id().getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) {
 					return;
 				}
 
-				if (!language.has(itemTagKey.getTranslationKey())) {
-					untranslatedItemTags.add(itemTagKey);
+				if (!language.hasTranslation(itemTagKey.getKey().getTranslationKey())) {
+					untranslatedItemTags.add(itemTagKey.getKey());
 				}
 			});
 
@@ -109,7 +109,7 @@ public class TranslationConventionLogWarnings implements ModInitializer {
 				stringBuilder.append("\nUntranslated item tags:");
 
 				for (TagKey<Item> tagKey : untranslatedItemTags) {
-					stringBuilder.append("\n     ").append(tagKey.location());
+					stringBuilder.append("\n     ").append(tagKey.id());
 				}
 			}
 

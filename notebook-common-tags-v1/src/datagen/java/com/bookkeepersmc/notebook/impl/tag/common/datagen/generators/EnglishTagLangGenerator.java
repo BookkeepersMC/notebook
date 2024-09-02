@@ -24,7 +24,7 @@ package com.bookkeepersmc.notebook.impl.tag.common.datagen.generators;
 
 import java.util.concurrent.CompletableFuture;
 
-import net.minecraft.core.HolderLookup;
+import net.minecraft.registry.HolderLookup;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 import com.bookkeepersmc.notebook.api.datagen.v1.provider.LanguageDataProvider;

@@ -22,9 +22,8 @@
  */
 package com.bookkeepersmc.notebook.api.tag.common.v1;
 
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Item;
+import net.minecraft.item.Item;
+import net.minecraft.registry.tag.TagKey;
 
 import com.bookkeepersmc.notebook.impl.tag.common.v1.TagRegistration;
 

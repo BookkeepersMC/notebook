@@ -24,10 +24,10 @@ package com.bookkeepersmc.notebook.mixin.datagen.loot;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-import net.minecraft.data.loot.BlockLootSubProvider;
+import net.minecraft.data.server.loot_table.BlockLootTableGenerator;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.loot.NotebookBlockLootTableGenerator;
 
-@Mixin(BlockLootSubProvider.class)
+@Mixin(BlockLootTableGenerator.class)
 public class BlockLootSubProviderMixin implements NotebookBlockLootTableGenerator {
 }

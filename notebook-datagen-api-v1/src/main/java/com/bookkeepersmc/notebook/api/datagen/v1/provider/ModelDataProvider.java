@@ -22,18 +22,18 @@
  */
 package com.bookkeepersmc.notebook.api.datagen.v1.provider;
 
-import net.minecraft.data.models.BlockModelGenerators;
-import net.minecraft.data.models.ItemModelGenerators;
-import net.minecraft.data.models.ModelProvider;
+import net.minecraft.data.client.BlockStateDefinitionProvider;
+import net.minecraft.data.client.ItemModelGenerator;
+import net.minecraft.data.client.model.BlockStateModelGenerator;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 
-public abstract class ModelDataProvider extends ModelProvider {
+public abstract class ModelDataProvider extends BlockStateDefinitionProvider {
 	public ModelDataProvider(NotebookDataOutput output) {
 		super(output);
 	}
 
-	public abstract void generateBlockStateModels(BlockModelGenerators blockModelGenerators);
+	public abstract void generateBlockStateModels(BlockStateModelGenerator blockModelGenerators);
 
-	public abstract void generateItemModels(ItemModelGenerators itemModelGenerators);
+	public abstract void generateItemModels(ItemModelGenerator itemModelGenerators);
 }

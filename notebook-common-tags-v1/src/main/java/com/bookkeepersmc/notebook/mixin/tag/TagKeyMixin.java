@@ -24,7 +24,7 @@ package com.bookkeepersmc.notebook.mixin.tag;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-import net.minecraft.tags.TagKey;
+import net.minecraft.registry.tag.TagKey;
 
 import com.bookkeepersmc.notebook.api.tag.NotebookTagExtensions;
 

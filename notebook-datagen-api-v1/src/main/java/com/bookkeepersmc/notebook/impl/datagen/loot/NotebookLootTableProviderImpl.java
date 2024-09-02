@@ -34,14 +34,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
+import net.minecraft.data.DataWriter;
+import net.minecraft.loot.LootTable;
+import net.minecraft.loot.context.LootContextType;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 import com.bookkeepersmc.notebook.api.datagen.v1.provider.LootTableDataProvider;
@@ -50,39 +50,39 @@ import com.bookkeepersmc.notebook.impl.datagen.NotebookDatagenHelper;
 
 public final class NotebookLootTableProviderImpl {
 	public static CompletableFuture<?> run(
-			CachedOutput writer,
+			DataWriter writer,
 			LootTableDataProvider provider,
-			LootContextParamSet lootContextType,
+			LootContextType lootContextType,
 			NotebookDataOutput fabricDataOutput,
 			CompletableFuture<HolderLookup.Provider> registryLookup) {
-		HashMap<ResourceLocation, LootTable> builders = Maps.newHashMap();
-		HashMap<ResourceLocation, ResourceCondition[]> conditionMap = new HashMap<>();
+		HashMap<Identifier, LootTable> builders = Maps.newHashMap();
+		HashMap<Identifier, ResourceCondition[]> conditionMap = new HashMap<>();
 
 		return registryLookup.thenCompose(lookup -> {
 			provider.generate((registryKey, builder) -> {
 				ResourceCondition[] conditions = NotebookDatagenHelper.consumeConditions(builder);
-				conditionMap.put(registryKey.location(), conditions);
+				conditionMap.put(registryKey.getValue(), conditions);
 
-				if (builders.put(registryKey.location(), builder.setParamSet(lootContextType).build()) != null) {
-					throw new IllegalStateException("Duplicate loot table " + registryKey.location());
+				if (builders.put(registryKey.getValue(), builder.type(lootContextType).build()) != null) {
+					throw new IllegalStateException("Duplicate loot table " + registryKey.getValue());
 				}
 			});
 
 			RegistryOps<JsonElement> ops = lookup.createSerializationContext(JsonOps.INSTANCE);
 			final List<CompletableFuture<?>> futures = new ArrayList<>();
 
-			for (Map.Entry<ResourceLocation, LootTable> entry : builders.entrySet()) {
-				JsonObject tableJson = (JsonObject) LootTable.DIRECT_CODEC.encodeStart(ops, entry.getValue()).getOrThrow(IllegalStateException::new);
+			for (Map.Entry<Identifier, LootTable> entry : builders.entrySet()) {
+				JsonObject tableJson = (JsonObject) LootTable.field_50021.encodeStart(ops, entry.getValue()).getOrThrow(IllegalStateException::new);
 				NotebookDatagenHelper.addConditions(tableJson, conditionMap.remove(entry.getKey()));
-				futures.add(DataProvider.saveStable(writer, tableJson, getOutputPath(fabricDataOutput, entry.getKey())));
+				futures.add(DataProvider.writeToPath(writer, tableJson, getOutputPath(fabricDataOutput, entry.getKey())));
 			}
 
 			return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
 		});
 	}
 
-	private static Path getOutputPath(NotebookDataOutput dataOutput, ResourceLocation lootTableId) {
-		return dataOutput.createRegistryElementsPathProvider(Registries.LOOT_TABLE).json(lootTableId);
+	private static Path getOutputPath(NotebookDataOutput dataOutput, Identifier lootTableId) {
+		return dataOutput.method_60917(Registries.LOOT_TABLE).resolveJsonFile(lootTableId);
 	}
 
 	private NotebookLootTableProviderImpl() {

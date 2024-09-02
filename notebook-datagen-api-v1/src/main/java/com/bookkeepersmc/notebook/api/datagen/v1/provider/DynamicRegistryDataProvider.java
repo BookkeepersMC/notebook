@@ -41,21 +41,21 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderGetter;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.HolderOwner;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.data.CachedOutput;
+import net.minecraft.data.DataPackOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.PackOutput;
-import net.minecraft.resources.RegistryDataLoader;
-import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.data.DataWriter;
+import net.minecraft.registry.Holder;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.registry.HolderOwner;
+import net.minecraft.registry.HolderProvider;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryLoader;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.registry.ResourceKey;
+import net.minecraft.util.Identifier;
+import net.minecraft.world.gen.carver.ConfiguredCarver;
+import net.minecraft.world.gen.feature.PlacedFeature;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 import com.bookkeepersmc.notebook.api.event.registry.DynamicRegistries;
@@ -79,7 +79,7 @@ public abstract class DynamicRegistryDataProvider implements DataProvider {
 	public static final class Entries {
 		private final HolderLookup.Provider registries;
 		// Registry ID -> Entries for that registry
-		private final Map<ResourceLocation, RegistryEntries<?>> queuedEntries;
+		private final Map<Identifier, RegistryEntries<?>> queuedEntries;
 		private final String modId;
 
 		@ApiStatus.Internal
@@ -87,9 +87,9 @@ public abstract class DynamicRegistryDataProvider implements DataProvider {
 			this.registries = registries;
 			this.queuedEntries = DynamicRegistries.getDynamicRegistries().stream()
 					// Some modded dynamic registries might not be in the wrapper lookup, filter them out
-					.filter(e -> registries.lookup(e.key()).isPresent())
+					.filter(e -> registries.getLookup(e.key()).isPresent())
 					.collect(Collectors.toMap(
-							e -> e.key().location(),
+							e -> e.key().getValue(),
 							e -> RegistryEntries.create(registries, e)
 					));
 			this.modId = modId;
@@ -99,21 +99,21 @@ public abstract class DynamicRegistryDataProvider implements DataProvider {
 			return registries;
 		}
 
-		public <T> HolderGetter<T> getLookup(ResourceKey<? extends Registry<T>> registryKey) {
-			return registries.lookupOrThrow(registryKey);
+		public <T> HolderProvider<T> getLookup(ResourceKey<? extends Registry<T>> registryKey) {
+			return registries.getLookupOrThrow(registryKey);
 		}
 
-		public HolderGetter<PlacedFeature> placedFeatures() {
+		public HolderProvider<PlacedFeature> placedFeatures() {
 			return getLookup(Registries.PLACED_FEATURE);
 		}
 
-		public HolderGetter<ConfiguredWorldCarver<?>> configuredCarvers() {
+		public HolderProvider<ConfiguredCarver<?>> configuredCarvers() {
 			return getLookup(Registries.CONFIGURED_CARVER);
 		}
 
 		public <T> Holder<T> ref(ResourceKey<T> key) {
 			RegistryEntries<T> entries = getQueuedEntries(key);
-			return Holder.Reference.createStandAlone(entries.lookup, key);
+			return Holder.Reference.create(entries.lookup, key);
 		}
 
 		public <T> Holder<T> add(ResourceKey<T> key, T object) {
@@ -125,34 +125,34 @@ public abstract class DynamicRegistryDataProvider implements DataProvider {
 		}
 
 		public <T> void add(Holder.Reference<T> object) {
-			add(object.key(), object.value());
+			add(object.getRegistryKey(), object.value());
 		}
 
 		public <T> void add(Holder.Reference<T> object, ResourceCondition... conditions) {
-			add(object.key(), object.value(), conditions);
+			add(object.getRegistryKey(), object.value(), conditions);
 		}
 
 		public <T> Holder<T> add(HolderLookup.RegistryLookup<T> registry, ResourceKey<T> valueKey) {
-			return add(valueKey, registry.getOrThrow(valueKey).value());
+			return add(valueKey, registry.getHolderOrThrow(valueKey).value());
 		}
 
 		public <T> Holder<T> add(HolderLookup.RegistryLookup<T> registry, ResourceKey<T> valueKey, ResourceCondition... conditions) {
-			return add(valueKey, registry.getOrThrow(valueKey).value(), conditions);
+			return add(valueKey, registry.getHolderOrThrow(valueKey).value(), conditions);
 		}
 
 		public <T> List<Holder<T>> addAll(HolderLookup.RegistryLookup<T> registry) {
-			return registry.listElementIds()
-					.filter(registryKey -> registryKey.location().getNamespace().equals(modId))
+			return registry.streamElementKeys()
+					.filter(registryKey -> registryKey.getValue().getNamespace().equals(modId))
 					.map(key -> add(registry, key))
 					.toList();
 		}
 
 		@SuppressWarnings("unchecked")
 		<T> RegistryEntries<T> getQueuedEntries(ResourceKey<T> key) {
-			RegistryEntries<?> regEntries = queuedEntries.get(key.registry());
+			RegistryEntries<?> regEntries = queuedEntries.get(key.getRegistry());
 
 			if (regEntries == null) {
-				throw new IllegalArgumentException("Registry " + key.registry() + " is not loaded from datapacks");
+				throw new IllegalArgumentException("Registry " + key.getRegistry() + " is not loaded from datapacks");
 			}
 
 			return (RegistryEntries<T>) regEntries;
@@ -176,8 +176,8 @@ public abstract class DynamicRegistryDataProvider implements DataProvider {
 			this.elementCodec = elementCodec;
 		}
 
-		static <T> RegistryEntries<T> create(HolderLookup.Provider lookups, RegistryDataLoader.RegistryData<T> loaderEntry) {
-			HolderLookup.RegistryLookup<T> lookup = lookups.lookupOrThrow(loaderEntry.key());
+		static <T> RegistryEntries<T> create(HolderLookup.Provider lookups, RegistryLoader.DecodingData<T> loaderEntry) {
+			HolderLookup.RegistryLookup<T> lookup = lookups.getLookupOrThrow(loaderEntry.key());
 			return new RegistryEntries<>(lookup, loaderEntry.key(), loaderEntry.elementCodec());
 		}
 
@@ -186,12 +186,12 @@ public abstract class DynamicRegistryDataProvider implements DataProvider {
 				throw new IllegalArgumentException("Trying to add registry key " + key + " more than once.");
 			}
 
-			return Holder.Reference.createStandAlone(lookup, key);
+			return Holder.Reference.create(lookup, key);
 		}
 	}
 
 	@Override
-	public CompletableFuture<?> run(CachedOutput writer) {
+	public CompletableFuture<?> run(DataWriter writer) {
 		return registriesFuture.thenCompose(registries -> {
 			return CompletableFuture
 					.supplyAsync(() -> {
@@ -212,22 +212,22 @@ public abstract class DynamicRegistryDataProvider implements DataProvider {
 		});
 	}
 
-	private <T> CompletableFuture<?> writeRegistryEntries(CachedOutput writer, RegistryOps<JsonElement> ops, RegistryEntries<T> entries) {
+	private <T> CompletableFuture<?> writeRegistryEntries(DataWriter writer, RegistryOps<JsonElement> ops, RegistryEntries<T> entries) {
 		final ResourceKey<? extends Registry<T>> registry = entries.registry;
-		final boolean shouldOmitNamespace = registry.location().getNamespace().equals(ResourceLocation.DEFAULT_NAMESPACE) || !DynamicRegistriesImpl.NOTEBOOK_DYNAMIC_REGISTRY_KEYS.contains(registry);
-		final String directoryName = shouldOmitNamespace ? registry.location().getPath() : registry.location().getNamespace() + "/" + registry.location().getPath();
-		final PackOutput.PathProvider pathResolver = output.createPathProvider(PackOutput.Target.DATA_PACK, directoryName);
+		final boolean shouldOmitNamespace = registry.getValue().getNamespace().equals(Identifier.DEFAULT_NAMESPACE) || !DynamicRegistriesImpl.NOTEBOOK_DYNAMIC_REGISTRY_KEYS.contains(registry);
+		final String directoryName = shouldOmitNamespace ? registry.getValue().getPath() : registry.getValue().getNamespace() + "/" + registry.getValue().getPath();
+		final DataPackOutput.PathResolver pathResolver = output.createPathResolver(DataPackOutput.Type.DATA_PACK, directoryName);
 		final List<CompletableFuture<?>> futures = new ArrayList<>();
 
 		for (Map.Entry<ResourceKey<T>, ConditionalEntry<T>> entry : entries.entries.entrySet()) {
-			Path path = pathResolver.json(entry.getKey().location());
+			Path path = pathResolver.resolveJsonFile(entry.getKey().getValue());
 			futures.add(writeToPath(path, writer, ops, entries.elementCodec, entry.getValue().value(), entry.getValue().conditions()));
 		}
 
 		return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
 	}
 
-	private static <E> CompletableFuture<?> writeToPath(Path path, CachedOutput cache, DynamicOps<JsonElement> json, Encoder<E> encoder, E value, @Nullable ResourceCondition[] conditions) {
+	private static <E> CompletableFuture<?> writeToPath(Path path, DataWriter cache, DynamicOps<JsonElement> json, Encoder<E> encoder, E value, @Nullable ResourceCondition[] conditions) {
 		Optional<JsonElement> optional = encoder.encodeStart(json, value).resultOrPartial((error) -> {
 			LOGGER.error("Couldn't serialize element {}: {}", path, error);
 		});
@@ -243,7 +243,7 @@ public abstract class DynamicRegistryDataProvider implements DataProvider {
 				}
 			}
 
-			return DataProvider.saveStable(cache, jsonElement, path);
+			return DataProvider.writeToPath(cache, jsonElement, path);
 		}
 
 		return CompletableFuture.completedFuture(null);

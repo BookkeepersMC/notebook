@@ -38,21 +38,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.CachedOutput;
-import net.minecraft.data.PackOutput;
-import net.minecraft.data.models.BlockModelGenerators;
-import net.minecraft.data.models.ItemModelGenerators;
-import net.minecraft.data.models.ModelProvider;
-import net.minecraft.data.models.blockstates.BlockStateGenerator;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.block.Block;
+import net.minecraft.data.DataPackOutput;
+import net.minecraft.data.DataWriter;
+import net.minecraft.data.client.BlockStateDefinitionProvider;
+import net.minecraft.data.client.ItemModelGenerator;
+import net.minecraft.data.client.model.BlockStateModelGenerator;
+import net.minecraft.item.Item;
+import net.minecraft.registry.BuiltInRegistries;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 import com.bookkeepersmc.notebook.api.datagen.v1.provider.ModelDataProvider;
 
-@Mixin(ModelProvider.class)
+@Mixin(BlockStateDefinitionProvider.class)
 public class ModelProviderMixin {
 	@Unique
 	private NotebookDataOutput notebookDataOutput;
@@ -61,47 +60,47 @@ public class ModelProviderMixin {
 	private static final ThreadLocal<NotebookDataOutput> notebookDataOutputThreadLocal = new ThreadLocal<>();
 
 	@Inject(method = "<init>", at = @At("RETURN"))
-	public void init(PackOutput output, CallbackInfo info) {
+	public void init(DataPackOutput output, CallbackInfo info) {
 		if (output instanceof NotebookDataOutput notebookDataOutput) {
 			this.notebookDataOutput = notebookDataOutput;
 		}
 	}
 
 	@Unique
-	private static ThreadLocal<Map<Block, BlockStateGenerator>> blockStateMapThreadLocal = new ThreadLocal<>();
+	private static ThreadLocal<Map<Block, BlockStateModelGenerator>> blockStateMapThreadLocal = new ThreadLocal<>();
 
-	@Redirect(method = "run", at = @At(value = "INVOKE", target = "Lnet/minecraft/data/models/BlockModelGenerators;run()V"))
-	private void registerBlockStateModels(BlockModelGenerators instance) {
+	@Redirect(method = "run", at = @At(value = "INVOKE", target = "Lnet/minecraft/data/client/model/BlockStateModelGenerator;register()V"))
+	private void registerBlockStateModels(BlockStateModelGenerator instance) {
 		if (((Object) this) instanceof ModelDataProvider modelDataProvider) {
 			modelDataProvider.generateBlockStateModels(instance);
 		} else {
-			instance.run();
+			instance.register();
 		}
 	}
 
-	@Redirect(method = "run", at = @At(value = "INVOKE", target = "Lnet/minecraft/data/models/ItemModelGenerators;run()V"))
-	private void registerItemModels(ItemModelGenerators instance) {
+	@Redirect(method = "run", at = @At(value = "INVOKE", target = "Lnet/minecraft/data/client/ItemModelGenerator;register()V"))
+	private void registerItemModels(ItemModelGenerator instance) {
 		if (((Object) this) instanceof ModelDataProvider modelDataProvider) {
 			modelDataProvider.generateItemModels(instance);
 		} else {
-			instance.run();
+			instance.register();
 		}
 	}
 
 	@Inject(method = "run", at = @At(value = "INVOKE_ASSIGN", target = "Lcom/google/common/collect/Maps;newHashMap()Ljava/util/HashMap;", ordinal = 0, remap = false))
-	private void runHead(CachedOutput cachedOutput, CallbackInfoReturnable<CompletableFuture<?>> cir, @Local Map<Block, BlockStateGenerator> map) {
+	private void runHead(DataWriter cachedOutput, CallbackInfoReturnable<CompletableFuture<?>> cir, @Local Map<Block, BlockStateModelGenerator> map) {
 		notebookDataOutputThreadLocal.set(notebookDataOutput);
 		blockStateMapThreadLocal.set(map);
 	}
 
 	@Inject(method = "run", at = @At("TAIL"))
-	private void runTail(CachedOutput output, CallbackInfoReturnable<CompletableFuture<?>> cir) {
+	private void runTail(DataWriter output, CallbackInfoReturnable<CompletableFuture<?>> cir) {
 		notebookDataOutputThreadLocal.remove();
 		blockStateMapThreadLocal.remove();
 	}
 
 	@Inject(method = "method_25738", at = @At("HEAD"), cancellable = true)
-	private static void filterBlocksForProcessingMod(Map<Block, BlockStateGenerator> map, Block block, CallbackInfoReturnable<Boolean> cir) {
+	private static void filterBlocksForProcessingMod(Map<Block, BlockStateModelGenerator> map, Block block, CallbackInfoReturnable<Boolean> cir) {
 		NotebookDataOutput dataOutput = notebookDataOutputThreadLocal.get();
 
 		if (dataOutput != null) {
@@ -110,14 +109,14 @@ public class ModelProviderMixin {
 				return;
 			}
 
-			if (!BuiltInRegistries.BLOCK.getKey(block).getNamespace().equals(dataOutput.getModId())) {
+			if (!BuiltInRegistries.BLOCK.getId(block).getNamespace().equals(dataOutput.getModId())) {
 				cir.setReturnValue(false);
 			}
 		}
 	}
 
-	@Inject(method = "method_25741", at = @At(value = "INVOKE", target = "Lnet/minecraft/data/models/model/ModelLocationUtils;getModelLocation(Lnet/minecraft/world/item/Item;)Lnet/minecraft/resources/ResourceLocation;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-	private static void filterItemsForProcessingMod(Set<Item> set, Map<ResourceLocation, Supplier<JsonElement>> map, Block block, CallbackInfo ci, Item item) {
+	@Inject(method = "method_25741", at = @At(value = "INVOKE", target = "Lnet/minecraft/data/client/model/ModelIds;getItemModelId(Lnet/minecraft/item/Item;)Lnet/minecraft/util/Identifier;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+	private static void filterItemsForProcessingMod(Set<Item> set, Map<Identifier, Supplier<JsonElement>> map, Block block, CallbackInfo ci, Item item) {
 		NotebookDataOutput dataOutput = notebookDataOutputThreadLocal.get();
 
 		if (dataOutput != null) {
@@ -127,7 +126,7 @@ public class ModelProviderMixin {
 				return;
 			}
 
-			if (!BuiltInRegistries.ITEM.getKey(item).getNamespace().equals(dataOutput.getModId())) {
+			if (!BuiltInRegistries.ITEM.getId(item).getNamespace().equals(dataOutput.getModId())) {
 				ci.cancel();
 			}
 		}

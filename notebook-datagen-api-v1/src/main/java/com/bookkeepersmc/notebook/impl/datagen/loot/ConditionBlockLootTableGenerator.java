@@ -24,21 +24,21 @@ package com.bookkeepersmc.notebook.impl.datagen.loot;
 
 import java.util.Collections;
 
-import net.minecraft.data.loot.BlockLootSubProvider;
-import net.minecraft.world.flag.FeatureFlags;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.block.Block;
+import net.minecraft.data.server.loot_table.BlockLootTableGenerator;
+import net.minecraft.feature_flags.FeatureFlags;
+import net.minecraft.loot.LootTable;
 
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceCondition;
 import com.bookkeepersmc.notebook.impl.datagen.NotebookDatagenHelper;
 import com.bookkeepersmc.notebook.mixin.datagen.loot.BlockLootTableGeneratorAccessor;
 
-public class ConditionBlockLootTableGenerator extends BlockLootSubProvider {
-	private final BlockLootSubProvider parent;
+public class ConditionBlockLootTableGenerator extends BlockLootTableGenerator {
+	private final BlockLootTableGenerator parent;
 	private final ResourceCondition[] conditions;
 
-	public ConditionBlockLootTableGenerator(BlockLootSubProvider parent, ResourceCondition[] conditions) {
-		super(Collections.emptySet(), FeatureFlags.REGISTRY.allFlags(), ((BlockLootTableGeneratorAccessor) parent).getRegistries());
+	public ConditionBlockLootTableGenerator(BlockLootTableGenerator parent, ResourceCondition[] conditions) {
+		super(Collections.emptySet(), FeatureFlags.MAIN_REGISTRY.setOf(), ((BlockLootTableGeneratorAccessor) parent).getProvider());
 
 		this.parent = parent;
 		this.conditions = conditions;

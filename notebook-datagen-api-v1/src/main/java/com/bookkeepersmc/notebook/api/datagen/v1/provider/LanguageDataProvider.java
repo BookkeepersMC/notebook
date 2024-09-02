@@ -35,26 +35,26 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.jetbrains.annotations.ApiStatus;
 
-import net.minecraft.Util;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.CachedOutput;
+import net.minecraft.block.Block;
+import net.minecraft.data.DataPackOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.PackOutput;
-import net.minecraft.network.chat.ComponentContents;
-import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.stats.StatType;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.data.DataWriter;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.registry.BuiltInRegistries;
+import net.minecraft.registry.Holder;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.registry.ResourceKey;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.stat.StatType;
+import net.minecraft.text.component.TextComponent;
+import net.minecraft.text.component.TranslatableComponent;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 
@@ -81,7 +81,7 @@ public abstract class LanguageDataProvider implements DataProvider {
 	public abstract void generateTranslations(HolderLookup.Provider registryLookup, TranslationBuilder translationBuilder);
 
 	@Override
-	public CompletableFuture<?> run(CachedOutput writer) {
+	public CompletableFuture<?> run(DataWriter writer) {
 		TreeMap<String, String> translationEntries = new TreeMap<>();
 
 		return this.registryLookup.thenCompose(lookup -> {
@@ -102,14 +102,14 @@ public abstract class LanguageDataProvider implements DataProvider {
 				langEntryJson.addProperty(entry.getKey(), entry.getValue());
 			}
 
-			return DataProvider.saveStable(writer, langEntryJson, getLangFilePath(this.languageCode));
+			return DataProvider.writeToPath(writer, langEntryJson, getLangFilePath(this.languageCode));
 		});
 	}
 
 	private Path getLangFilePath(String code) {
 		return dataOutput
-				.createPathProvider(PackOutput.Target.RESOURCE_PACK, "lang")
-				.json(ResourceLocation.fromNamespaceAndPath(dataOutput.getModId(), code));
+				.createPathResolver(DataPackOutput.Type.RESOURCE_PACK, "lang")
+				.resolveJsonFile(Identifier.of(dataOutput.getModId(), code));
 	}
 
 	@Override
@@ -123,47 +123,47 @@ public abstract class LanguageDataProvider implements DataProvider {
 		void add(String translationKey, String value);
 
 		default void add(Item item, String value) {
-			add(item.getDescriptionId(), value);
+			add(item.getTranslationKey(), value);
 		}
 
 		default void add(Block block, String value) {
-			add(block.getDescriptionId(), value);
+			add(block.getTranslationKey(), value);
 		}
 
-		default void add(ResourceKey<CreativeModeTab> registryKey, String value) {
-			final CreativeModeTab group = BuiltInRegistries.CREATIVE_MODE_TAB.getOrThrow(registryKey);
-			final ComponentContents content = group.getDisplayName().getContents();
+		default void add(ResourceKey<ItemGroup> registryKey, String value) {
+			final ItemGroup group = BuiltInRegistries.ITEM_GROUP.getOrThrow(registryKey);
+			final TextComponent content = group.getName().asComponent();
 
-			if (content instanceof TranslatableContents translatableTextContent) {
+			if (content instanceof TranslatableComponent translatableTextContent) {
 				add(translatableTextContent.getKey(), value);
 				return;
 			}
 
-			throw new UnsupportedOperationException("Cannot add language entry for ItemGroup (%s) as the display name is not translatable.".formatted(group.getDisplayName().getString()));
+			throw new UnsupportedOperationException("Cannot add language entry for ItemGroup (%s) as the display name is not translatable.".formatted(group.getName().getString()));
 		}
 
 		default void add(EntityType<?> entityType, String value) {
-			add(entityType.getDescriptionId(), value);
+			add(entityType.getTranslationKey(), value);
 		}
 
 		default void addEnchantment(ResourceKey<Enchantment> enchantment, String value) {
-			add(Util.makeDescriptionId("enchantment", enchantment.location()), value);
+			add(Util.createTranslationKey("enchantment", enchantment.getValue()), value);
 		}
 
-		default void add(Holder<Attribute> entityAttribute, String value) {
-			add(entityAttribute.value().getDescriptionId(), value);
+		default void add(Holder<EntityAttribute> entityAttribute, String value) {
+			add(entityAttribute.value().getTranslationKey(), value);
 		}
 
 		default void add(StatType<?> statType, String value) {
 			add("stat_type." + BuiltInRegistries.STAT_TYPE.getKey(statType).toString().replace(':', '.'), value);
 		}
 
-		default void add(MobEffect statusEffect, String value) {
-			add(statusEffect.getDescriptionId(), value);
+		default void add(StatusEffect statusEffect, String value) {
+			add(statusEffect.getTranslationKey(), value);
 		}
 
-		default void add(ResourceLocation identifier, String value) {
-			add(identifier.toLanguageKey(), value);
+		default void add(Identifier identifier, String value) {
+			add(identifier.toTranslationKey(), value);
 		}
 
 		default void add(TagKey<?> tagKey, String value) {

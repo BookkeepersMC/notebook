@@ -27,14 +27,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-import net.minecraft.data.tags.TagsProvider;
-import net.minecraft.tags.TagBuilder;
+import net.minecraft.data.server.tag.AbstractTagProvider;
+import net.minecraft.registry.tag.TagBuilder;
 
 import com.bookkeepersmc.notebook.impl.datagen.NotebookTagBuilder;
 
-@Mixin(TagsProvider.class)
+@Mixin(AbstractTagProvider.class)
 public class TagsProviderMixin {
-	@ModifyArg(method = "method_27046", at = @At(value = "INVOKE", target = "Lnet/minecraft/tags/TagFile;<init>(Ljava/util/List;Z)V"), index = 1)
+	@ModifyArg(method = "method_27046", at = @At(value = "INVOKE", target = "Lnet/minecraft/registry/tag/TagFile;<init>(Ljava/util/List;Z)V"), index = 1)
 	private boolean addReplaced(boolean replaced, @Local TagBuilder tagBuilder) {
 		if (tagBuilder instanceof NotebookTagBuilder notebookTagBuilder) {
 			return notebookTagBuilder.notebook_isReplaced();

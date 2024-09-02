@@ -35,15 +35,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.data.CachedOutput;
+import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementHolder;
+import net.minecraft.data.DataPackOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.PackOutput;
-import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.data.DataWriter;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceCondition;
@@ -51,12 +51,12 @@ import com.bookkeepersmc.notebook.impl.datagen.NotebookDatagenHelper;
 
 public abstract class AdvancementDataProvider implements DataProvider {
 	protected final NotebookDataOutput output;
-	private final PackOutput.PathProvider pathResolver;
+	private final DataPackOutput.PathResolver pathResolver;
 	private final CompletableFuture<HolderLookup.Provider> registryLookup;
 
 	protected AdvancementDataProvider(NotebookDataOutput output,  CompletableFuture<HolderLookup.Provider> registryLookup) {
 		this.output = output;
-		this.pathResolver = output.createRegistryElementsPathProvider(Registries.ADVANCEMENT);
+		this.pathResolver = output.method_60917(Registries.ADVANCEMENT);
 		this.registryLookup = registryLookup;
 	}
 
@@ -72,9 +72,9 @@ public abstract class AdvancementDataProvider implements DataProvider {
 	}
 
 	@Override
-	public CompletableFuture<?> run(CachedOutput writer) {
+	public CompletableFuture<?> run(DataWriter writer) {
 		return this.registryLookup.thenCompose(lookup -> {
-			final Set<ResourceLocation> identifiers = Sets.newHashSet();
+			final Set<Identifier> identifiers = Sets.newHashSet();
 			final Set<AdvancementHolder> advancements = Sets.newHashSet();
 
 			generateAdvancements(lookup, advancements::add);
@@ -87,9 +87,9 @@ public abstract class AdvancementDataProvider implements DataProvider {
 					throw new IllegalStateException("Duplicate advancement " + advancement.id());
 				}
 
-				JsonObject advancementJson = Advancement.CODEC.encodeStart(ops, advancement.value()).getOrThrow(IllegalStateException::new).getAsJsonObject();
+				JsonObject advancementJson = Advancement.CODEC.encodeStart(ops, advancement.data()).getOrThrow(IllegalStateException::new).getAsJsonObject();
 				NotebookDatagenHelper.addConditions(advancementJson, NotebookDatagenHelper.consumeConditions(advancement));
-				futures.add(DataProvider.saveStable(writer, advancementJson, getOutputPath(advancement)));
+				futures.add(DataProvider.writeToPath(writer, advancementJson, getOutputPath(advancement)));
 			}
 
 			return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
@@ -97,7 +97,7 @@ public abstract class AdvancementDataProvider implements DataProvider {
 	}
 
 	private Path getOutputPath(AdvancementHolder advancement) {
-		return pathResolver.json(advancement.id());
+		return pathResolver.resolveJsonFile(advancement.id());
 	}
 
 	@Override

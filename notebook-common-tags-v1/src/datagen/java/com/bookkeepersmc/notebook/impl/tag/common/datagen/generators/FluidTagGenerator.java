@@ -24,8 +24,8 @@ package com.bookkeepersmc.notebook.impl.tag.common.datagen.generators;
 
 import java.util.concurrent.CompletableFuture;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.tags.FluidTags;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.registry.tag.FluidTags;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 import com.bookkeepersmc.notebook.api.datagen.v1.provider.TagDataProvider;
@@ -37,13 +37,13 @@ public final class FluidTagGenerator extends TagDataProvider.FluidTagProvider {
 	}
 
 	@Override
-	protected void addTags(HolderLookup.Provider wrapperLookup) {
-		tag(ConventionalFluidTags.WATER)
+	protected void configure(HolderLookup.Provider wrapperLookup) {
+		getOrCreateTagBuilder(ConventionalFluidTags.WATER)
 				.addOptionalTag(FluidTags.WATER);
-		tag(ConventionalFluidTags.LAVA)
+		getOrCreateTagBuilder(ConventionalFluidTags.LAVA)
 				.addOptionalTag(FluidTags.LAVA);
-		tag(ConventionalFluidTags.MILK);
-		tag(ConventionalFluidTags.HONEY);
-		tag(ConventionalFluidTags.HIDDEN_FROM_RECIPE_VIEWERS);
+		getOrCreateTagBuilder(ConventionalFluidTags.MILK);
+		getOrCreateTagBuilder(ConventionalFluidTags.HONEY);
+		getOrCreateTagBuilder(ConventionalFluidTags.HIDDEN_FROM_RECIPE_VIEWERS);
 	}
 }

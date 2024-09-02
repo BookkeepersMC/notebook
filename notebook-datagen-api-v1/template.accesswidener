@@ -1,54 +1,52 @@
-accessible	field	net/minecraft/data/DataGenerator	vanillaPackOutput	Lnet/minecraft/data/PackOutput;
-mutable	field	net/minecraft/data/DataGenerator	vanillaPackOutput	Lnet/minecraft/data/PackOutput;
+accessible	field	net/minecraft/data/DataGenerator	output	Lnet/minecraft/data/DataPackOutput;
+mutable	field	net/minecraft/data/DataGenerator	output	Lnet/minecraft/data/DataPackOutput;
 
-accessible	field	net/minecraft/data/recipes/RecipeProvider	recipePathProvider	Lnet/minecraft/data/PackOutput$PathProvider;
-accessible	field	net/minecraft/data/recipes/RecipeProvider	advancementPathProvider	Lnet/minecraft/data/PackOutput$PathProvider;
+accessible class net/minecraft/data/server/RecipesProvider$C_ujfsvkmt
+extendable method net/minecraft/data/server/RecipesProvider$C_ujfsvkmt run (Lnet/minecraft/data/DataWriter;)Ljava/util/concurrent/CompletableFuture;
 
-accessible	field	net/minecraft/data/tags/TagsProvider$TagAppender	builder	Lnet/minecraft/tags/TagBuilder;
-extendable	method	net/minecraft/data/tags/TagsProvider$TagAppender	add	(Lnet/minecraft/resources/ResourceKey;)Lnet/minecraft/data/tags/TagsProvider$TagAppender;
-extendable	method	net/minecraft/data/tags/TagsProvider$TagAppender	add	([Lnet/minecraft/resources/ResourceKey;)Lnet/minecraft/data/tags/TagsProvider$TagAppender;
+accessible	field	net/minecraft/data/server/tag/AbstractTagProvider$ObjectBuilder	builder	Lnet/minecraft/registry/tag/TagBuilder;
+extendable	method	net/minecraft/data/server/tag/AbstractTagProvider$ObjectBuilder	add	(Lnet/minecraft/registry/ResourceKey;)Lnet/minecraft/data/server/tag/AbstractTagProvider$ObjectBuilder;
+extendable	method	net/minecraft/data/server/tag/AbstractTagProvider$ObjectBuilder	add	([Lnet/minecraft/registry/ResourceKey;)Lnet/minecraft/data/server/tag/AbstractTagProvider$ObjectBuilder;
 
-accessible	field	net/minecraft/data/tags/TagsProvider	builders	Ljava/util/Map;
+accessible	field	net/minecraft/data/server/tag/AbstractTagProvider	tagBuilders	Ljava/util/Map;
 
-accessible	field	net/minecraft/data/loot/BlockLootSubProvider	map	Ljava/util/Map;
+accessible	field	net/minecraft/data/server/loot_table/BlockLootTableGenerator	lootTables	Ljava/util/Map;
 
-extendable	method	net/minecraft/tags/TagEntry	<init>	(Lnet/minecraft/resources/ResourceLocation;ZZ)V
-accessible	field	net/minecraft/tags/TagEntry	id	Lnet/minecraft/resources/ResourceLocation;
-accessible	field	net/minecraft/tags/TagEntry	tag	Z
-accessible	field	net/minecraft/tags/TagEntry	required	Z
+extendable	method	net/minecraft/registry/tag/TagEntry	<init>	(Lnet/minecraft/util/Identifier;ZZ)V
+accessible	field	net/minecraft/registry/tag/TagEntry	id	Lnet/minecraft/util/Identifier;
+accessible	field	net/minecraft/registry/tag/TagEntry	tag	Z
+accessible	field	net/minecraft/registry/tag/TagEntry	required	Z
 
-extendable	method	net/minecraft/data/PackOutput$PathProvider	<init>	(Lnet/minecraft/data/PackOutput;Lnet/minecraft/data/PackOutput$Target;Ljava/lang/String;)V
-accessible	field	net/minecraft/data/PackOutput$PathProvider	root	Ljava/nio/file/Path;
-accessible	field	net/minecraft/data/PackOutput$PathProvider	kind	Ljava/lang/String;
+extendable	method	net/minecraft/data/DataPackOutput$PathResolver	<init>	(Lnet/minecraft/data/DataPackOutput;Lnet/minecraft/data/DataPackOutput$Type;Ljava/lang/String;)V
+accessible	field	net/minecraft/data/DataPackOutput$PathResolver	root	Ljava/nio/file/Path;
+accessible	field	net/minecraft/data/DataPackOutput$PathResolver	directoryName	Ljava/lang/String;
 
-extendable	method	net/minecraft/data/DataGenerator$PackGenerator	<init>	(Lnet/minecraft/data/DataGenerator;ZLjava/lang/String;Lnet/minecraft/data/PackOutput;)V
+extendable	method	net/minecraft/data/DataGenerator$PackGenerator	<init>	(Lnet/minecraft/data/DataGenerator;ZLjava/lang/String;Lnet/minecraft/data/DataPackOutput;)V
 
-accessible	field	net/minecraft/data/registries/VanillaRegistries	BUILDER	Lnet/minecraft/core/RegistrySetBuilder;
-accessible	method	net/minecraft/data/registries/VanillaRegistries	validateThatAllBiomeFeaturesHaveBiomeFilter	(Lnet/minecraft/core/HolderLookup$Provider;)V
-accessible	field	net/minecraft/core/RegistrySetBuilder	entries	Ljava/util/List;
-accessible	class	net/minecraft/core/RegistrySetBuilder$RegistryStub
+accessible	field	net/minecraft/registry/VanillaDynamicRegistries	BUILDER	Lnet/minecraft/registry/RegistrySetBuilder;
+accessible	method	net/minecraft/registry/VanillaDynamicRegistries	validateBiomeFeatures	(Lnet/minecraft/registry/HolderLookup$Provider;)V
+accessible	field	net/minecraft/registry/RegistrySetBuilder	entries	Ljava/util/List;
+accessible	class	net/minecraft/registry/RegistrySetBuilder$RegistryStub
 
-accessible	field	net/minecraft/world/level/storage/loot/parameters/LootContextParamSets	REGISTRY	Lcom/google/common/collect/BiMap;
+accessible	field	net/minecraft/loot/context/LootContextTypes	MAP	Lcom/google/common/collect/BiMap;
 
-transitive-accessible	method	net/minecraft/data/BlockFamilies	familyBuilder	(Lnet/minecraft/world/level/block/Block;)Lnet/minecraft/data/BlockFamily$Builder;
+transitive-accessible	method	net/minecraft/data/family/BlockFamilies	register	(Lnet/minecraft/block/Block;)Lnet/minecraft/data/family/BlockFamily$Builder;
 
-transitive-accessible	field	net/minecraft/data/models/BlockModelGenerators	blockStateOutput	Ljava/util/function/Consumer;
-transitive-accessible	field	net/minecraft/data/models/BlockModelGenerators	modelOutput	Ljava/util/function/BiConsumer;
+transitive-accessible	field	net/minecraft/data/client/model/BlockStateModelGenerator	blockStateCollector	Ljava/util/function/Consumer;
+transitive-accessible	field	net/minecraft/data/client/model/BlockStateModelGenerator	modelCollector	Ljava/util/function/BiConsumer;
 
-transitive-accessible	field	net/minecraft/data/models/ItemModelGenerators	output	Ljava/util/function/BiConsumer;
+transitive-accessible	field	net/minecraft/data/client/ItemModelGenerator	writer	Ljava/util/function/BiConsumer;
 
-transitive-accessible	method	net/minecraft/data/models/model/TextureSlot	create	(Ljava/lang/String;)Lnet/minecraft/data/models/model/TextureSlot;
-transitive-accessible	method	net/minecraft/data/models/model/TextureSlot	create	(Ljava/lang/String;Lnet/minecraft/data/models/model/TextureSlot;)Lnet/minecraft/data/models/model/TextureSlot;
+transitive-accessible	method	net/minecraft/data/client/model/TextureKey	of	(Ljava/lang/String;)Lnet/minecraft/data/client/model/TextureKey;
+transitive-accessible	method	net/minecraft/data/client/model/TextureKey	of	(Ljava/lang/String;Lnet/minecraft/data/client/model/TextureKey;)Lnet/minecraft/data/client/model/TextureKey;
 
-transitive-extendable	method	net/minecraft/data/tags/TagsProvider$TagAppender	add	([Lnet/minecraft/resources/ResourceKey;)Lnet/minecraft/data/tags/TagsProvider$TagAppender;
+transitive-extendable	method	net/minecraft/data/server/tag/AbstractTagProvider$ObjectBuilder	add	([Lnet/minecraft/registry/ResourceKey;)Lnet/minecraft/data/server/tag/AbstractTagProvider$ObjectBuilder;
 
-transitive-accessible	method	net/minecraft/data/models/model/TexturedModel	createDefault	(Ljava/util/function/Function;Lnet/minecraft/data/models/model/ModelTemplate;)Lnet/minecraft/data/models/model/TexturedModel$Provider;
+transitive-accessible	method	net/minecraft/data/client/model/TexturedModel	makeFactory	(Ljava/util/function/Function;Lnet/minecraft/data/client/model/Model;)Lnet/minecraft/data/client/model/TexturedModel$Factory;
 
-transitive-accessible	class	net/minecraft/data/models/BlockModelGenerators$TintState
-transitive-accessible	class	net/minecraft/data/models/BlockModelGenerators$BlockFamilyProvider
-transitive-accessible	class	net/minecraft/data/models/BlockModelGenerators$WoodProvider
-transitive-accessible	class	net/minecraft/data/models/BlockModelGenerators$BlockEntityModelGenerator
-
-transitive-accessible field net/minecraft/data/loot/BlockLootSubProvider HAS_SHEARS Lnet/minecraft/world/level/storage/loot/predicates/LootItemCondition$Builder;
+transitive-accessible	class	net/minecraft/data/client/model/BlockStateModelGenerator$TintType
+transitive-accessible	class	net/minecraft/data/client/model/BlockStateModelGenerator$BlockTexturePool
+transitive-accessible	class	net/minecraft/data/client/model/BlockStateModelGenerator$LogTexturePool
+transitive-accessible	class	net/minecraft/data/client/model/BlockStateModelGenerator$BuiltinModelPool
 
 ### Generated access wideners below

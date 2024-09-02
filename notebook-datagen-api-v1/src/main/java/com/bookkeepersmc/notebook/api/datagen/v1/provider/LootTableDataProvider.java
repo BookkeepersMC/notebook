@@ -28,15 +28,15 @@ import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.ApiStatus;
 
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.loot.LootTableSubProvider;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.data.server.loot_table.LootTableGenerator;
+import net.minecraft.loot.LootTable;
+import net.minecraft.registry.ResourceKey;
 
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceCondition;
 import com.bookkeepersmc.notebook.impl.datagen.NotebookDatagenHelper;
 
 @ApiStatus.NonExtendable
-public interface LootTableDataProvider extends LootTableSubProvider, DataProvider {
+public interface LootTableDataProvider extends LootTableGenerator, DataProvider {
 	default BiConsumer<ResourceKey<LootTable>, LootTable.Builder> withConditions(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> exporter, ResourceCondition... conditions) {
 		Preconditions.checkArgument(conditions.length > 0, "Must add at least one condition.");
 		return (id, table) -> {

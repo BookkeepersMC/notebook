@@ -22,8 +22,8 @@
  */
 package com.bookkeepersmc.notebook.api.tag.common.v1;
 
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.world.gen.feature.StructureFeature;
 
 import com.bookkeepersmc.notebook.impl.tag.common.v1.TagRegistration;
 
@@ -38,15 +38,15 @@ public final class ConventionalStructureTags {
 	 * Structures that should not show up on minimaps or world map views from mods/sites.
 	 * No effect on vanilla map items.
 	 */
-	public static final TagKey<Structure> HIDDEN_FROM_DISPLAYERS = register("hidden_from_displayers");
+	public static final TagKey<StructureFeature> HIDDEN_FROM_DISPLAYERS = register("hidden_from_displayers");
 
 	/**
 	 * Structures that should not be locatable/selectable by modded structure-locating items or abilities.
 	 * No effect on vanilla map items.
 	 */
-	public static final TagKey<Structure> HIDDEN_FROM_LOCATOR_SELECTION = register("hidden_from_locator_selection");
+	public static final TagKey<StructureFeature> HIDDEN_FROM_LOCATOR_SELECTION = register("hidden_from_locator_selection");
 
-	private static TagKey<Structure> register(String tagId) {
+	private static TagKey<StructureFeature> register(String tagId) {
 		return TagRegistration.STRUCTURE_TAG.registerC(tagId);
 	}
 }

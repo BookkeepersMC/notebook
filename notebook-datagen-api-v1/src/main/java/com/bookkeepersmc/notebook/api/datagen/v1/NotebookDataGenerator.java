@@ -27,10 +27,10 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import net.minecraft.SharedConstants;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.loader.api.ModContainer;
 
@@ -41,7 +41,7 @@ public final class NotebookDataGenerator extends DataGenerator {
 	private final CompletableFuture<HolderLookup.Provider> provider;
 
 	public NotebookDataGenerator(Path output, ModContainer mod, boolean strictValidation, CompletableFuture<HolderLookup.Provider> registriesFuture) {
-		super(output, SharedConstants.getCurrentVersion(), true);
+		super(output, SharedConstants.getGameVersion(), true);
 		this.modContainer = Objects.requireNonNull(mod);
 		this.strictValidation = strictValidation;
 		this.notebookOutput = new NotebookDataOutput(mod, output, strictValidation);
@@ -52,8 +52,8 @@ public final class NotebookDataGenerator extends DataGenerator {
 		return new Pack(true, modContainer.getMetadata().getName(), this.notebookOutput);
 	}
 
-	public Pack createBuiltinResourcePack(ResourceLocation id) {
-		Path path = this.vanillaPackOutput.getOutputFolder().resolve("resourcepacks").resolve(id.getPath());
+	public Pack createBuiltinResourcePack(Identifier id) {
+		Path path = this.output.getPath().resolve("resourcepacks").resolve(id.getPath());
 		return new Pack(true, id.toString(), new NotebookDataOutput(modContainer, path, strictValidation));
 	}
 
@@ -75,13 +75,13 @@ public final class NotebookDataGenerator extends DataGenerator {
 
 	@Override
 	@Deprecated
-	public PackGenerator getVanillaPack(boolean bl) {
+	public PackGenerator createVanillaPack(boolean bl) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	@Deprecated
-	public PackGenerator getBuiltinDatapack(boolean bl, String string) {
+	public PackGenerator createDataPack(boolean bl, String string) {
 		throw new UnsupportedOperationException();
 	}
 

@@ -22,18 +22,18 @@
  */
 package com.bookkeepersmc.notebook.impl.tag.common.v1;
 
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraft.world.level.material.Fluid;
+import net.minecraft.block.Block;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.entity.EntityType;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.item.Item;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.ResourceKey;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.Identifier;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.feature.StructureFeature;
 
 import com.bookkeepersmc.notebook.api.tag.common.v1.TagUtil;
 
@@ -41,16 +41,16 @@ public record TagRegistration<T>(ResourceKey<Registry<T>> resourceKey) {
 	public static final TagRegistration<Item> ITEM_TAG = new TagRegistration<>(Registries.ITEM);
 	public static final TagRegistration<Block> BLOCK_TAG = new TagRegistration<>(Registries.BLOCK);
 	public static final TagRegistration<Biome> BIOME_TAG = new TagRegistration<>(Registries.BIOME);
-	public static final TagRegistration<Structure> STRUCTURE_TAG = new TagRegistration<>(Registries.STRUCTURE);
+	public static final TagRegistration<StructureFeature> STRUCTURE_TAG = new TagRegistration<>(Registries.STRUCTURE_FEATURE);
 	public static final TagRegistration<Fluid> FLUID_TAG = new TagRegistration<>(Registries.FLUID);
 	public static final TagRegistration<EntityType<?>> ENTITY_TYPE_TAG = new TagRegistration<>(Registries.ENTITY_TYPE);
 	public static final TagRegistration<Enchantment> ENCHANTMENT_TAG = new TagRegistration<>(Registries.ENCHANTMENT);
 
 	public TagKey<T> registerNotebook(String tagId) {
-		return TagKey.create(resourceKey, ResourceLocation.fromNamespaceAndPath(TagUtil.NOTEBOOK_TAG_NAMESPACE, tagId));
+		return TagKey.of(resourceKey, Identifier.of(TagUtil.NOTEBOOK_TAG_NAMESPACE, tagId));
 	}
 
 	public TagKey<T> registerC(String tagId) {
-		return TagKey.create(resourceKey, ResourceLocation.fromNamespaceAndPath(TagUtil.C_TAG_NAMESPACE, tagId));
+		return TagKey.of(resourceKey, Identifier.of(TagUtil.C_TAG_NAMESPACE, tagId));
 	}
 }

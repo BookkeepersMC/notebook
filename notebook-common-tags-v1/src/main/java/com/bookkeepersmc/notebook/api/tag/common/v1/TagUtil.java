@@ -27,11 +27,12 @@ import java.util.Optional;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.tags.TagKey;
+import net.minecraft.registry.BuiltInRegistries;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.ResourceKey;
+import net.minecraft.registry.tag.TagKey;
+
 
 /**
  * A Helper class for checking whether a {@link TagKey} contains some entry.
@@ -64,26 +65,26 @@ public final class TagUtil {
 	 * @return if the entry is in the provided tag.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> boolean isIn(@Nullable RegistryAccess registryManager, TagKey<T> tagKey, T entry) {
+	public static <T> boolean isIn(@Nullable DynamicRegistryManager registryManager, TagKey<T> tagKey, T entry) {
 		Optional<? extends Registry<?>> maybeRegistry;
 		Objects.requireNonNull(tagKey);
 		Objects.requireNonNull(entry);
 
 		if (registryManager != null) {
-			maybeRegistry = registryManager.registry(tagKey.registry());
+			maybeRegistry = registryManager.getOptional(tagKey.registry());
 		} else {
-			maybeRegistry = BuiltInRegistries.REGISTRY.getOptional(tagKey.registry().location());
+			maybeRegistry = BuiltInRegistries.ROOT.getOrEmpty(tagKey.registry().getValue());
 		}
 
 		if (maybeRegistry.isPresent()) {
-			if (tagKey.isFor(maybeRegistry.get().key())) {
+			if (tagKey.isOfRegistry(maybeRegistry.get().getKey())) {
 				Registry<T> registry = (Registry<T>) maybeRegistry.get();
 
-				Optional<ResourceKey<T>> maybeKey = registry.getResourceKey(entry);
+				Optional<ResourceKey<T>> maybeKey = registry.getKey(entry);
 
 				// Check synced tag
 				if (maybeKey.isPresent()) {
-					return registry.getHolderOrThrow(maybeKey.get()).is(tagKey);
+					return registry.getHolderOrThrow(maybeKey.get()).isIn(tagKey);
 				}
 			}
 		}

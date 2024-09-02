@@ -30,40 +30,40 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.data.tags.TagsProvider;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagBuilder;
-import net.minecraft.tags.TagEntry;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.material.Fluid;
+import net.minecraft.block.Block;
+import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.data.server.tag.AbstractTagProvider;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.entity.EntityType;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.item.Item;
+import net.minecraft.registry.BuiltInRegistries;
+import net.minecraft.registry.Holder;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.ResourceKey;
+import net.minecraft.registry.tag.TagBuilder;
+import net.minecraft.registry.tag.TagEntry;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 import com.bookkeepersmc.notebook.impl.datagen.ForcedTagEntry;
 
-public abstract class TagDataProvider<T> extends TagsProvider<T> {
+public abstract class TagDataProvider<T> extends AbstractTagProvider<T> {
 	public TagDataProvider(NotebookDataOutput output, ResourceKey<? extends Registry<T>> registryKey, CompletableFuture<HolderLookup.Provider> registriesFuture) {
 		super(output, registryKey, registriesFuture);
 	}
 
-	protected abstract void addTags(HolderLookup.Provider wrapperLookup);
+	protected abstract void configure(HolderLookup.Provider wrapperLookup);
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	protected ResourceKey<T> reverseLookup(T element) {
-		Registry registry = BuiltInRegistries.REGISTRY.get((ResourceKey) registryKey);
+		Registry registry = BuiltInRegistries.ROOT.get((ResourceKey) key);
 
 		if (registry != null) {
-			Optional<Holder<T>> key = registry.getResourceKey(element);
+			Optional<Holder<T>> key = registry.getKey(element);
 
 			if (key.isPresent()) {
 				return (ResourceKey<T>) key.get();
@@ -74,8 +74,8 @@ public abstract class TagDataProvider<T> extends TagsProvider<T> {
 	}
 
 	@Override
-	protected NotebookTagBuilder tag(TagKey<T> tag) {
-		return new NotebookTagBuilder(super.tag(tag));
+	protected NotebookTagBuilder getOrCreateTagBuilder(TagKey<T> tag) {
+		return new NotebookTagBuilder(super.getOrCreateTagBuilder(tag));
 	}
 
 	public abstract static class BlockTagProvider extends TagDataProvider<Block> {
@@ -85,7 +85,7 @@ public abstract class TagDataProvider<T> extends TagsProvider<T> {
 
 		@Override
 		protected ResourceKey<Block> reverseLookup(Block element) {
-			return element.builtInRegistryHolder().key();
+			return element.getBuiltInRegistryHolder().getRegistryKey();
 		}
 	}
 
@@ -96,7 +96,7 @@ public abstract class TagDataProvider<T> extends TagsProvider<T> {
 
 		@Override
 		protected ResourceKey<BlockEntityType<?>> reverseLookup(BlockEntityType<?> element) {
-			return element.builtInRegistryHolder().key();
+			return element.getBuiltinRegistryHolder().getRegistryKey();
 		}
 	}
 
@@ -107,7 +107,7 @@ public abstract class TagDataProvider<T> extends TagsProvider<T> {
 		public ItemTagProvider(NotebookDataOutput output, CompletableFuture<HolderLookup.Provider> completableFuture, @Nullable TagDataProvider.BlockTagProvider blockTagProvider) {
 			super(output, Registries.ITEM, completableFuture);
 
-			this.blockTagBuilderProvider = blockTagProvider == null ? null : blockTagProvider::getOrCreateRawBuilder;
+			this.blockTagBuilderProvider = blockTagProvider == null ? null : blockTagProvider::getTagBuilder;
 		}
 
 		public ItemTagProvider(NotebookDataOutput output, CompletableFuture<HolderLookup.Provider> completableFuture) {
@@ -116,13 +116,13 @@ public abstract class TagDataProvider<T> extends TagsProvider<T> {
 
 		public void copy(TagKey<Block> blockTag, TagKey<Item> itemTag) {
 			TagBuilder blockTagBuilder = Objects.requireNonNull(this.blockTagBuilderProvider, "Pass Block tag provider via constructor to use copy").apply(blockTag);
-			TagBuilder itemTagBuilder = this.getOrCreateRawBuilder(itemTag);
+			TagBuilder itemTagBuilder = this.getTagBuilder(itemTag);
 			blockTagBuilder.build().forEach(itemTagBuilder::add);
 		}
 
 		@Override
 		protected ResourceKey<Item> reverseLookup(Item element) {
-			return element.builtInRegistryHolder().key();
+			return element.getBuiltInRegistryHolder().getRegistryKey();
 		}
 	}
 
@@ -133,7 +133,7 @@ public abstract class TagDataProvider<T> extends TagsProvider<T> {
 
 		@Override
 		protected ResourceKey<Fluid> reverseLookup(Fluid element) {
-			return element.builtInRegistryHolder().key();
+			return element.getBuiltInRegistryHolder().getRegistryKey();
 		}
 	}
 
@@ -150,14 +150,14 @@ public abstract class TagDataProvider<T> extends TagsProvider<T> {
 
 		@Override
 		protected ResourceKey<EntityType<?>> reverseLookup(EntityType<?> element) {
-			return element.builtInRegistryHolder().key();
+			return element.getBuiltInRegistryHolder().getRegistryKey();
 		}
 	}
 
-	public final class NotebookTagBuilder extends TagAppender<T> {
-		private final TagAppender<T> parent;
+	public final class NotebookTagBuilder extends ObjectBuilder<T> {
+		private final ObjectBuilder<T> parent;
 
-		private NotebookTagBuilder(TagAppender<T> parent) {
+		private NotebookTagBuilder(ObjectBuilder<T> parent) {
 			super(parent.builder);
 			this.parent = parent;
 		}
@@ -184,44 +184,44 @@ public abstract class TagDataProvider<T> extends TagsProvider<T> {
 			return this;
 		}
 
-		public NotebookTagBuilder add(ResourceLocation id) {
+		public NotebookTagBuilder add(Identifier id) {
 			builder.addElement(id);
 			return this;
 		}
 
 		@Override
-		public NotebookTagBuilder addOptional(ResourceLocation id) {
+		public NotebookTagBuilder addOptional(Identifier id) {
 			parent.addOptional(id);
 			return this;
 		}
 
 		public NotebookTagBuilder addOptional(ResourceKey<? extends T> registryKey) {
-			return addOptional(registryKey.location());
+			return addOptional(registryKey.getValue());
 		}
 
 		@Override
 		public NotebookTagBuilder addTag(TagKey<T> tag) {
-			builder.addTag(tag.location());
+			builder.addTag(tag.id());
 			return this;
 		}
 
 		@Override
-		public NotebookTagBuilder addOptionalTag(ResourceLocation id) {
+		public NotebookTagBuilder addOptionalTag(Identifier id) {
 			parent.addOptionalTag(id);
 			return this;
 		}
 
 		public NotebookTagBuilder addOptionalTag(TagKey<T> tag) {
-			return addOptionalTag(tag.location());
+			return addOptionalTag(tag.id());
 		}
 
 		public NotebookTagBuilder forceAddTag(TagKey<T> tag) {
-			builder.add(new ForcedTagEntry(TagEntry.element(tag.location())));
+			builder.add(new ForcedTagEntry(TagEntry.ofElement(tag.id())));
 			return this;
 		}
 
-		public NotebookTagBuilder add(ResourceLocation... ids) {
-			for (ResourceLocation id : ids) {
+		public NotebookTagBuilder add(Identifier... ids) {
+			for (Identifier id : ids) {
 				add(id);
 			}
 

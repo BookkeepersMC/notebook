@@ -24,22 +24,22 @@ package com.bookkeepersmc.notebook.impl.tag.common.datagen.generators;
 
 import java.util.concurrent.CompletableFuture;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.registry.Registries;
+import net.minecraft.world.gen.feature.StructureFeature;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 import com.bookkeepersmc.notebook.api.datagen.v1.provider.TagDataProvider;
 import com.bookkeepersmc.notebook.api.tag.common.v1.ConventionalStructureTags;
 
-public final class StructureTagGenerator extends TagDataProvider<Structure> {
+public final class StructureTagGenerator extends TagDataProvider<StructureFeature> {
 	public StructureTagGenerator(NotebookDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
-		super(output, Registries.STRUCTURE, registriesFuture);
+		super(output, Registries.STRUCTURE_FEATURE, registriesFuture);
 	}
 
 	@Override
-	protected void addTags(HolderLookup.Provider wrapperLookup) {
-		tag(ConventionalStructureTags.HIDDEN_FROM_DISPLAYERS);
-		tag(ConventionalStructureTags.HIDDEN_FROM_LOCATOR_SELECTION);
+	protected void configure(HolderLookup.Provider wrapperLookup) {
+		getOrCreateTagBuilder(ConventionalStructureTags.HIDDEN_FROM_DISPLAYERS);
+		getOrCreateTagBuilder(ConventionalStructureTags.HIDDEN_FROM_LOCATOR_SELECTION);
 	}
 }

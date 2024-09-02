@@ -22,7 +22,6 @@
  */
 package com.bookkeepersmc.notebook.mixin.datagen.server;
 
-import java.io.IOException;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,8 +35,8 @@ import com.bookkeepersmc.notebook.impl.datagen.NotebookDatagenHelper;
 @Mixin(Main.class)
 public class MainMixin {
 
-	@Inject(method = "main", at = @At(value = "NEW", target = "net/minecraft/server/dedicated/DedicatedServerSettings"), cancellable = true)
-	private static void main(String[] args, CallbackInfo info) throws IOException {
+	@Inject(method = "main", at = @At(value = "NEW", target = "net/minecraft/server/dedicated/ServerPropertiesLoader"), cancellable = true)
+	private static void main(String[] args, CallbackInfo info) {
 		if (NotebookDatagenHelper.ENABLED) {
 			NotebookDatagenHelper.run();
 			info.cancel();

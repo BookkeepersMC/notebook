@@ -26,11 +26,11 @@ import java.nio.file.Path;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import net.minecraft.data.PackOutput;
+import net.minecraft.data.DataPackOutput;
 
 import com.bookkeepersmc.loader.api.ModContainer;
 
-public final class NotebookDataOutput extends PackOutput {
+public final class NotebookDataOutput extends DataPackOutput {
 	private final ModContainer modContainer;
 	private final boolean strictValidation;
 

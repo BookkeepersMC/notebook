@@ -24,16 +24,16 @@ package com.bookkeepersmc.notebook.api.datagen.v1.loot;
 
 import com.google.common.base.Preconditions;
 
-import net.minecraft.data.loot.BlockLootSubProvider;
+import net.minecraft.data.server.loot_table.BlockLootTableGenerator;
 
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceCondition;
 import com.bookkeepersmc.notebook.impl.datagen.loot.ConditionBlockLootTableGenerator;
 
 public interface NotebookBlockLootTableGenerator {
 
-	default BlockLootSubProvider withConditions(ResourceCondition... conditions) {
+	default BlockLootTableGenerator withConditions(ResourceCondition... conditions) {
 		Preconditions.checkArgument(conditions.length > 0, "Must add at least 1 condition.");
 
-		return new ConditionBlockLootTableGenerator((BlockLootSubProvider) this, conditions);
+		return new ConditionBlockLootTableGenerator((BlockLootTableGenerator) this, conditions);
 	}
 }

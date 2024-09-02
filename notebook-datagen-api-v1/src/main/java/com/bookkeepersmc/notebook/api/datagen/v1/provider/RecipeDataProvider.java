@@ -34,89 +34,107 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.CachedOutput;
+import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementHolder;
+import net.minecraft.data.DataPackOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.recipes.RecipeBuilder;
-import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.data.DataWriter;
+import net.minecraft.data.server.RecipesProvider;
+import net.minecraft.data.server.recipe.RecipeExporter;
+import net.minecraft.data.server.recipe.RecipeJsonFactory;
+import net.minecraft.recipe.Recipe;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 import com.bookkeepersmc.notebook.api.resource.conditions.v1.ResourceCondition;
 import com.bookkeepersmc.notebook.impl.datagen.NotebookDatagenHelper;
 
-public abstract class RecipeDataProvider extends RecipeProvider {
+public abstract class RecipeDataProvider extends RecipesProvider.C_ujfsvkmt {
 	protected final NotebookDataOutput output;
+	private final CompletableFuture<HolderLookup.Provider> provider;
 
 	public RecipeDataProvider(NotebookDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
 		super(output, registriesFuture);
 		this.output = output;
+		this.provider = registriesFuture;
 	}
 
 	@Override
-	public abstract void buildRecipes(RecipeOutput exporter);
+	public abstract RecipesProvider method_62766(HolderLookup.Provider provider, RecipeExporter exporter);
 
-	protected RecipeOutput withConditions(RecipeOutput exporter, ResourceCondition... conditions) {
+	protected RecipeExporter withConditions(RecipeExporter exporter, ResourceCondition... conditions) {
 		Preconditions.checkArgument(conditions.length > 0, "Must add at least one condition.");
-		return new RecipeOutput() {
+		return new RecipeExporter() {
 			@Override
-			public void accept(ResourceLocation identifier, Recipe<?> recipe, @Nullable AdvancementHolder advancementEntry) {
+			public void accept(Identifier identifier, Recipe<?> recipe, @Nullable AdvancementHolder advancementEntry) {
 				NotebookDatagenHelper.addConditions(recipe, conditions);
 				exporter.accept(identifier, recipe, advancementEntry);
 			}
 
 			@Override
-			public Advancement.Builder advancement() {
-				return exporter.advancement();
+			public Advancement.Builder accept() {
+				return exporter.accept()	;
+			}
+
+			@Override
+			public void method_62738() {
+
 			}
 		};
 	}
 
 	@Override
-	public CompletableFuture<?> run(CachedOutput writer, HolderLookup.Provider wrapperLookup) {
-		Set<ResourceLocation> generatedRecipes = Sets.newHashSet();
-		List<CompletableFuture<?>> list = new ArrayList<>();
-		buildRecipes(new RecipeOutput() {
-			@Override
-			public void accept(ResourceLocation recipeId, Recipe<?> recipe, @Nullable AdvancementHolder advancement) {
-				ResourceLocation identifier = getRecipeIdentifier(recipeId);
+	public CompletableFuture<?> run(DataWriter writer) {
+		return provider.thenCompose((wrapperLookup -> {
+			Set<Identifier> generatedRecipes = Sets.newHashSet();
+			List<CompletableFuture<?>> list = new ArrayList<>();
+			method_62766(wrapperLookup, new RecipeExporter() {
+				@Override
+				public void accept(Identifier recipeId, Recipe<?> recipe, @Nullable AdvancementHolder advancement) {
+					Identifier identifier = getRecipeIdentifier(recipeId);
 
-				if (!generatedRecipes.add(identifier)) {
-					throw new IllegalStateException("Duplicate recipe " + identifier);
+					if (!generatedRecipes.add(identifier)) {
+						throw new IllegalStateException("Duplicate recipe " + identifier);
+					}
+
+					RegistryOps<JsonElement> registryOps = wrapperLookup.createSerializationContext(JsonOps.INSTANCE);
+					JsonObject recipeJson = Recipe.CODEC.encodeStart(registryOps, recipe).getOrThrow(IllegalStateException::new).getAsJsonObject();
+					ResourceCondition[] conditions = NotebookDatagenHelper.consumeConditions(recipe);
+					NotebookDatagenHelper.addConditions(recipeJson, conditions);
+
+					final DataPackOutput.PathResolver recipesPathResolver = output.method_60917(Registries.RECIPE);
+					final DataPackOutput.PathResolver advancementsPathResolver = output.method_60917(Registries.ADVANCEMENT);
+
+					list.add(DataProvider.writeToPath(writer, recipeJson, recipesPathResolver.resolveJsonFile(identifier)));
+
+					if (advancement != null) {
+						JsonObject advancementJson = Advancement.CODEC.encodeStart(registryOps, advancement.data()).getOrThrow(IllegalStateException::new).getAsJsonObject();
+						NotebookDatagenHelper.addConditions(advancementJson, conditions);
+						list.add(DataProvider.writeToPath(writer, advancementJson, advancementsPathResolver.resolveJsonFile(getRecipeIdentifier(advancement.id()))));
+					}
 				}
 
-				RegistryOps<JsonElement> registryOps = wrapperLookup.createSerializationContext(JsonOps.INSTANCE);
-				JsonObject recipeJson = Recipe.CODEC.encodeStart(registryOps, recipe).getOrThrow(IllegalStateException::new).getAsJsonObject();
-				ResourceCondition[] conditions = NotebookDatagenHelper.consumeConditions(recipe);
-				NotebookDatagenHelper.addConditions(recipeJson, conditions);
-
-				list.add(DataProvider.saveStable(writer, recipeJson, recipePathProvider.json(identifier)));
-
-				if (advancement != null) {
-					JsonObject advancementJson = Advancement.CODEC.encodeStart(registryOps, advancement.value()).getOrThrow(IllegalStateException::new).getAsJsonObject();
-					NotebookDatagenHelper.addConditions(advancementJson, conditions);
-					list.add(DataProvider.saveStable(writer, advancementJson, advancementPathProvider.json(getRecipeIdentifier(advancement.id()))));
+				@Override
+				public Advancement.Builder accept() {
+					//noinspection removal
+					return Advancement.Builder.create().parent(RecipeJsonFactory.ROOT_ID);
 				}
-			}
 
-			@Override
-			public Advancement.Builder advancement() {
-				//noinspection removal
-				return Advancement.Builder.recipeAdvancement().parent(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT);
-			}
-		});
-		return CompletableFuture.allOf(list.toArray(CompletableFuture[]::new));
+				@Override
+				public void method_62738() {
+				}
+			});
+			return CompletableFuture.allOf(list.toArray(CompletableFuture[]::new));
+		}));
 	}
 
 	/**
 	 * Override this method to change the recipe identifier. The default implementation normalizes the namespace to the mod ID.
 	 */
-	protected ResourceLocation getRecipeIdentifier(ResourceLocation identifier) {
-		return ResourceLocation.fromNamespaceAndPath(output.getModId(), identifier.getPath());
+	protected Identifier getRecipeIdentifier(Identifier identifier) {
+		return Identifier.of(output.getModId(), identifier.getPath());
 	}
 }

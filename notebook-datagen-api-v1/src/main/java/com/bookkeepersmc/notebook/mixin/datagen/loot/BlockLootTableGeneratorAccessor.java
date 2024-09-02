@@ -25,11 +25,11 @@ package com.bookkeepersmc.notebook.mixin.datagen.loot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.loot.BlockLootSubProvider;
+import net.minecraft.data.server.loot_table.BlockLootTableGenerator;
+import net.minecraft.registry.HolderLookup;
 
-@Mixin(BlockLootSubProvider.class)
+@Mixin(BlockLootTableGenerator.class)
 public interface BlockLootTableGeneratorAccessor {
 	@Accessor()
-	HolderLookup.Provider getRegistries();
+	HolderLookup.Provider getProvider();
 }

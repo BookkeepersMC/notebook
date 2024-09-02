@@ -1,0 +1,5 @@
+accessWidener	v2	named
+# Place access wideners that are required during javadoc generation here
+
+accessible class net/minecraft/data/server/RecipesProvider$C_ujfsvkmt
+accessible class net/minecraft/item/ItemGroup$Visibility

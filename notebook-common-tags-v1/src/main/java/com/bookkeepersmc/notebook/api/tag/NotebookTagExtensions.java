@@ -22,9 +22,9 @@
  */
 package com.bookkeepersmc.notebook.api.tag;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public interface NotebookTagExtensions {
 
@@ -33,10 +33,10 @@ public interface NotebookTagExtensions {
 		stringBuilder.append("tag.");
 
 		TagKey<?> tagKey = (TagKey<?>) this;
-		ResourceLocation registryIdentifier = tagKey.registry().location();
-		ResourceLocation tagIdentifier = tagKey.location();
+		Identifier registryIdentifier = tagKey.registry().getValue();
+		Identifier tagIdentifier = tagKey.id();
 
-		if (!registryIdentifier.getNamespace().equals(ResourceLocation.DEFAULT_NAMESPACE)) {
+		if (!registryIdentifier.getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) {
 			stringBuilder.append(registryIdentifier.getNamespace())
 					.append(".");
 		}
@@ -50,7 +50,7 @@ public interface NotebookTagExtensions {
 		return stringBuilder.toString();
 	}
 
-	default Component getName() {
-		return Component.translatableWithFallback(getTranslationKey(), "#" + ((TagKey<?>) this).location().toString());
+	default Text getName() {
+		return Text.translatableWithFallback(getTranslationKey(), "#" + ((TagKey<?>) this).id().toString());
 	}
 }

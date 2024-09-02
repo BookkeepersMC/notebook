@@ -35,43 +35,43 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
-import net.minecraft.data.CachedOutput;
+import net.minecraft.data.DataPackOutput;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.PackOutput;
-import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.data.DataWriter;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.registry.ResourceKey;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 
 public abstract class CodecDataProvider<T> implements DataProvider {
-	private final PackOutput.PathProvider pathProvider;
+	private final DataPackOutput.PathResolver pathProvider;
 	private final CompletableFuture<HolderLookup.Provider> provider;
 	private final Codec<T> codec;
 
-	protected CodecDataProvider(PackOutput.PathProvider pathProvider, CompletableFuture<HolderLookup.Provider> provider, Codec<T> codec) {
+	protected CodecDataProvider(DataPackOutput.PathResolver pathProvider, CompletableFuture<HolderLookup.Provider> provider, Codec<T> codec) {
 		this.pathProvider = pathProvider;
 		this.provider = Objects.requireNonNull(provider);
 		this.codec = codec;
 	}
 
-	protected CodecDataProvider(NotebookDataOutput dataOutput, CompletableFuture<HolderLookup.Provider> registriesFuture, PackOutput.Target outputType, String directoryName, Codec<T> codec) {
-		this(dataOutput.createPathProvider(outputType, directoryName), registriesFuture, codec);
+	protected CodecDataProvider(NotebookDataOutput dataOutput, CompletableFuture<HolderLookup.Provider> registriesFuture, DataPackOutput.Type outputType, String directoryName, Codec<T> codec) {
+		this(dataOutput.createPathResolver(outputType, directoryName), registriesFuture, codec);
 	}
 
 	protected CodecDataProvider(NotebookDataOutput dataOutput, CompletableFuture<HolderLookup.Provider> registriesFuture, ResourceKey<? extends Registry<?>> key, Codec<T> codec) {
-		this(dataOutput.createRegistryElementsPathProvider(key), registriesFuture, codec);
+		this(dataOutput.method_60917(key), registriesFuture, codec);
 	}
 
 	@Override
-	public CompletableFuture<?> run(CachedOutput cachedOutput) {
+	public CompletableFuture<?> run(DataWriter cachedOutput) {
 		return this.provider.thenCompose(lookup -> {
-			Map<ResourceLocation, JsonElement> entries = new HashMap<>();
+			Map<Identifier, JsonElement> entries = new HashMap<>();
 			RegistryOps<JsonElement> ops = lookup.createSerializationContext(JsonOps.INSTANCE);
 
-			BiConsumer<ResourceLocation, T> provider = (id, value) -> {
+			BiConsumer<Identifier, T> provider = (id, value) -> {
 				JsonElement json = this.convert(id, value, ops);
 				JsonElement existingJson = entries.put(id, json);
 
@@ -85,19 +85,19 @@ public abstract class CodecDataProvider<T> implements DataProvider {
 		});
 	}
 
-	protected abstract void configure(BiConsumer<ResourceLocation, T> provider, HolderLookup.Provider lookup);
+	protected abstract void configure(BiConsumer<Identifier, T> provider, HolderLookup.Provider lookup);
 
-	private JsonElement convert(ResourceLocation id, T value, DynamicOps<JsonElement> ops) {
+	private JsonElement convert(Identifier id, T value, DynamicOps<JsonElement> ops) {
 		DataResult<JsonElement> dataResult = this.codec.encodeStart(ops, value);
 		return dataResult
 				.mapError(mesage -> "Invalid entry %s: %s".formatted(id, mesage))
 				.getOrThrow();
 	}
 
-	private CompletableFuture<?> write(CachedOutput output, Map<ResourceLocation, JsonElement> entries) {
+	private CompletableFuture<?> write(DataWriter output, Map<Identifier, JsonElement> entries) {
 		return CompletableFuture.allOf(entries.entrySet().stream().map(entry -> {
-			Path path = this.pathProvider.json(entry.getKey());
-			return DataProvider.saveStable(output, entry.getValue(), path);
+			Path path = this.pathProvider.resolveJsonFile(entry.getKey());
+			return DataProvider.writeToPath(output, entry.getValue(), path);
 		}).toArray(CompletableFuture[]::new));
 	}
 }

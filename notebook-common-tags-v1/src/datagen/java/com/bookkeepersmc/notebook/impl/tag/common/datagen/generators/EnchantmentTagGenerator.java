@@ -24,9 +24,9 @@ package com.bookkeepersmc.notebook.impl.tag.common.datagen.generators;
 
 import java.util.concurrent.CompletableFuture;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.enchantment.Enchantments;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 import com.bookkeepersmc.notebook.api.datagen.v1.provider.TagDataProvider;
@@ -38,25 +38,25 @@ public final class EnchantmentTagGenerator extends TagDataProvider.EnchantmentTa
 	}
 
 	@Override
-	protected void addTags(HolderLookup.Provider provider) {
-		tag(ConventionalEnchantmentTags.INCREASE_BLOCK_DROPS)
+	protected void configure(HolderLookup.Provider provider) {
+		getOrCreateTagBuilder(ConventionalEnchantmentTags.INCREASE_BLOCK_DROPS)
 				.add(Enchantments.FORTUNE);
-		tag(ConventionalEnchantmentTags.INCREASE_ENTITY_DROPS)
+		getOrCreateTagBuilder(ConventionalEnchantmentTags.INCREASE_ENTITY_DROPS)
 				.add(Enchantments.LOOTING);
-		tag(ConventionalEnchantmentTags.WEAPON_DAMAGE_ENHANCEMENTS)
+		getOrCreateTagBuilder(ConventionalEnchantmentTags.WEAPON_DAMAGE_ENHANCEMENTS)
 				.add(Enchantments.SHARPNESS)
 				.add(Enchantments.SMITE)
 				.add(Enchantments.BANE_OF_ARTHROPODS)
 				.add(Enchantments.POWER)
 				.add(Enchantments.IMPALING);
-		tag(ConventionalEnchantmentTags.ENTITY_SPEED_ENHANCEMENTS)
+		getOrCreateTagBuilder(ConventionalEnchantmentTags.ENTITY_SPEED_ENHANCEMENTS)
 				.add(Enchantments.SOUL_SPEED)
 				.add(Enchantments.SWIFT_SNEAK)
 				.add(Enchantments.DEPTH_STRIDER);
-		tag(ConventionalEnchantmentTags.ENTITY_AUXILIARY_MOVEMENT_ENHANCEMENTS)
+		getOrCreateTagBuilder(ConventionalEnchantmentTags.ENTITY_AUXILIARY_MOVEMENT_ENHANCEMENTS)
 				.add(Enchantments.FEATHER_FALLING)
 				.add(Enchantments.FROST_WALKER);
-		tag(ConventionalEnchantmentTags.ENTITY_DEFENSE_ENHANCEMENTS)
+		getOrCreateTagBuilder(ConventionalEnchantmentTags.ENTITY_DEFENSE_ENHANCEMENTS)
 				.add(Enchantments.PROTECTION)
 				.add(Enchantments.BLAST_PROTECTION)
 				.add(Enchantments.PROJECTILE_PROTECTION)
@@ -66,9 +66,9 @@ public final class EnchantmentTagGenerator extends TagDataProvider.EnchantmentTa
 
 		// Backwards compat with pre-1.21 tags. Done after so optional tag is last for better readability.
 		// TODO: Remove backwards compat tag entries in 1.22
-		tag(ConventionalEnchantmentTags.ENTITY_SPEED_ENHANCEMENTS)
-				.addOptionalTag(ResourceLocation.fromNamespaceAndPath("c", "entity_movement_enhancement"));
-		tag(ConventionalEnchantmentTags.ENTITY_DEFENSE_ENHANCEMENTS)
-				.addOptionalTag(ResourceLocation.fromNamespaceAndPath("c", "entity_defense_enhancement"));
+		getOrCreateTagBuilder(ConventionalEnchantmentTags.ENTITY_SPEED_ENHANCEMENTS)
+				.addOptionalTag(Identifier.of("c", "entity_movement_enhancement"));
+		getOrCreateTagBuilder(ConventionalEnchantmentTags.ENTITY_DEFENSE_ENHANCEMENTS)
+				.addOptionalTag(Identifier.of("c", "entity_defense_enhancement"));
 	}
 }

@@ -31,28 +31,28 @@ import java.util.function.BiConsumer;
 
 import com.google.common.collect.Sets;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.CachedOutput;
-import net.minecraft.data.loot.BlockLootSubProvider;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.flag.FeatureFlags;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.block.Block;
+import net.minecraft.data.DataWriter;
+import net.minecraft.data.server.loot_table.BlockLootTableGenerator;
+import net.minecraft.feature_flags.FeatureFlags;
+import net.minecraft.loot.LootTable;
+import net.minecraft.loot.LootTables;
+import net.minecraft.loot.context.LootContextTypes;
+import net.minecraft.registry.BuiltInRegistries;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.registry.ResourceKey;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 import com.bookkeepersmc.notebook.impl.datagen.loot.NotebookLootTableProviderImpl;
 
-public abstract class BlockLootTableDataProvider extends BlockLootSubProvider implements LootTableDataProvider {
+public abstract class BlockLootTableDataProvider extends BlockLootTableGenerator implements LootTableDataProvider {
 	private final NotebookDataOutput output;
-	private final Set<ResourceLocation> excludedFromStrictValidation = new HashSet<>();
+	private final Set<Identifier> excludedFromStrictValidation = new HashSet<>();
 	private final CompletableFuture<HolderLookup.Provider> registryLookupFuture;
 
 	protected BlockLootTableDataProvider(NotebookDataOutput dataOutput, CompletableFuture<HolderLookup.Provider> registryLookup) {
-		super(Collections.emptySet(), FeatureFlags.REGISTRY.allFlags(), registryLookup.join());
+		super(Collections.emptySet(), FeatureFlags.MAIN_REGISTRY.setOf(), registryLookup.join());
 		this.output = dataOutput;
 		this.registryLookupFuture = registryLookup;
 	}
@@ -69,17 +69,17 @@ public abstract class BlockLootTableDataProvider extends BlockLootSubProvider im
 	 * Disable strict validation for the passed block.
 	 */
 	public void excludeFromStrictValidation(Block block) {
-		excludedFromStrictValidation.add(BuiltInRegistries.BLOCK.getKey(block));
+		excludedFromStrictValidation.add(BuiltInRegistries.BLOCK.getId(block));
 	}
 
 	@Override
 	public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
 		generate();
 
-		for (Map.Entry<ResourceKey<LootTable>, LootTable.Builder> entry : map.entrySet()) {
+		for (Map.Entry<ResourceKey<LootTable>, LootTable.Builder> entry : lootTables.entrySet()) {
 			ResourceKey<LootTable> registryKey = entry.getKey();
 
-			if (registryKey == BuiltInLootTables.EMPTY) {
+			if (registryKey == LootTables.EMPTY) {
 				continue;
 			}
 
@@ -87,14 +87,14 @@ public abstract class BlockLootTableDataProvider extends BlockLootSubProvider im
 		}
 
 		if (output.isStrictValidationEnabled()) {
-			Set<ResourceLocation> missing = Sets.newHashSet();
+			Set<Identifier> missing = Sets.newHashSet();
 
-			for (ResourceLocation blockId : BuiltInRegistries.BLOCK.keySet()) {
+			for (Identifier blockId : BuiltInRegistries.BLOCK.getIds()) {
 				if (blockId.getNamespace().equals(output.getModId())) {
-					ResourceKey<LootTable> blockLootTableId = BuiltInRegistries.BLOCK.get(blockId).getLootTable();
+					ResourceKey<LootTable> blockLootTableId = BuiltInRegistries.BLOCK.get(blockId).getLootTableId();
 
-					if (blockLootTableId.location().getNamespace().equals(output.getModId())) {
-						if (!map.containsKey(blockLootTableId)) {
+					if (blockLootTableId.getValue().getNamespace().equals(output.getModId())) {
+						if (!lootTables.containsKey(blockLootTableId)) {
 							missing.add(blockId);
 						}
 					}
@@ -110,8 +110,8 @@ public abstract class BlockLootTableDataProvider extends BlockLootSubProvider im
 	}
 
 	@Override
-	public CompletableFuture<?> run(CachedOutput writer) {
-		return NotebookLootTableProviderImpl.run(writer, this, LootContextParamSets.BLOCK, output, registryLookupFuture);
+	public CompletableFuture<?> run(DataWriter writer) {
+		return NotebookLootTableProviderImpl.run(writer, this, LootContextTypes.BLOCK, output, registryLookupFuture);
 	}
 
 	@Override

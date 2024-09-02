@@ -44,16 +44,16 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.minecraft.Util;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.RegistrySetBuilder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.registries.VanillaRegistries;
-import net.minecraft.data.worldgen.BootstrapContext;
-import net.minecraft.resources.RegistryDataLoader;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.registry.BootstrapContext;
+import net.minecraft.registry.BuiltInRegistries;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.HolderLookup;
+import net.minecraft.registry.RegistryLoader;
+import net.minecraft.registry.RegistrySetBuilder;
+import net.minecraft.registry.ResourceKey;
+import net.minecraft.registry.VanillaDynamicRegistries;
+import net.minecraft.util.Util;
 
 import com.bookkeepersmc.loader.api.ModContainer;
 import com.bookkeepersmc.loader.api.NotebookLoader;
@@ -104,7 +104,7 @@ public class NotebookDatagenHelper {
 
 		// Ensure that the DataGeneratorEntrypoint is constructed on the main thread.
 		final List<DataGeneratorEntrypoint> entrypoints = datagenInitializers.stream().map(EntrypointContainer::getEntrypoint).toList();
-		CompletableFuture<HolderLookup.Provider> registriesFuture = CompletableFuture.supplyAsync(() -> createRegistryWrapper(entrypoints), Util.backgroundExecutor());
+		CompletableFuture<HolderLookup.Provider> registriesFuture = CompletableFuture.supplyAsync(() -> createRegistryWrapper(entrypoints), Util.getMainWorkerExecutor());
 
 		Object2IntOpenHashMap<String> jsonKeySortOrders = (Object2IntOpenHashMap<String>) DataProvider.FIXED_ORDER_FIELDS;
 		Object2IntOpenHashMap<String> defaultJsonKeySortOrders = new Object2IntOpenHashMap<>(jsonKeySortOrders);
@@ -151,7 +151,7 @@ public class NotebookDatagenHelper {
 	private static HolderLookup.Provider createRegistryWrapper(List<DataGeneratorEntrypoint> dataGeneratorInitializers) {
 		// Build a list of all the RegistryBuilder's including vanilla's
 		List<RegistrySetBuilder> builders = new ArrayList<>();
-		builders.add(VanillaRegistries.BUILDER);
+		builders.add(VanillaDynamicRegistries.BUILDER);
 
 		for (DataGeneratorEntrypoint entrypoint : dataGeneratorInitializers) {
 			final var registryBuilder = new RegistrySetBuilder();
@@ -188,7 +188,7 @@ public class NotebookDatagenHelper {
 
 		Map<ResourceKey<?>, BuilderData> builderDataMap = new HashMap<>();
 
-		for (RegistryDataLoader.RegistryData<?> key : DynamicRegistries.getDynamicRegistries()) {
+		for (RegistryLoader.DecodingData<?> key : DynamicRegistries.getDynamicRegistries()) {
 			builderDataMap.computeIfAbsent(key.key(), BuilderData::new);
 		}
 
@@ -205,8 +205,8 @@ public class NotebookDatagenHelper {
 			value.apply(merged);
 		}
 
-		HolderLookup.Provider wrapperLookup = merged.build(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY));
-		VanillaRegistries.validateThatAllBiomeFeaturesHaveBiomeFilter(wrapperLookup);
+		HolderLookup.Provider wrapperLookup = merged.build(DynamicRegistryManager.fromRegistryOfRegistries(BuiltInRegistries.ROOT));
+		VanillaDynamicRegistries.validateBiomeFeatures(wrapperLookup);
 		return wrapperLookup;
 	}
 

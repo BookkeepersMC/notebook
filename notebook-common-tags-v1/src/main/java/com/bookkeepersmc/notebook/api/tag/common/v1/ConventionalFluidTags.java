@@ -22,8 +22,8 @@
  */
 package com.bookkeepersmc.notebook.api.tag.common.v1;
 
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.material.Fluid;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.registry.tag.TagKey;
 
 import com.bookkeepersmc.notebook.impl.tag.common.v1.TagRegistration;
 

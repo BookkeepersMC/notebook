@@ -24,7 +24,7 @@ package com.bookkeepersmc.notebook.api.datagen.v1;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.core.RegistrySetBuilder;
+import net.minecraft.registry.RegistrySetBuilder;
 
 @FunctionalInterface
 public interface DataGeneratorEntrypoint {

@@ -25,8 +25,8 @@ package com.bookkeepersmc.notebook.impl.datagen;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagEntry;
+import net.minecraft.registry.tag.TagEntry;
+import net.minecraft.util.Identifier;
 
 public class ForcedTagEntry extends TagEntry {
 	private final TagEntry entry;
@@ -42,7 +42,7 @@ public class ForcedTagEntry extends TagEntry {
 	}
 
 	@Override
-	public boolean verifyIfPresent(Predicate<ResourceLocation> predicate, Predicate<ResourceLocation> predicate2) {
+	public boolean verifyIfPresent(Predicate<Identifier> predicate, Predicate<Identifier> predicate2) {
 		return true;
 	}
 }

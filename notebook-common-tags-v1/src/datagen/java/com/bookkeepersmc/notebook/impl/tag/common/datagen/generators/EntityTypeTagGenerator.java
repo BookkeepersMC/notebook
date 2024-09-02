@@ -24,8 +24,8 @@ package com.bookkeepersmc.notebook.impl.tag.common.datagen.generators;
 
 import java.util.concurrent.CompletableFuture;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.entity.EntityType;
+import net.minecraft.registry.HolderLookup;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 import com.bookkeepersmc.notebook.api.datagen.v1.provider.TagDataProvider;
@@ -37,11 +37,11 @@ public final class EntityTypeTagGenerator extends TagDataProvider.EntityTypeTagP
 	}
 
 	@Override
-	protected void addTags(HolderLookup.Provider wrapperLookup) {
-		tag(ConventionalEntityTypeTags.BOSSES)
+	protected void configure(HolderLookup.Provider wrapperLookup) {
+		getOrCreateTagBuilder(ConventionalEntityTypeTags.BOSSES)
 				.add(EntityType.WITHER)
 				.add(EntityType.ENDER_DRAGON);
-		tag(ConventionalEntityTypeTags.MINECARTS)
+		getOrCreateTagBuilder(ConventionalEntityTypeTags.MINECARTS)
 				.add(EntityType.MINECART)
 				.add(EntityType.TNT_MINECART)
 				.add(EntityType.CHEST_MINECART)
@@ -49,10 +49,10 @@ public final class EntityTypeTagGenerator extends TagDataProvider.EntityTypeTagP
 				.add(EntityType.COMMAND_BLOCK_MINECART)
 				.add(EntityType.HOPPER_MINECART)
 				.add(EntityType.SPAWNER_MINECART);
-		tag(ConventionalEntityTypeTags.BOATS)
+		getOrCreateTagBuilder(ConventionalEntityTypeTags.BOATS)
 				.add(EntityType.BOAT)
 				.add(EntityType.CHEST_BOAT);
-		tag(ConventionalEntityTypeTags.CAPTURING_NOT_SUPPORTED);
-		tag(ConventionalEntityTypeTags.TELEPORTING_NOT_SUPPORTED);
+		getOrCreateTagBuilder(ConventionalEntityTypeTags.CAPTURING_NOT_SUPPORTED);
+		getOrCreateTagBuilder(ConventionalEntityTypeTags.TELEPORTING_NOT_SUPPORTED);
 	}
 }

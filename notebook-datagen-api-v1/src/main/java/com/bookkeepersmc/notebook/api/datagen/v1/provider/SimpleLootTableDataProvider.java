@@ -25,10 +25,10 @@ package com.bookkeepersmc.notebook.api.datagen.v1.provider;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.CachedOutput;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.data.DataWriter;
+import net.minecraft.loot.context.LootContextType;
+import net.minecraft.loot.context.LootContextTypes;
+import net.minecraft.registry.HolderLookup;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 import com.bookkeepersmc.notebook.impl.datagen.loot.NotebookLootTableProviderImpl;
@@ -36,21 +36,21 @@ import com.bookkeepersmc.notebook.impl.datagen.loot.NotebookLootTableProviderImp
 public abstract class SimpleLootTableDataProvider implements LootTableDataProvider {
 	protected final NotebookDataOutput output;
 	private final CompletableFuture<HolderLookup.Provider> registryLookup;
-	protected final LootContextParamSet lootContextType;
+	protected final LootContextType lootContextType;
 
-	public SimpleLootTableDataProvider(NotebookDataOutput output, CompletableFuture<HolderLookup.Provider> registryLookup, LootContextParamSet lootContextType) {
+	public SimpleLootTableDataProvider(NotebookDataOutput output, CompletableFuture<HolderLookup.Provider> registryLookup, LootContextType lootContextType) {
 		this.output = output;
 		this.registryLookup = registryLookup;
 		this.lootContextType = lootContextType;
 	}
 
 	@Override
-	public CompletableFuture<?> run(CachedOutput writer) {
+	public CompletableFuture<?> run(DataWriter writer) {
 		return NotebookLootTableProviderImpl.run(writer, this, lootContextType, output, registryLookup);
 	}
 
 	@Override
 	public String getName() {
-		return Objects.requireNonNull(LootContextParamSets.REGISTRY.inverse().get(lootContextType), "Could not get id for loot context type") + " Loot Table";
+		return Objects.requireNonNull(LootContextTypes.MAP.inverse().get(lootContextType), "Could not get id for loot context type") + " Loot Table";
 	}
 }
