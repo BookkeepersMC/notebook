@@ -24,29 +24,29 @@ package com.bookkeepersmc.notebook.impl.mod.screen.gui.widget;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.button.ButtonWidget;
+import net.minecraft.text.Text;
 
 import com.bookkeepersmc.notebook.impl.mod.screen.NotebookModScreen;
 import com.bookkeepersmc.notebook.impl.mod.screen.config.ModScreenConfig;
 import com.bookkeepersmc.notebook.impl.mod.screen.gui.ModsScreen;
 
-public class ModScreenButtonWidget extends Button {
-	public ModScreenButtonWidget(int x, int y, int width, int height, Component text, Screen screen) {
+public class ModScreenButtonWidget extends ButtonWidget {
+	public ModScreenButtonWidget(int x, int y, int width, int height, Text text, Screen screen) {
 		super(x,
 			y,
 			width,
 			height,
 			text,
 			button -> Minecraft.getInstance().setScreen(new ModsScreen(screen)),
-			Button.DEFAULT_NARRATION
+			ButtonWidget.DEFAULT_NARRATION
 		);
 	}
 
 	@Override
-	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-		super.renderWidget(guiGraphics, mouseX, mouseY, delta);
+	public void drawWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+		super.drawWidget(guiGraphics, mouseX, mouseY, delta);
 		if (ModScreenConfig.BUTTON_UPDATE_BADGE.getValue() && NotebookModScreen.areModUpdatesAvailable()) {
 			UpdateAvailableBadge.renderBadge(guiGraphics,
 				this.width + this.getX() - 16,

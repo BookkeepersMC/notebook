@@ -23,12 +23,7 @@
 package com.bookkeepersmc.notebook.impl.mod.screen;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.gson.FieldNamingPolicy;
@@ -37,9 +32,9 @@ import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.Text;
 
 import com.bookkeepersmc.api.ClientModInitializer;
 import com.bookkeepersmc.loader.api.ModContainer;
@@ -217,12 +212,12 @@ public class NotebookModScreen implements ClientModInitializer {
 		return NumberFormat.getInstance().format(cachedDisplayedModCount);
 	}
 
-	public static Component createModsButtonText(boolean title) {
+	public static Text createModsButtonText(boolean title) {
 		String count = NotebookModScreen.getDisplayedModCount();
 		String specificKey = "modscreen.loaded." + count;
-		String key = I18n.exists(specificKey) ? specificKey : "modscreen.loaded";
+		String key = I18n.hasTranslation(specificKey) ? specificKey : "modscreen.loaded";
 
-		Component numberOnText = Component.literal(count);
+		Text numberOnText = Text.literal(count);
 
 		return numberOnText.copy().append(" ").append(ModScreenTexts.TITLE);
 	}

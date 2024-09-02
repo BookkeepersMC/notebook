@@ -35,11 +35,7 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Sets;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 
 import com.bookkeepersmc.loader.api.NotebookLoader;
 import com.bookkeepersmc.notebook.impl.mod.screen.NotebookModScreen;

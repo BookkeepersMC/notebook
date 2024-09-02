@@ -25,11 +25,12 @@ package com.bookkeepersmc.notebook.impl.mod.screen.util;
 import java.text.NumberFormat;
 import java.util.Arrays;
 
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.Text;
+
 
 public class TranslationUtil {
-	public static Component translateNumeric(String key, int[]... args) {
+	public static Text translateNumeric(String key, int[]... args) {
 		Object[] realArgs = new Object[args.length];
 		for (int i = 0; i < args.length; i++) {
 			NumberFormat nf = NumberFormat.getInstance();
@@ -65,11 +66,11 @@ public class TranslationUtil {
 				}
 			}
 			lastKey = fullKey.toString();
-			if (I18n.exists(lastKey)) {
-				return Component.translatable(lastKey, realArgs);
+			if (I18n.hasTranslation(lastKey)) {
+				return Text.translatable(lastKey, realArgs);
 			}
 		}
-		return Component.translatable(lastKey, realArgs);
+		return Text.translatable(lastKey, realArgs);
 	}
 
 	public static String translationKeyOf(String type, String id) {

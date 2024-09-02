@@ -22,36 +22,36 @@
  */
 package com.bookkeepersmc.notebook.impl.mod.screen.util;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
+import net.minecraft.text.CommonTexts;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 public final class ModScreenTexts {
-	public static final Component CONFIGURE = Component.translatable("modscreen.configure");
-	public static final Component DROP_CONFIRM = Component.translatable("modscreen.dropConfirm");
-	public static final Component DROP_INFO_LINE_1 = Component.translatable("modscreen.dropInfo.line1");
-	public static final Component DROP_INFO_LINE_2 = Component.translatable("modscreen.dropInfo.line2");
-	public static final Component DROP_SUCCESSFUL_LINE_1 = Component.translatable("modscreen.dropSuccessful.line1");
-	public static final Component DROP_SUCCESSFUL_LINE_2 = Component.translatable("modscreen.dropSuccessful.line2");
-	public static final Component ISSUES = Component.translatable("modscreen.issues");
-	public static final Component MODS_FOLDER = Component.translatable("modscreen.modsFolder");
-	public static final Component SEARCH = Component.translatable("modscreen.search");
-	public static final Component TITLE = Component.translatable("modscreen.title");
-	public static final Component TOGGLE_FILTER_OPTIONS = Component.translatable("modscreen.toggleFilterOptions");
-	public static final Component WEBSITE = Component.translatable("modscreen.website");
+	public static final Text CONFIGURE = Text.translatable("modscreen.configure");
+	public static final Text DROP_CONFIRM = Text.translatable("modscreen.dropConfirm");
+	public static final Text DROP_INFO_LINE_1 = Text.translatable("modscreen.dropInfo.line1");
+	public static final Text DROP_INFO_LINE_2 = Text.translatable("modscreen.dropInfo.line2");
+	public static final Text DROP_SUCCESSFUL_LINE_1 = Text.translatable("modscreen.dropSuccessful.line1");
+	public static final Text DROP_SUCCESSFUL_LINE_2 = Text.translatable("modscreen.dropSuccessful.line2");
+	public static final Text ISSUES = Text.translatable("modscreen.issues");
+	public static final Text MODS_FOLDER = Text.translatable("modscreen.modsFolder");
+	public static final Text SEARCH = Text.translatable("modscreen.search");
+	public static final Text TITLE = Text.translatable("modscreen.title");
+	public static final Text TOGGLE_FILTER_OPTIONS = Text.translatable("modscreen.toggleFilterOptions");
+	public static final Text WEBSITE = Text.translatable("modscreen.website");
 
 	private ModScreenTexts() {
 	}
 
-	public static Component modIdTooltip(String modId) {
-		return Component.translatable("modscreen.modIdToolTip", modId);
+	public static Text modIdTooltip(String modId) {
+		return Text.translatable("modscreen.modIdToolTip", modId);
 	}
 
-	public static Component configureError(String modId, Throwable e) {
-		return Component.translatable("modscreen.configure.error", modId, modId)
-			.append(CommonComponents.NEW_LINE)
-			.append(CommonComponents.NEW_LINE)
+	public static Text configureError(String modId, Throwable e) {
+		return Text.translatable("modscreen.configure.error", modId, modId)
+			.append(CommonTexts.LINE_BREAK)
+			.append(CommonTexts.LINE_BREAK)
 			.append(e.toString())
-			.withStyle(ChatFormatting.RED);
+			.formatted(Formatting.RED);
 	}
 }

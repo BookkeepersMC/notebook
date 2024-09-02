@@ -23,24 +23,24 @@
 package com.bookkeepersmc.notebook.impl.mod.screen.gui;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.options.OptionsSubScreen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.option.GameOptionsScreen;
+import net.minecraft.text.Text;
 
 import com.bookkeepersmc.notebook.impl.mod.screen.NotebookModScreen;
 import com.bookkeepersmc.notebook.impl.mod.screen.config.ModScreenConfig;
 import com.bookkeepersmc.notebook.impl.mod.screen.config.ModScreenConfigManager;
 
-public class ModScreenOptionsScreen extends OptionsSubScreen {
+public class ModScreenOptionsScreen extends GameOptionsScreen {
 
 	public ModScreenOptionsScreen(Screen previous) {
-		super(previous, Minecraft.getInstance().options, Component.translatable("modscreen.options"));
+		super(previous, Minecraft.getInstance().options, Text.translatable("modscreen.options"));
 	}
 
 	@Override
-	protected void addOptions() {
-		if (this.list != null) {
-			this.list.addSmall(ModScreenConfig.asOptions());
+	protected void initOptionButtons() {
+		if (this.buttonList != null) {
+			this.buttonList.addEntries(ModScreenConfig.asOptions());
 		}
 	}
 

@@ -22,21 +22,12 @@
  */
 package com.bookkeepersmc.notebook.impl.mod.screen.util.mod.notebook;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.texture.NativeImageBackedTexture;
 
 import com.bookkeepersmc.loader.api.ModContainer;
 import com.bookkeepersmc.loader.api.NotebookLoader;
@@ -67,14 +58,14 @@ public class DummyParentMod implements Mod {
 		if (parentData != null) {
 			return parentData.getName().orElse("");
 		}
-		if (id.equals("notebook-api")) {
-			return "Notebook API";
+		if (id.equals("fabric-api")) {
+			return "Fabric API";
 		}
 		return id;
 	}
 
 	@Override
-	public @NotNull DynamicTexture getIcon(IconHandler iconHandler, int i) {
+	public @NotNull NativeImageBackedTexture getIcon(IconHandler iconHandler, int i) {
 		String iconSourceId = host.getId();
 		NotebookMod.ModMenuData.DummyParentData parentData = host.getModMenuData().getDummyParentData();
 		String iconPath = null;
@@ -143,7 +134,7 @@ public class DummyParentMod implements Mod {
 			return parentData.getBadges();
 		}
 		var badges = new HashSet<Badge>();
-		if (id.equals("notebook-api")) {
+		if (id.equals("fabric-api")) {
 			badges.add(Badge.LIBRARY);
 		}
 

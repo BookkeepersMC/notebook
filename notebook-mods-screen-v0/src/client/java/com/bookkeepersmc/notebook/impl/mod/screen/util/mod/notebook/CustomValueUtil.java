@@ -22,11 +22,7 @@
  */
 package com.bookkeepersmc.notebook.impl.mod.screen.util.mod.notebook;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import com.bookkeepersmc.loader.api.metadata.CustomValue;
 import com.bookkeepersmc.loader.api.metadata.ModMetadata;

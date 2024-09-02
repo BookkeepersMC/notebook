@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.util.Tuple;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.util.Pair;
 
 import com.bookkeepersmc.notebook.impl.mod.screen.NotebookModScreen;
 import com.bookkeepersmc.notebook.impl.mod.screen.config.ModScreenConfig;
@@ -44,12 +44,12 @@ public class ModSearch {
 			return candidates;
 		}
 		return candidates.stream()
-			.map(modContainer -> new Tuple<>(modContainer,
+			.map(modContainer -> new Pair<>(modContainer,
 				passesFilters(screen, modContainer, query.toLowerCase(Locale.ROOT))
 			))
-			.filter(pair -> pair.getB() > 0)
-			.sorted((a, b) -> b.getB() - a.getB())
-			.map(Tuple::getA)
+			.filter(pair -> pair.getRight() > 0)
+			.sorted((a, b) -> b.getRight() - a.getRight())
+			.map(Pair::getLeft)
 			.collect(Collectors.toList());
 	}
 
@@ -60,13 +60,13 @@ public class ModSearch {
 		String modDescription = mod.getDescription();
 		String modSummary = mod.getSummary();
 
-		String library = I18n.get("modscreen.searchTerms.library");
-		String patchwork = I18n.get("modscreen.searchTerms.patchwork");
-		String modpack = I18n.get("modscreen.searchTerms.modpack");
-		String deprecated = I18n.get("modscreen.searchTerms.deprecated");
-		String clientside = I18n.get("modscreen.searchTerms.clientside");
-		String configurable = I18n.get("modscreen.searchTerms.configurable");
-		String hasUpdate = I18n.get("modscreen.searchTerms.hasUpdate");
+		String library = I18n.translate("modscreen.searchTerms.library");
+		String patchwork = I18n.translate("modscreen.searchTerms.patchwork");
+		String modpack = I18n.translate("modscreen.searchTerms.modpack");
+		String deprecated = I18n.translate("modscreen.searchTerms.deprecated");
+		String clientside = I18n.translate("modscreen.searchTerms.clientside");
+		String configurable = I18n.translate("modscreen.searchTerms.configurable");
+		String hasUpdate = I18n.translate("modscreen.searchTerms.hasUpdate");
 
 		// Libraries are currently hidden, ignore them entirely
 		if (mod.isHidden() || !ModScreenConfig.SHOW_LIBRARIES.getValue() && mod.getBadges().contains(Mod.Badge.LIBRARY)) {

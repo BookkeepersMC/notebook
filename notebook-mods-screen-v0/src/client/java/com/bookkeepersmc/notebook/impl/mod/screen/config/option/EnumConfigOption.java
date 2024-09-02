@@ -27,9 +27,9 @@ import java.util.Locale;
 
 import com.mojang.serialization.Codec;
 
-import net.minecraft.client.OptionInstance;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.option.Option;
+import net.minecraft.text.CommonTexts;
+import net.minecraft.text.Text;
 
 import com.bookkeepersmc.notebook.impl.mod.screen.util.TranslationUtil;
 
@@ -70,20 +70,20 @@ public class EnumConfigOption<E extends Enum<E>> implements OptionConvertable {
 		return defaultValue;
 	}
 
-	private static <E extends Enum<E>> Component getValueText(EnumConfigOption<E> option, E value) {
-		return Component.translatable(option.translationKey + "." + value.name().toLowerCase(Locale.ROOT));
+	private static <E extends Enum<E>> Text getValueText(EnumConfigOption<E> option, E value) {
+		return Text.translatable(option.translationKey + "." + value.name().toLowerCase(Locale.ROOT));
 	}
 
-	public Component getButtonText() {
-		return CommonComponents.optionNameValue(Component.translatable(translationKey), getValueText(this, getValue()));
+	public Text getButtonText() {
+		return CommonTexts.genericOption(Text.translatable(translationKey), getValueText(this, getValue()));
 	}
 
 	@Override
-	public OptionInstance<E> asOption() {
-		return new OptionInstance<>(translationKey,
-			OptionInstance.noTooltip(),
+	public Option<E> asOption() {
+		return new Option<>(translationKey,
+			Option.emptyTooltip(),
 			(text, value) -> getValueText(this, value),
-			new OptionInstance.Enum<>(Arrays.asList(enumClass.getEnumConstants()),
+			new Option.EnumValueSet<>(Arrays.asList(enumClass.getEnumConstants()),
 				Codec.STRING.xmap(string -> Arrays.stream(enumClass.getEnumConstants())
 					.filter(e -> e.name().toLowerCase().equals(string))
 					.findAny()

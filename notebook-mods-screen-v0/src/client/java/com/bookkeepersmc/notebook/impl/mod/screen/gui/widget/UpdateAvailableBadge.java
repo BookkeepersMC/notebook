@@ -24,19 +24,20 @@ package com.bookkeepersmc.notebook.impl.mod.screen.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 
 public class UpdateAvailableBadge {
-	private static final ResourceLocation UPDATE_ICON = ResourceLocation.withDefaultNamespace("icon/trial_available");
+	private static final Identifier UPDATE_ICON = Identifier.ofDefault("icon/trial_available");
 
-	public static void renderBadge(GuiGraphics guiGraphics, int x, int y) {
+	public static void renderBadge(GuiGraphics DrawContext, int x, int y) {
 		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 		int animOffset = 0;
-		if ((Util.getMillis() / 800L & 1L) == 1L) {
+		if ((Util.getMeasuringTimeMs() / 800L & 1L) == 1L) {
 			animOffset = 8;
 		}
-		guiGraphics.blitSprite(UPDATE_ICON, x, y, 8, 8);
+		DrawContext.method_52706(RenderLayer::getGuiTextured, UPDATE_ICON, x, y, 8, 8);
 	}
 }

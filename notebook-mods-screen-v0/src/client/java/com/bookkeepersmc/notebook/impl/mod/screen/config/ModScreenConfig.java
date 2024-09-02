@@ -31,7 +31,7 @@ import java.util.Locale;
 
 import com.google.gson.annotations.SerializedName;
 
-import net.minecraft.client.OptionInstance;
+import net.minecraft.client.option.Option;
 
 import com.bookkeepersmc.notebook.api.mod.screen.v0.UpdateChannel;
 import com.bookkeepersmc.notebook.impl.mod.screen.config.option.BooleanConfigOption;
@@ -93,8 +93,8 @@ public class ModScreenConfig {
 		new HashSet<>()
 	);
 
-	public static OptionInstance<?>[] asOptions() {
-		ArrayList<OptionInstance<?>> options = new ArrayList<>();
+	public static Option<?>[] asOptions() {
+		ArrayList<Option<?>> options = new ArrayList<>();
 		for (Field field : ModScreenConfig.class.getDeclaredFields()) {
 			if (Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers()) &&
 				OptionConvertable.class.isAssignableFrom(field.getType()) &&
@@ -106,7 +106,7 @@ public class ModScreenConfig {
 				}
 			}
 		}
-		return options.stream().toArray(OptionInstance[]::new);
+		return options.stream().toArray(Option[]::new);
 	}
 
 	public enum Sorting {

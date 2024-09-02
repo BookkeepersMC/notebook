@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "com.bookkeepersmc.notebook.mixin.crash.details",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ServerWatchdogMixin",
+    "SystemReportMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

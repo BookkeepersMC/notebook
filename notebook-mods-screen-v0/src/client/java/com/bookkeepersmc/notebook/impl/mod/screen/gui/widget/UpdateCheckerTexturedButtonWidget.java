@@ -22,9 +22,11 @@
  */
 package com.bookkeepersmc.notebook.impl.mod.screen.gui.widget;
 
+
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.widget.button.ButtonWidget;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.impl.mod.screen.NotebookModScreen;
 import com.bookkeepersmc.notebook.impl.mod.screen.config.ModScreenConfig;
@@ -38,18 +40,18 @@ public class UpdateCheckerTexturedButtonWidget extends LegacyTexturedButtonWidge
 		int u,
 		int v,
 		int hoveredVOffset,
-		ResourceLocation texture,
+		Identifier texture,
 		int textureWidth,
 		int textureHeight,
-		OnPress pressAction,
-		Component message
+		ButtonWidget.PressAction pressAction,
+		Text message
 	) {
 		super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, message);
 	}
 
 	@Override
-	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
-		super.renderWidget(guiGraphics, mouseX, mouseY, delta);
+	public void drawWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float delta) {
+		super.drawWidget(guiGraphics, mouseX, mouseY, delta);
 		if (ModScreenConfig.BUTTON_UPDATE_BADGE.getValue() && NotebookModScreen.areModUpdatesAvailable()) {
 			UpdateAvailableBadge.renderBadge(guiGraphics, this.getX() + this.width - 5, this.getY() - 3);
 		}

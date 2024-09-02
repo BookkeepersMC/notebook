@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-transitive-access-wideners-v1",
+  "name": "Notebook Transitive Access Wideners (v1)",
+  "version": "${version}",
+  "depends": {
+    "notebookloader": ">=0.3.2"
+  },
+  "custom": {
+    "notebook-api:module-lifecycle": "stable"
+  }
+}

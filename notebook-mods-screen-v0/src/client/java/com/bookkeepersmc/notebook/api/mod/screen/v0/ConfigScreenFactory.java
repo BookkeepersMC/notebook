@@ -22,7 +22,7 @@
  */
 package com.bookkeepersmc.notebook.api.mod.screen.v0;
 
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screen.Screen;
 
 @FunctionalInterface
 public interface ConfigScreenFactory<S extends Screen> {

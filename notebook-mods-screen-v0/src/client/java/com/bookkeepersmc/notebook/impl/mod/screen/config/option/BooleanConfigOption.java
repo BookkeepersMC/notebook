@@ -22,25 +22,25 @@
  */
 package com.bookkeepersmc.notebook.impl.mod.screen.config.option;
 
-import net.minecraft.client.OptionInstance;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.option.Option;
+import net.minecraft.text.CommonTexts;
+import net.minecraft.text.Text;
 
 import com.bookkeepersmc.notebook.impl.mod.screen.util.TranslationUtil;
 
 public class BooleanConfigOption implements OptionConvertable {
 	private final String key, translationKey;
 	private final boolean defaultValue;
-	private final Component enabledText;
-	private final Component disabledText;
+	private final Text enabledText;
+	private final Text disabledText;
 
 	public BooleanConfigOption(String key, boolean defaultValue, String enabledKey, String disabledKey) {
 		ConfigOptionStorage.setBoolean(key, defaultValue);
 		this.key = key;
 		this.translationKey = TranslationUtil.translationKeyOf("option", key);
 		this.defaultValue = defaultValue;
-		this.enabledText = Component.translatable(translationKey + "." + enabledKey);
-		this.disabledText = Component.translatable(translationKey + "." + disabledKey);
+		this.enabledText = Text.translatable(translationKey + "." + enabledKey);
+		this.disabledText = Text.translatable(translationKey + "." + disabledKey);
 	}
 
 	public BooleanConfigOption(String key, boolean defaultValue) {
@@ -67,24 +67,24 @@ public class BooleanConfigOption implements OptionConvertable {
 		return defaultValue;
 	}
 
-	public Component getButtonText() {
-		return CommonComponents.optionNameValue(Component.translatable(translationKey),
+	public Text getButtonText() {
+		return CommonTexts.genericOption(Text.translatable(translationKey),
 			getValue() ? enabledText : disabledText
 		);
 	}
 
 	@Override
-	public OptionInstance<Boolean> asOption() {
+	public Option<Boolean> asOption() {
 		if (enabledText != null && disabledText != null) {
-			return new OptionInstance<>(translationKey,
-				OptionInstance.noTooltip(),
+			return new Option<>(translationKey,
+				Option.emptyTooltip(),
 				(text, value) -> value ? enabledText : disabledText,
-				OptionInstance.BOOLEAN_VALUES,
+				Option.BOOLEAN_VALUES,
 				getValue(),
 				newValue -> ConfigOptionStorage.setBoolean(key, newValue)
 			);
 		}
-		return OptionInstance.createBoolean(translationKey,
+		return Option.ofBoolean(translationKey,
 			getValue(),
 			(value) -> ConfigOptionStorage.setBoolean(key, value)
 		);

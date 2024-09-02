@@ -24,7 +24,7 @@ package com.bookkeepersmc.notebook.impl.mod.screen.util.mod;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.network.chat.Component;
+import net.minecraft.text.Text;
 
 import com.bookkeepersmc.notebook.api.mod.screen.v0.UpdateChannel;
 import com.bookkeepersmc.notebook.api.mod.screen.v0.UpdateInfo;
@@ -36,7 +36,7 @@ public class ModrinthUpdateInfo implements UpdateInfo {
 	protected final String versionNumber;
 	protected final UpdateChannel updateChannel;
 
-	private static final Component MODRINTH_TEXT = Component.translatable("modscreen.modrinth");
+	private static final Text MODRINTH_TEXT = Text.translatable("modscreen.modrinth");
 
 	public ModrinthUpdateInfo(String projectId, String versionId, String versionNumber, UpdateChannel updateChannel) {
 		this.projectId = projectId;
@@ -51,8 +51,8 @@ public class ModrinthUpdateInfo implements UpdateInfo {
 	}
 
 	@Override
-	public @Nullable Component getUpdateMessage() {
-		return Component.translatable("modscreen.updateText", VersionUtil.stripPrefix(this.versionNumber), MODRINTH_TEXT);
+	public @Nullable Text getUpdateMessage() {
+		return Text.translatable("modscreen.updateText", VersionUtil.stripPrefix(this.versionNumber), MODRINTH_TEXT);
 	}
 
 	@Override

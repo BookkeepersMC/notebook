@@ -29,11 +29,12 @@ import java.util.Objects;
 import com.mojang.blaze3d.systems.RenderSystem;
 import org.lwjgl.glfw.GLFW;
 
-import net.minecraft.Util;
-import net.minecraft.client.gui.Font;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 
 import com.bookkeepersmc.notebook.impl.mod.screen.NotebookModScreen;
 import com.bookkeepersmc.notebook.impl.mod.screen.config.ModScreenConfig;
@@ -42,7 +43,7 @@ import com.bookkeepersmc.notebook.impl.mod.screen.util.mod.Mod;
 import com.bookkeepersmc.notebook.impl.mod.screen.util.mod.ModSearch;
 
 public class ParentEntry extends ModListEntry {
-	private static final ResourceLocation PARENT_MOD_TEXTURE = ResourceLocation.fromNamespaceAndPath(NotebookModScreen.MOD_ID, "textures/gui/parent_mod.png");
+	private static final Identifier PARENT_MOD_TEXTURE = Identifier.of(NotebookModScreen.MOD_ID, "textures/gui/parent_mod.png");
 	protected List<Mod> children;
 	protected ModListWidget list;
 	protected boolean hoveringIcon = false;
@@ -67,14 +68,14 @@ public class ParentEntry extends ModListEntry {
 		float delta
 	) {
 		super.render(guiGraphics, index, y, x, rowWidth, rowHeight, mouseX, mouseY, isSelected, delta);
-		Font font = client.font;
-		int childrenBadgeHeight = font.lineHeight;
-		int childrenBadgeWidth = font.lineHeight;
+		TextRenderer font = client.textRenderer;
+		int childrenBadgeHeight = font.fontHeight;
+		int childrenBadgeWidth = font.fontHeight;
 		int shownChildren = ModSearch.search(list.getParent(), list.getParent().getSearchInput(), getChildren()).size();
-		Component str = shownChildren == children.size() ?
-			Component.literal(String.valueOf(shownChildren)) :
-			Component.literal(shownChildren + "/" + children.size());
-		int childrenWidth = font.width(str) - 1;
+		Text str = shownChildren == children.size() ?
+			Text.literal(String.valueOf(shownChildren)) :
+			Text.literal(shownChildren + "/" + children.size());
+		int childrenWidth = font.getWidth(str) - 1;
 		if (childrenBadgeWidth < childrenWidth + 4) {
 			childrenBadgeWidth = childrenWidth + 4;
 		}
@@ -113,8 +114,8 @@ public class ParentEntry extends ModListEntry {
 			childrenBadgeY + childrenBadgeHeight,
 			childrenOutlineColor
 		);
-		guiGraphics.drawString(font,
-			str.getVisualOrderText(),
+		guiGraphics.drawText(font,
+			str.asOrderedText(),
 			(int) (childrenBadgeX + (float) childrenBadgeWidth / 2 - (float) childrenWidth / 2),
 			childrenBadgeY + 1,
 			0xCACACA,
@@ -126,7 +127,7 @@ public class ParentEntry extends ModListEntry {
 			int xOffset = list.getParent().showModChildren.contains(getMod().getId()) ? iconSize : 0;
 			int yOffset = hoveringIcon ? iconSize : 0;
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-			guiGraphics.blit(PARENT_MOD_TEXTURE,
+			guiGraphics.method_25290(RenderLayer::getGuiTextured, PARENT_MOD_TEXTURE,
 				x,
 				y,
 				xOffset,
@@ -150,7 +151,7 @@ public class ParentEntry extends ModListEntry {
 		if (mouseX - list.getRowLeft() <= iconSize) {
 			this.toggleChildren();
 			return true;
-		} else if (!quickConfigure && Util.getMillis() - this.sinceLastClick < 250) {
+		} else if (!quickConfigure && Util.getMeasuringTimeMs() - this.sinceLastClick < 250) {
 			this.toggleChildren();
 			return true;
 		} else {

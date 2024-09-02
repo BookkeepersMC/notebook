@@ -40,25 +40,26 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
-import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.client.gui.screens.ConfirmLinkScreen;
-import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.locale.Language;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.CommonLinks;
+import net.minecraft.client.gui.screen.ConfirmLinkScreen;
+import net.minecraft.client.gui.screen.ConfirmScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.Tooltip;
+import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.button.ButtonWidget;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.toast.SystemToast;
+import net.minecraft.text.CommonTexts;
+import net.minecraft.text.StringVisitable;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.Language;
+import net.minecraft.util.UrlConstants;
+import net.minecraft.util.Util;
 
 import com.bookkeepersmc.loader.api.NotebookLoader;
 import com.bookkeepersmc.notebook.impl.mod.screen.NotebookModScreen;
@@ -75,14 +76,14 @@ import com.bookkeepersmc.notebook.impl.mod.screen.util.mod.Mod;
 import com.bookkeepersmc.notebook.impl.mod.screen.util.mod.ModBadgeRenderer;
 
 public class ModsScreen extends Screen {
-	private static final ResourceLocation FILTERS_BUTTON_LOCATION = ResourceLocation.fromNamespaceAndPath(NotebookModScreen.MOD_ID,
-		"textures/gui/filters_button.png"
+	private static final Identifier FILTERS_BUTTON_LOCATION = Identifier.of(NotebookModScreen.MOD_ID,
+			"textures/gui/filters_button.png"
 	);
-	private static final ResourceLocation CONFIGURE_BUTTON_LOCATION = ResourceLocation.fromNamespaceAndPath(NotebookModScreen.MOD_ID,
-		"textures/gui/configure_button.png"
+	private static final Identifier CONFIGURE_BUTTON_LOCATION = Identifier.of(NotebookModScreen.MOD_ID,
+			"textures/gui/configure_button.png"
 	);
 
-	private static final Logger LOGGER = LoggerFactory.getLogger("Notebook Mod Screen | ModsScreen");
+	private static final Logger LOGGER = LoggerFactory.getLogger("Mod Menu | ModsScreen");
 	private final Screen previousScreen;
 	private ModListEntry selected;
 	private ModBadgeRenderer modBadgeRenderer;
@@ -99,23 +100,23 @@ public class ModsScreen extends Screen {
 	private int searchRowWidth;
 	public final Set<String> showModChildren = new HashSet<>();
 
-	private EditBox searchBox;
-	private @Nullable AbstractWidget filtersButton;
-	private AbstractWidget sortingButton;
-	private AbstractWidget librariesButton;
+	private TextFieldWidget searchBox;
+	private @Nullable ClickableWidget filtersButton;
+	private ClickableWidget sortingButton;
+	private ClickableWidget librariesButton;
 	private ModListWidget modList;
-	private @Nullable AbstractWidget configureButton;
-	private AbstractWidget websiteButton;
-	private AbstractWidget issuesButton;
+	private @Nullable ClickableWidget configureButton;
+	private ClickableWidget websiteButton;
+	private ClickableWidget issuesButton;
 	private DescriptionListWidget descriptionListWidget;
-	private AbstractWidget modsFolderButton;
-	private AbstractWidget doneButton;
+	private ClickableWidget modsFolderButton;
+	private ClickableWidget doneButton;
 
 	public final Map<String, Boolean> modHasConfigScreen = new HashMap<>();
 	public final Map<String, Throwable> modScreenErrors = new HashMap<>();
 
-	private static final Component SEND_FEEDBACK_TEXT = Component.translatable("menu.sendFeedback");
-	private static final Component REPORT_BUGS_TEXT = Component.translatable("menu.reportBugs");
+	private static final Text SEND_FEEDBACK_TEXT = Text.translatable("menu.sendFeedback");
+	private static final Text REPORT_BUGS_TEXT = Text.translatable("menu.reportBugs");
 
 	public ModsScreen(Screen previousScreen) {
 		super(ModScreenTexts.TITLE);
@@ -141,10 +142,10 @@ public class ModsScreen extends Screen {
 				try {
 					Screen configScreen = NotebookModScreen.getConfigScreen(id, this);
 					modHasConfigScreen.put(id, configScreen != null);
-				} catch (NoClassDefFoundError e) {
+				} catch (java.lang.NoClassDefFoundError e) {
 					LOGGER.warn(
-						"The '" + id + "' mod config screen is not available because " + e.getLocalizedMessage() +
-							" is missing.");
+							"The '" + id + "' mod config screen is not available because " + e.getLocalizedMessage() +
+									" is missing.");
 					modScreenErrors.put(id, e);
 					modHasConfigScreen.put(id, false);
 				} catch (Throwable e) {
@@ -160,13 +161,13 @@ public class ModsScreen extends Screen {
 		this.rightPaneX = this.width - this.paneWidth;
 
 		// Mod list (initialized early for updateFiltersX)
-		this.modList = new ModListWidget(this.minecraft,
-			this.paneWidth,
-			this.height - paneY - 36,
-			paneY,
-			ModScreenConfig.COMPACT_LIST.getValue() ? 23 : 36,
-			this.modList,
-			this
+		this.modList = new ModListWidget(this.client,
+				this.paneWidth,
+				this.height - paneY - 36,
+				paneY,
+				ModScreenConfig.COMPACT_LIST.getValue() ? 23 : 36,
+				this.modList,
+				this
 		);
 		this.modList.setX(0);
 
@@ -177,24 +178,24 @@ public class ModsScreen extends Screen {
 
 		this.searchBoxX = this.paneWidth / 2 - searchBoxWidth / 2 - filtersButtonSize / 2;
 
-		this.searchBox = new EditBox(this.font,
-			this.searchBoxX,
-			22,
-			searchBoxWidth,
-			20,
-			this.searchBox,
-			ModScreenTexts.SEARCH
+		this.searchBox = new TextFieldWidget(this.textRenderer,
+				this.searchBoxX,
+				22,
+				searchBoxWidth,
+				20,
+				this.searchBox,
+				ModScreenTexts.SEARCH
 		);
-		this.searchBox.setResponder(text -> {
+		this.searchBox.setChangedListener(text -> {
 			this.modList.filter(text, false);
 		});
 
 		// Filters button
-		Component sortingText = ModScreenConfig.SORTING.getButtonText();
-		Component librariesText = ModScreenConfig.SHOW_LIBRARIES.getButtonText();
+		Text sortingText = ModScreenConfig.SORTING.getButtonText();
+		Text librariesText = ModScreenConfig.SHOW_LIBRARIES.getButtonText();
 
-		int sortingWidth = font.width(sortingText) + 20;
-		int librariesWidth = font.width(librariesText) + 20;
+		int sortingWidth = textRenderer.getWidth(sortingText) + 20;
+		int librariesWidth = textRenderer.getWidth(librariesText) + 20;
 
 		this.filtersWidth = librariesWidth + sortingWidth + 2;
 		this.searchRowWidth = this.searchBoxX + searchBoxWidth + 22;
@@ -203,136 +204,136 @@ public class ModsScreen extends Screen {
 
 		if (!ModScreenConfig.CONFIG_MODE.getValue()) {
 			this.filtersButton = LegacyTexturedButtonWidget.legacyTexturedBuilder(ModScreenTexts.TOGGLE_FILTER_OPTIONS,
-					button -> {
-						this.setFilterOptionsShown(!this.filterOptionsShown);
-					}
-				)
-				.position(this.paneWidth / 2 + searchBoxWidth / 2 - 20 / 2 + 2, 22)
-				.size(20, 20)
-				.uv(0, 0, 20)
-				.texture(FILTERS_BUTTON_LOCATION, 32, 64)
-				.build();
+							button -> {
+								this.setFilterOptionsShown(!this.filterOptionsShown);
+							}
+					)
+					.position(this.paneWidth / 2 + searchBoxWidth / 2 - 20 / 2 + 2, 22)
+					.size(20, 20)
+					.uv(0, 0, 20)
+					.texture(FILTERS_BUTTON_LOCATION, 32, 64)
+					.build();
 
 			this.filtersButton.setTooltip(Tooltip.create(ModScreenTexts.TOGGLE_FILTER_OPTIONS));
 		}
 
 		// Sorting button
-		this.sortingButton = Button.builder(sortingText, button -> {
+		this.sortingButton = ButtonWidget.builder(sortingText, button -> {
 			ModScreenConfig.SORTING.cycleValue();
 			ModScreenConfigManager.save();
 			modList.reloadFilters();
 			button.setMessage(ModScreenConfig.SORTING.getButtonText());
-		}).pos(this.filtersX, 45).size(sortingWidth, 20).build();
+		}).position(this.filtersX, 45).size(sortingWidth, 20).build();
 
 		// Show libraries button
-		this.librariesButton = Button.builder(librariesText, button -> {
+		this.librariesButton = ButtonWidget.builder(librariesText, button -> {
 			ModScreenConfig.SHOW_LIBRARIES.toggleValue();
 			ModScreenConfigManager.save();
 			modList.reloadFilters();
 			button.setMessage(ModScreenConfig.SHOW_LIBRARIES.getButtonText());
-		}).pos(this.filtersX + sortingWidth + 2, 45).size(librariesWidth, 20).build();
+		}).position(this.filtersX + sortingWidth + 2, 45).size(librariesWidth, 20).build();
 
 		// Configure button
 		if (!ModScreenConfig.HIDE_CONFIG_BUTTONS.getValue()) {
-			this.configureButton = LegacyTexturedButtonWidget.legacyTexturedBuilder(CommonComponents.EMPTY, button -> {
-					final String id = Objects.requireNonNull(selected).getMod().getId();
-					if (modHasConfigScreen.get(id)) {
-						Screen configScreen = NotebookModScreen.getConfigScreen(id, this);
-						minecraft.setScreen(configScreen);
-					} else {
-						button.active = false;
-					}
-				})
-				.position(width - 24, RIGHT_PANE_Y)
-				.size(20, 20)
-				.uv(0, 0, 20)
-				.texture(CONFIGURE_BUTTON_LOCATION, 32, 64)
-				.build();
+			this.configureButton = LegacyTexturedButtonWidget.legacyTexturedBuilder(CommonTexts.EMPTY, button -> {
+						final String id = Objects.requireNonNull(selected).getMod().getId();
+						if (modHasConfigScreen.get(id)) {
+							Screen configScreen = NotebookModScreen.getConfigScreen(id, this);
+							client.setScreen(configScreen);
+						} else {
+							button.active = false;
+						}
+					})
+					.position(width - 24, RIGHT_PANE_Y)
+					.size(20, 20)
+					.uv(0, 0, 20)
+					.texture(CONFIGURE_BUTTON_LOCATION, 32, 64)
+					.build();
 		}
 
 		// Website button
 		int urlButtonWidths = this.paneWidth / 2 - 2;
 		int cappedButtonWidth = Math.min(urlButtonWidths, 200);
 
-		this.websiteButton = Button.builder(ModScreenTexts.WEBSITE, button -> {
-				final Mod mod = Objects.requireNonNull(selected).getMod();
-				boolean isMinecraft = selected.getMod().getId().equals("minecraft");
+		this.websiteButton = ButtonWidget.builder(ModScreenTexts.WEBSITE, button -> {
+					final Mod mod = Objects.requireNonNull(selected).getMod();
+					boolean isMinecraft = selected.getMod().getId().equals("minecraft");
 
-				if (isMinecraft) {
-					var url = SharedConstants.getCurrentVersion().isStable() ? CommonLinks.RELEASE_FEEDBACK : CommonLinks.SNAPSHOT_FEEDBACK;
-					ConfirmLinkScreen.confirmLinkNow(this, url, true);
-				} else {
-					var url = mod.getWebsite();
-					ConfirmLinkScreen.confirmLinkNow(this, url, false);
-				}
-			})
-			.pos(this.rightPaneX + (urlButtonWidths / 2) - (cappedButtonWidth / 2), RIGHT_PANE_Y + 36)
-			.size(Math.min(urlButtonWidths, 200), 20)
-			.build();
+					if (isMinecraft) {
+						var url = SharedConstants.getGameVersion().isStable() ? UrlConstants.JAVA_FEEDBACK : UrlConstants.SNAPSHOT_FEEDBACK;
+						ConfirmLinkScreen.openConfirmLink(this, url, true);
+					} else {
+						var url = mod.getWebsite();
+						ConfirmLinkScreen.openConfirmLink(this, url, false);
+					}
+				})
+				.position(this.rightPaneX + (urlButtonWidths / 2) - (cappedButtonWidth / 2), RIGHT_PANE_Y + 36)
+				.size(Math.min(urlButtonWidths, 200), 20)
+				.build();
 
 		// Issues button
-		this.issuesButton = Button.builder(ModScreenTexts.ISSUES, button -> {
-				final Mod mod = Objects.requireNonNull(selected).getMod();
-				boolean isMinecraft = selected.getMod().getId().equals("minecraft");
+		this.issuesButton = ButtonWidget.builder(ModScreenTexts.ISSUES, button -> {
+					final Mod mod = Objects.requireNonNull(selected).getMod();
+					boolean isMinecraft = selected.getMod().getId().equals("minecraft");
 
-				if (isMinecraft) {
-					ConfirmLinkScreen.confirmLinkNow(this, CommonLinks.SNAPSHOT_BUGS_FEEDBACK, true);
-				} else {
-					var url = mod.getIssueTracker();
-					ConfirmLinkScreen.confirmLinkNow(this, url, false);
-				}
-			})
-			.pos(this.rightPaneX + urlButtonWidths + 4 + (urlButtonWidths / 2) - (cappedButtonWidth / 2),
-				RIGHT_PANE_Y + 36
-			)
-			.size(Math.min(urlButtonWidths, 200), 20)
-			.build();
+					if (isMinecraft) {
+						ConfirmLinkScreen.openConfirmLink(this, UrlConstants.SNAPSHOT_BUGS, true);
+					} else {
+						var url = mod.getIssueTracker();
+						ConfirmLinkScreen.openConfirmLink(this, url, false);
+					}
+				})
+				.position(this.rightPaneX + urlButtonWidths + 4 + (urlButtonWidths / 2) - (cappedButtonWidth / 2),
+						RIGHT_PANE_Y + 36
+				)
+				.size(Math.min(urlButtonWidths, 200), 20)
+				.build();
 
 		// Description list
-		this.descriptionListWidget = new DescriptionListWidget(this.minecraft,
-			this.paneWidth,
-			this.height - RIGHT_PANE_Y - 96,
-			RIGHT_PANE_Y + 60,
-			font.lineHeight + 1,
-			this
+		this.descriptionListWidget = new DescriptionListWidget(this.client,
+				this.paneWidth,
+				this.height - RIGHT_PANE_Y - 96,
+				RIGHT_PANE_Y + 60,
+				textRenderer.fontHeight + 1,
+				this
 		);
 		this.descriptionListWidget.setX(this.rightPaneX);
 
 		// Mods folder button
-		this.modsFolderButton = Button.builder(ModScreenTexts.MODS_FOLDER, button -> {
-			Util.getPlatform().openUri(NotebookLoader.getInstance().getGameDir().resolve("mods").toUri());
-		}).pos(this.width / 2 - 154, this.height - 28).size(150, 20).build();
+		this.modsFolderButton = ButtonWidget.builder(ModScreenTexts.MODS_FOLDER, button -> {
+			Util.getOperatingSystem().open(NotebookLoader.getInstance().getGameDir().resolve("mods").toUri());
+		}).position(this.width / 2 - 154, this.height - 28).size(150, 20).build();
 
 		// Done button
-		this.doneButton = Button.builder(CommonComponents.GUI_DONE, button -> {
-			minecraft.setScreen(previousScreen);
-		}).pos(this.width / 2 + 4, this.height - 28).size(150, 20).build();
+		this.doneButton = ButtonWidget.builder(CommonTexts.DONE, button -> {
+			client.setScreen(previousScreen);
+		}).position(this.width / 2 + 4, this.height - 28).size(150, 20).build();
 
 		// Initialize data
 		modList.reloadFilters();
 		this.setFilterOptionsShown(this.keepFilterOptionsShown && this.filterOptionsShown);
 
 		// Add children
-		this.addWidget(this.searchBox);
+		this.addSelectableElement(this.searchBox);
 		this.setInitialFocus(this.searchBox);
 
 		if (this.filtersButton != null) {
-			this.addRenderableWidget(this.filtersButton);
+			this.addDrawable(this.filtersButton);
 		}
 
-		this.addRenderableWidget(this.sortingButton);
-		this.addRenderableWidget(this.librariesButton);
-		this.addWidget(this.modList);
+		this.addDrawableSelectableElement(this.sortingButton);
+		this.addDrawableSelectableElement(this.librariesButton);
+		this.addSelectableElement(this.modList);
 
 		if (this.configureButton != null) {
-			this.addRenderableWidget(this.configureButton);
+			this.addDrawableSelectableElement(this.configureButton);
 		}
 
-		this.addRenderableWidget(this.websiteButton);
-		this.addRenderableWidget(this.issuesButton);
-		this.addWidget(this.descriptionListWidget);
-		this.addRenderableWidget(this.modsFolderButton);
-		this.addRenderableWidget(this.doneButton);
+		this.addDrawableSelectableElement(this.websiteButton);
+		this.addDrawableSelectableElement(this.issuesButton);
+		this.addSelectableElement(this.descriptionListWidget);
+		this.addDrawableSelectableElement(this.modsFolderButton);
+		this.addDrawableSelectableElement(this.doneButton);
 
 		this.init = true;
 		this.keepFilterOptionsShown = true;
@@ -341,7 +342,7 @@ public class ModsScreen extends Screen {
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		return super.keyPressed(keyCode, scanCode, modifiers) ||
-			this.searchBox.keyPressed(keyCode, scanCode, modifiers);
+				this.searchBox.keyPressed(keyCode, scanCode, modifiers);
 	}
 
 	@Override
@@ -359,74 +360,74 @@ public class ModsScreen extends Screen {
 		this.modList.render(guiGraphics, mouseX, mouseY, delta);
 		this.searchBox.render(guiGraphics, mouseX, mouseY, delta);
 		RenderSystem.disableBlend();
-		guiGraphics.drawCenteredString(this.font, this.title, this.modList.getWidth() / 2, 8, 16777215);
+		guiGraphics.drawCenteredShadowedText(this.textRenderer, this.title, this.modList.getWidth() / 2, 8, 16777215);
 		if (!ModScreenConfig.DISABLE_DRAG_AND_DROP.getValue()) {
-			guiGraphics.drawCenteredString(this.font,
-				ModScreenTexts.DROP_INFO_LINE_1,
-				this.width - this.modList.getWidth() / 2,
-				RIGHT_PANE_Y / 2 - minecraft.font.lineHeight - 1,
-				ChatFormatting.GRAY.getColor()
+			guiGraphics.drawCenteredShadowedText(this.textRenderer,
+					ModScreenTexts.DROP_INFO_LINE_1,
+					this.width - this.modList.getWidth() / 2,
+					RIGHT_PANE_Y / 2 - client.textRenderer.fontHeight - 1,
+					Formatting.GRAY.getColorValue()
 			);
-			guiGraphics.drawCenteredString(this.font,
-				ModScreenTexts.DROP_INFO_LINE_2,
-				this.width - this.modList.getWidth() / 2,
-				RIGHT_PANE_Y / 2 + 1,
-				ChatFormatting.GRAY.getColor()
+			guiGraphics.drawCenteredShadowedText(this.textRenderer,
+					ModScreenTexts.DROP_INFO_LINE_2,
+					this.width - this.modList.getWidth() / 2,
+					RIGHT_PANE_Y / 2 + 1,
+					Formatting.GRAY.getColorValue()
 			);
 		}
 		if (!ModScreenConfig.CONFIG_MODE.getValue()) {
-			Component fullModCount = this.computeModCountText(true);
+			Text fullModCount = this.computeModCountText(true);
 			if (!ModScreenConfig.CONFIG_MODE.getValue() && this.updateFiltersX()) {
 				if (this.filterOptionsShown) {
 					if (!ModScreenConfig.SHOW_LIBRARIES.getValue() ||
-						font.width(fullModCount) <= this.filtersX - 5) {
-						guiGraphics.drawString(font,
-							fullModCount.getVisualOrderText(),
-							this.searchBoxX,
-							52,
-							0xFFFFFF,
-							true
+							textRenderer.getWidth(fullModCount) <= this.filtersX - 5) {
+						guiGraphics.drawText(textRenderer,
+								fullModCount.asOrderedText(),
+								this.searchBoxX,
+								52,
+								0xFFFFFF,
+								true
 						);
 					} else {
-						guiGraphics.drawString(font,
-							computeModCountText(false).getVisualOrderText(),
-							this.searchBoxX,
-							46,
-							0xFFFFFF,
-							true
+						guiGraphics.drawText(textRenderer,
+								computeModCountText(false).asOrderedText(),
+								this.searchBoxX,
+								46,
+								0xFFFFFF,
+								true
 						);
-						guiGraphics.drawString(font,
-							computeLibraryCountText().getVisualOrderText(),
-							this.searchBoxX,
-							57,
-							0xFFFFFF,
-							true
+						guiGraphics.drawText(textRenderer,
+								computeLibraryCountText().asOrderedText(),
+								this.searchBoxX,
+								57,
+								0xFFFFFF,
+								true
 						);
 					}
 				} else {
 					if (!ModScreenConfig.SHOW_LIBRARIES.getValue() ||
-						font.width(fullModCount) <= modList.getWidth() - 5) {
-						guiGraphics.drawString(font,
-							fullModCount.getVisualOrderText(),
-							this.searchBoxX,
-							52,
-							0xFFFFFF,
-							true
+							textRenderer.getWidth(fullModCount) <= modList.getWidth() - 5) {
+						guiGraphics.drawText(textRenderer,
+								fullModCount.asOrderedText(),
+								this.searchBoxX,
+								52,
+								0xFFFFFF,
+								true
 						);
 					} else {
-						guiGraphics.drawString(font,
-							computeModCountText(false).getVisualOrderText(),
-							this.searchBoxX,
-							46,
-							0xFFFFFF,
-							true
+						guiGraphics.drawText(textRenderer,
+								computeModCountText(false).asOrderedText(),
+								this.searchBoxX,
+								46,
+								0xFFFFFF,
+								true
 						);
-						guiGraphics.drawString(font,
-							computeLibraryCountText().getVisualOrderText(),
-							this.searchBoxX,
-							57,
-							0xFFFFFF,
-							true
+						guiGraphics.drawText(textRenderer,
+								computeLibraryCountText().asOrderedText(),
+								this.searchBoxX,
+								57,
+								0xFFFFFF,
+								true
 						);
 					}
 				}
@@ -440,38 +441,38 @@ public class ModsScreen extends Screen {
 			}
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			RenderSystem.enableBlend();
-			guiGraphics.blit(this.selected.getIconTexture(), x, RIGHT_PANE_Y, 0.0F, 0.0F, 32, 32, 32, 32);
+			guiGraphics.method_25290(RenderLayer::getGuiTextured, this.selected.getIconTexture(), x, RIGHT_PANE_Y, 0.0F, 0.0F, 32, 32, 32, 32);
 			RenderSystem.disableBlend();
-			int lineSpacing = font.lineHeight + 1;
+			int lineSpacing = textRenderer.fontHeight + 1;
 			int imageOffset = 36;
-			Component name = Component.literal(mod.getTranslatedName());
-			FormattedText trimmedName = name;
+			Text name = Text.literal(mod.getTranslatedName());
+			StringVisitable trimmedName = name;
 			int maxNameWidth = this.width - (x + imageOffset);
-			if (font.width(name) > maxNameWidth) {
-				FormattedText ellipsis = FormattedText.of("...");
-				trimmedName = FormattedText.composite(font.substrByWidth(name,
-					maxNameWidth - font.width(ellipsis)
+			if (textRenderer.getWidth(name) > maxNameWidth) {
+				StringVisitable ellipsis = StringVisitable.plain("...");
+				trimmedName = StringVisitable.concat(textRenderer.trimToWidth(name,
+						maxNameWidth - textRenderer.getWidth(ellipsis)
 				), ellipsis);
 			}
-			guiGraphics.drawString(font,
-				Language.getInstance().getVisualOrder(trimmedName),
-				x + imageOffset,
-				RIGHT_PANE_Y + 1,
-				0xFFFFFF,
-				true
+			guiGraphics.drawText(textRenderer,
+					Language.getInstance().reorder(trimmedName),
+					x + imageOffset,
+					RIGHT_PANE_Y + 1,
+					0xFFFFFF,
+					true
 			);
 			if (mouseX > x + imageOffset && mouseY > RIGHT_PANE_Y + 1 &&
-				mouseY < RIGHT_PANE_Y + 1 + font.lineHeight &&
-				mouseX < x + imageOffset + font.width(trimmedName)) {
-				this.setTooltipForNextRenderPass(ModScreenTexts.modIdTooltip(mod.getId()));
+					mouseY < RIGHT_PANE_Y + 1 + textRenderer.fontHeight &&
+					mouseX < x + imageOffset + textRenderer.getWidth(trimmedName)) {
+				this.setDeferredTooltip(ModScreenTexts.modIdTooltip(mod.getId()));
 			}
 			if (this.init || modBadgeRenderer == null || modBadgeRenderer.getMod() != mod) {
 				modBadgeRenderer = new ModBadgeRenderer(
-					x + imageOffset + this.minecraft.font.width(trimmedName) + 2,
-					RIGHT_PANE_Y,
-					width - 28,
-					selectedEntry.mod,
-					this
+						x + imageOffset + this.client.textRenderer.getWidth(trimmedName) + 2,
+						RIGHT_PANE_Y,
+						width - 28,
+						selectedEntry.mod,
+						this
 				);
 				this.init = false;
 			}
@@ -479,12 +480,12 @@ public class ModsScreen extends Screen {
 				modBadgeRenderer.draw(guiGraphics, mouseX, mouseY);
 			}
 			if (mod.isReal()) {
-				guiGraphics.drawString(font,
-					mod.getPrefixedVersion(),
-					x + imageOffset,
-					RIGHT_PANE_Y + 2 + lineSpacing,
-					0x808080,
-					true
+				guiGraphics.drawText(textRenderer,
+						mod.getPrefixedVersion(),
+						x + imageOffset,
+						RIGHT_PANE_Y + 2 + lineSpacing,
+						0x808080,
+						true
 				);
 			}
 			String authors;
@@ -497,46 +498,46 @@ public class ModsScreen extends Screen {
 					authors = names.get(0);
 				}
 				DrawingUtil.drawWrappedString(guiGraphics,
-					I18n.get("modscreen.authorPrefix", authors),
-					x + imageOffset,
-					RIGHT_PANE_Y + 2 + lineSpacing * 2,
-					this.paneWidth - imageOffset - 4,
-					1,
-					0x808080
+						I18n.translate("modscreen.authorPrefix", authors),
+						x + imageOffset,
+						RIGHT_PANE_Y + 2 + lineSpacing * 2,
+						this.paneWidth - imageOffset - 4,
+						1,
+						0x808080
 				);
 			}
 		}
 	}
 
-	private Component computeModCountText(boolean includeLibs) {
+	private Text computeModCountText(boolean includeLibs) {
 		int[] rootMods = formatModCount(NotebookModScreen.ROOT_MODS.values()
-			.stream()
-			.filter(mod -> !mod.isHidden() && !mod.getBadges().contains(Mod.Badge.LIBRARY))
-			.map(Mod::getId)
-			.collect(Collectors.toSet()));
+				.stream()
+				.filter(mod -> !mod.isHidden() && !mod.getBadges().contains(Mod.Badge.LIBRARY))
+				.map(Mod::getId)
+				.collect(Collectors.toSet()));
 
 		if (includeLibs && ModScreenConfig.SHOW_LIBRARIES.getValue()) {
 			int[] rootLibs = formatModCount(NotebookModScreen.ROOT_MODS.values()
-				.stream()
-				.filter(mod -> !mod.isHidden() && mod.getBadges().contains(Mod.Badge.LIBRARY))
-				.map(Mod::getId)
-				.collect(Collectors.toSet()));
+					.stream()
+					.filter(mod -> !mod.isHidden() && mod.getBadges().contains(Mod.Badge.LIBRARY))
+					.map(Mod::getId)
+					.collect(Collectors.toSet()));
 			return TranslationUtil.translateNumeric("modscreen.showingModsLibraries", rootMods, rootLibs);
 		} else {
 			return TranslationUtil.translateNumeric("modscreen.showingMods", rootMods);
 		}
 	}
 
-	private Component computeLibraryCountText() {
+	private Text computeLibraryCountText() {
 		if (ModScreenConfig.SHOW_LIBRARIES.getValue()) {
 			int[] rootLibs = formatModCount(NotebookModScreen.ROOT_MODS.values()
-				.stream()
-				.filter(mod -> !mod.isHidden() && mod.getBadges().contains(Mod.Badge.LIBRARY))
-				.map(Mod::getId)
-				.collect(Collectors.toSet()));
+					.stream()
+					.filter(mod -> !mod.isHidden() && mod.getBadges().contains(Mod.Badge.LIBRARY))
+					.map(Mod::getId)
+					.collect(Collectors.toSet()));
 			return TranslationUtil.translateNumeric("modscreen.showingLibraries", rootLibs);
 		} else {
-			return Component.literal(null);
+			return Text.literal(null);
 		}
 	}
 
@@ -550,9 +551,9 @@ public class ModsScreen extends Screen {
 	}
 
 	@Override
-	public void onClose() {
+	public void closeScreen() {
 		this.modList.close();
-		this.minecraft.setScreen(this.previousScreen);
+		this.client.setScreen(this.previousScreen);
 	}
 
 	private void setFilterOptionsShown(boolean filterOptionsShown) {
@@ -575,7 +576,7 @@ public class ModsScreen extends Screen {
 
 				this.configureButton.active = modHasConfigScreen.get(modId);
 				this.configureButton.visible =
-					selected != null && modHasConfigScreen.get(modId) || modScreenErrors.containsKey(modId);
+						selected != null && modHasConfigScreen.get(modId) || modScreenErrors.containsKey(modId);
 
 				if (modScreenErrors.containsKey(modId)) {
 					Throwable e = modScreenErrors.get(modId);
@@ -612,14 +613,14 @@ public class ModsScreen extends Screen {
 	}
 
 	public String getSearchInput() {
-		return this.searchBox.getValue();
+		return this.searchBox.getText();
 	}
 
 	private boolean updateFiltersX() {
-		if ((this.filtersWidth + font.width(this.computeModCountText(true)) + 20) >= this.searchRowWidth &&
-			((this.filtersWidth + font.width(computeModCountText(false)) + 20) >= this.searchRowWidth ||
-				(this.filtersWidth + font.width(this.computeLibraryCountText()) + 20) >= this.searchRowWidth
-			)) {
+		if ((this.filtersWidth + textRenderer.getWidth(this.computeModCountText(true)) + 20) >= this.searchRowWidth &&
+				((this.filtersWidth + textRenderer.getWidth(computeModCountText(false)) + 20) >= this.searchRowWidth ||
+						(this.filtersWidth + textRenderer.getWidth(this.computeLibraryCountText()) + 20) >= this.searchRowWidth
+				)) {
 			this.filtersX = this.paneWidth / 2 - this.filtersWidth / 2;
 			return !filterOptionsShown;
 		} else {
@@ -629,11 +630,11 @@ public class ModsScreen extends Screen {
 	}
 
 	@Override
-	public void onFilesDrop(List<Path> paths) {
+	public void filesDragged(List<Path> paths) {
 		Path modsDirectory = NotebookLoader.getInstance().getGameDir().resolve("mods");
 
 		// Filter out none mods
-		List<Path> mods = paths.stream().filter(ModsScreen::isMod).collect(Collectors.toList());
+		List<Path> mods = paths.stream().filter(ModsScreen::isFabricMod).collect(Collectors.toList());
 
 		if (mods.isEmpty()) {
 			return;
@@ -641,7 +642,7 @@ public class ModsScreen extends Screen {
 
 		String modList = mods.stream().map(Path::getFileName).map(Path::toString).collect(Collectors.joining(", "));
 
-		this.minecraft.setScreen(new ConfirmScreen((value) -> {
+		this.client.setScreen(new ConfirmScreen((value) -> {
 			if (value) {
 				boolean allSuccessful = true;
 
@@ -650,30 +651,30 @@ public class ModsScreen extends Screen {
 						Files.copy(path, modsDirectory.resolve(path.getFileName()));
 					} catch (IOException e) {
 						LOGGER.warn("Failed to copy mod from {} to {}",
-							path,
-							modsDirectory.resolve(path.getFileName())
+								path,
+								modsDirectory.resolve(path.getFileName())
 						);
-						SystemToast.onPackCopyFailure(minecraft, path.toString());
+						SystemToast.addPackCopyFailureToast(client, path.toString());
 						allSuccessful = false;
 						break;
 					}
 				}
 
 				if (allSuccessful) {
-					SystemToast.add(minecraft.getToasts(),
-						SystemToast.SystemToastId.PERIODIC_NOTIFICATION,
-						ModScreenTexts.DROP_SUCCESSFUL_LINE_1,
-						ModScreenTexts.DROP_SUCCESSFUL_LINE_1
+					SystemToast.add(client.method_1566(),
+							SystemToast.Id.PERIODIC_NOTIFICATION,
+							ModScreenTexts.DROP_SUCCESSFUL_LINE_1,
+							ModScreenTexts.DROP_SUCCESSFUL_LINE_1
 					);
 				}
 			}
-			this.minecraft.setScreen(this);
-		}, ModScreenTexts.DROP_CONFIRM, Component.literal(modList)));
+			this.client.setScreen(this);
+		}, ModScreenTexts.DROP_CONFIRM, Text.literal(modList)));
 	}
 
-	private static boolean isMod(Path mod) {
+	private static boolean isFabricMod(Path mod) {
 		try (JarFile jarFile = new JarFile(mod.toFile())) {
-			return jarFile.getEntry("notebook.mod.json") != null;
+			return jarFile.getEntry("fabric.mod.json") != null;
 		} catch (IOException e) {
 			return false;
 		}

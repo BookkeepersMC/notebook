@@ -24,7 +24,7 @@ package com.bookkeepersmc.notebook.api.mod.screen.v0;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.network.chat.Component;
+import net.minecraft.text.Text;
 
 public interface UpdateInfo {
 	/**
@@ -36,7 +36,7 @@ public interface UpdateInfo {
 	 * @return The message that is getting displayed when an update is available or <code>null</code> to let ModMenu handle displaying the message.
 	 */
 	@Nullable
-	default Component getUpdateMessage() {
+	default Text getUpdateMessage() {
 		return null;
 	}
 

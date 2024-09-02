@@ -26,15 +26,15 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.resource.language.I18n;
 
 import com.bookkeepersmc.notebook.impl.mod.screen.NotebookModScreen;
 import com.bookkeepersmc.notebook.impl.mod.screen.config.ModScreenConfig;
 
 @Mixin(TitleScreen.class)
 public class MixinTitleScreen {
-	@ModifyArg(at = @At(value = "INVOKE", target = "Lcom/mojang/realmsclient/gui/screens/RealmsNotificationsScreen;init(Lnet/minecraft/client/Minecraft;II)V"), method = "init", index = 2)
+	@ModifyArg(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/realms/RealmsNotificationsScreen;init(Lnet/minecraft/client/Minecraft;II)V"), method = "init", index = 2)
 	private int adjustRealmsHeight(int height) {
 		if (ModScreenConfig.MODIFY_TITLE_SCREEN.getValue() && ModScreenConfig.MODS_BUTTON_STYLE.getValue() == ModScreenConfig.TitleMenuButtonStyle.CLASSIC) {
 			return height - 51;
@@ -44,17 +44,17 @@ public class MixinTitleScreen {
 		return height;
 	}
 
-	@ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;drawString(Lnet/minecraft/client/gui/Font;Ljava/lang/String;III)I", ordinal = 0))
+	@ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;drawShadowedText(Lnet/minecraft/client/font/TextRenderer;Ljava/lang/String;III)I", ordinal = 0))
 	private String onRender(String string) {
 		if (ModScreenConfig.MODIFY_TITLE_SCREEN.getValue() && ModScreenConfig.MOD_COUNT_LOCATION.getValue()
 			.isOnTitleScreen()) {
 			String count = NotebookModScreen.getDisplayedModCount();
 			String specificKey = "modscreen.mods." + count;
-			String replacementKey = I18n.exists(specificKey) ? specificKey : "modscreen.mods.n";
-			if (ModScreenConfig.EASTER_EGGS.getValue() && I18n.exists(specificKey + ".secret")) {
+			String replacementKey = I18n.hasTranslation(specificKey) ? specificKey : "modscreen.mods.n";
+			if (ModScreenConfig.EASTER_EGGS.getValue() && I18n.hasTranslation(specificKey + ".secret")) {
 				replacementKey = specificKey + ".secret";
 			}
-			return string.replace(I18n.get(I18n.get("menu.modded")), I18n.get(replacementKey, count));
+			return string.replace(I18n.translate(I18n.translate("menu.modded")), I18n.translate(replacementKey, count));
 		}
 		return string;
 	}

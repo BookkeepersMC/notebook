@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-crash-details-v1",
+  "name": "Notebook Crash Details (v1)",
+  "version": "${version}",
+  "environment": "*",
+  "depends": {
+    "notebookloader": ">=0.3.2"
+  },
+  "mixins": [
+    "notebook-crash-details-v1.mixins.json"
+  ],
+  "custom": {
+    "notebook-api:module-lifecycle": "stable"
+  }
+}

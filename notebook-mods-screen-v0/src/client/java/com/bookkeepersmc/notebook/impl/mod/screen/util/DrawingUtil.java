@@ -29,12 +29,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.locale.Language;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
-import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.Mth;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.StringVisitable;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.util.Language;
+import net.minecraft.util.math.MathHelper;
 
 import com.bookkeepersmc.notebook.impl.mod.screen.config.ModScreenConfig;
 import com.bookkeepersmc.notebook.impl.mod.screen.util.mod.Mod;
@@ -52,7 +52,7 @@ public class DrawingUtil {
 	) {
 		int seed = mod.getName().hashCode() + mod.getVersion().hashCode();
 		Random random = new Random(seed);
-		int color = 0xFF000000 | Mth.hsvToRgb(random.nextFloat(1f), random.nextFloat(0.7f, 0.8f), 0.9f);
+		int color = 0xFF000000 | MathHelper.hsvToRgb(random.nextFloat(1f), random.nextFloat(0.7f, 0.8f), 0.9f);
 		if (!ModScreenConfig.RANDOM_JAVA_COLORS.getValue()) {
 			color = 0xFFDD5656;
 		}
@@ -72,23 +72,23 @@ public class DrawingUtil {
 		while (string != null && string.endsWith("\n")) {
 			string = string.substring(0, string.length() - 1);
 		}
-		List<FormattedText> strings = CLIENT.font.getSplitter()
-			.splitLines(Component.literal(string), wrapWidth, Style.EMPTY);
+		List<StringVisitable> strings = CLIENT.textRenderer.getTextHandler()
+			.wrapLines(Text.literal(string), wrapWidth, Style.EMPTY);
 		for (int i = 0; i < strings.size(); i++) {
 			if (i >= lines) {
 				break;
 			}
-			FormattedText renderable = strings.get(i);
+			StringVisitable renderable = strings.get(i);
 			if (i == lines - 1 && strings.size() > lines) {
-				renderable = FormattedText.composite(strings.get(i), FormattedText.of("..."));
+				renderable = StringVisitable.concat(strings.get(i), StringVisitable.plain("..."));
 			}
-			FormattedCharSequence line = Language.getInstance().getVisualOrder(renderable);
+			OrderedText line = Language.getInstance().reorder(renderable);
 			int x1 = x;
-			if (CLIENT.font.isBidirectional()) {
-				int width = CLIENT.font.width(line);
+			if (CLIENT.textRenderer.isRightToLeft()) {
+				int width = CLIENT.textRenderer.getWidth(line);
 				x1 += (float) (wrapWidth - width);
 			}
-			guiGraphics.drawString(CLIENT.font, line, x1, y + i * CLIENT.font.lineHeight, color, true);
+			guiGraphics.drawText(CLIENT.textRenderer, line, x1, y + i * CLIENT.textRenderer.fontHeight, color, true);
 		}
 	}
 
@@ -97,24 +97,24 @@ public class DrawingUtil {
 		int x,
 		int y,
 		int tagWidth,
-		FormattedCharSequence text,
+		OrderedText text,
 		int outlineColor,
 		int fillColor,
 		int textColor
 	) {
 		guiGraphics.fill(x + 1, y - 1, x + tagWidth, y, outlineColor);
-		guiGraphics.fill(x, y, x + 1, y + CLIENT.font.lineHeight, outlineColor);
+		guiGraphics.fill(x, y, x + 1, y + CLIENT.textRenderer.fontHeight, outlineColor);
 		guiGraphics.fill(x + 1,
-			y + 1 + CLIENT.font.lineHeight - 1,
+			y + 1 + CLIENT.textRenderer.fontHeight - 1,
 			x + tagWidth,
-			y + CLIENT.font.lineHeight + 1,
+			y + CLIENT.textRenderer.fontHeight + 1,
 			outlineColor
 		);
-		guiGraphics.fill(x + tagWidth, y, x + tagWidth + 1, y + CLIENT.font.lineHeight, outlineColor);
-		guiGraphics.fill(x + 1, y, x + tagWidth, y + CLIENT.font.lineHeight, fillColor);
-		guiGraphics.drawString(CLIENT.font,
+		guiGraphics.fill(x + tagWidth, y, x + tagWidth + 1, y + CLIENT.textRenderer.fontHeight, outlineColor);
+		guiGraphics.fill(x + 1, y, x + tagWidth, y + CLIENT.textRenderer.fontHeight, fillColor);
+		guiGraphics.drawText(CLIENT.textRenderer,
 			text,
-			(int) (x + 1 + (tagWidth - CLIENT.font.width(text)) / (float) 2),
+			(int) (x + 1 + (tagWidth - CLIENT.textRenderer.getWidth(text)) / (float) 2),
 			y + 1,
 			textColor,
 			false

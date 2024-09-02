@@ -25,7 +25,7 @@ package com.bookkeepersmc.notebook.impl.mod.screen;
 import java.util.Map;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.options.OptionsScreen;
+import net.minecraft.client.gui.screen.option.OptionsScreen;
 
 import com.bookkeepersmc.notebook.api.mod.screen.v0.ConfigScreenFactory;
 import com.bookkeepersmc.notebook.api.mod.screen.v0.ModScreenCreator;

@@ -30,24 +30,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.texture.NativeImage;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.texture.NativeImageBackedTexture;
 
 import com.bookkeepersmc.loader.api.ModContainer;
 
 public class IconHandler implements Closeable {
-	private static final Logger LOGGER = LoggerFactory.getLogger("Notebook Mod Screen | IconHandler");
+	private static final Logger LOGGER = LoggerFactory.getLogger("Mod Menu | FabricIconHandler");
 
-	private final Map<Path, DynamicTexture> modIconCache = new HashMap<>();
+	private final Map<Path, NativeImageBackedTexture> modIconCache = new HashMap<>();
 
-	public DynamicTexture createIcon(ModContainer iconSource, String iconPath) {
+	public NativeImageBackedTexture createIcon(ModContainer iconSource, String iconPath) {
 		try {
 			Path path = iconSource.getPath(iconPath);
-			DynamicTexture cachedIcon = getCachedModIcon(path);
+			NativeImageBackedTexture cachedIcon = getCachedModIcon(path);
 			if (cachedIcon != null) {
 				return cachedIcon;
 			}
@@ -58,7 +58,7 @@ public class IconHandler implements Closeable {
 			try (InputStream inputStream = Files.newInputStream(path)) {
 				NativeImage image = NativeImage.read(Objects.requireNonNull(inputStream));
 				Validate.validState(image.getHeight() == image.getWidth(), "Must be square icon");
-				DynamicTexture tex = new DynamicTexture(image);
+				NativeImageBackedTexture tex = new NativeImageBackedTexture(image);
 				cacheModIcon(path, tex);
 				return tex;
 			}
@@ -83,16 +83,16 @@ public class IconHandler implements Closeable {
 
 	@Override
 	public void close() {
-		for (DynamicTexture tex : modIconCache.values()) {
+		for (NativeImageBackedTexture tex : modIconCache.values()) {
 			tex.close();
 		}
 	}
 
-	DynamicTexture getCachedModIcon(Path path) {
+	NativeImageBackedTexture getCachedModIcon(Path path) {
 		return modIconCache.get(path);
 	}
 
-	void cacheModIcon(Path path, DynamicTexture tex) {
+	void cacheModIcon(Path path, NativeImageBackedTexture tex) {
 		modIconCache.put(path, tex);
 	}
 }

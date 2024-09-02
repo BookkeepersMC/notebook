@@ -51,10 +51,10 @@ public class HttpUtil {
 		String env = NotebookModScreen.DEV_ENVIRONMENT ? "/development" : "";
 
 		var modMenuVersion = getModMenuVersion();
-		var minecraftVersion = SharedConstants.getCurrentVersion().getName();
+		var minecraftVersion = SharedConstants.getGameVersion().getName();
 
 		// -> TerraformersMC/ModMenu/9.1.0 (1.20.3/quilt/development)
-		return "%s (%s/%s%s)".formatted(modMenuVersion, minecraftVersion, "fabric", env);
+		return "%s (%s/%s%s)".formatted(modMenuVersion, minecraftVersion, "notebook", env);
 	}
 
 	private static String getModMenuVersion() {

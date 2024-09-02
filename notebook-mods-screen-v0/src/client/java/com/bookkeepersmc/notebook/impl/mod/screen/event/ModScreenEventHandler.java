@@ -25,19 +25,19 @@ package com.bookkeepersmc.notebook.impl.mod.screen.event;
 import java.util.Arrays;
 import java.util.List;
 
-import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.InputUtil;
 
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.layouts.LayoutElement;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentContents;
-import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.client.gui.widget.button.ButtonWidget;
+import net.minecraft.client.option.KeyBind;
+import net.minecraft.text.Text;
+import net.minecraft.text.component.TextComponent;
+import net.minecraft.text.component.TranslatableComponent;
+import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.client.event.lifecycle.v1.ClientTickEvents;
 import com.bookkeepersmc.notebook.api.client.keybind.v1.KeybindHelper;
@@ -52,14 +52,14 @@ import com.bookkeepersmc.notebook.impl.mod.screen.gui.widget.UpdateCheckerTextur
 import com.bookkeepersmc.notebook.impl.mod.screen.util.UpdateCheckerUtil;
 
 public class ModScreenEventHandler {
-	public static final ResourceLocation MODS_BUTTON_TEXTURE = ResourceLocation.fromNamespaceAndPath(NotebookModScreen.MOD_ID, "textures/gui/mods_button.png");
-	private static KeyMapping MENU_KEY_BIND;
+	public static final Identifier MODS_BUTTON_TEXTURE = Identifier.of(NotebookModScreen.MOD_ID, "textures/gui/mods_button.png");
+	private static KeyBind MENU_KEY_BIND;
 
 	public static void register() {
-		MENU_KEY_BIND = KeybindHelper.registerKeybind(new KeyMapping("key.modmenu.open_menu",
-			InputConstants.Type.KEYSYM,
-			InputConstants.UNKNOWN.getValue(),
-			"key.categories.misc"
+		MENU_KEY_BIND = KeybindHelper.registerKeybind(new KeyBind("key.modscreen.open_menu",
+				InputUtil.Type.KEYSYM,
+				InputUtil.UNKNOWN_KEY.getKeyCode(),
+				"key.categories.misc"
 		));
 		ClientTickEvents.END_CLIENT_TICK.register(ModScreenEventHandler::onClientEndTick);
 
@@ -73,14 +73,14 @@ public class ModScreenEventHandler {
 	}
 
 	private static void afterTitleScreenInit(Screen screen) {
-		final List<AbstractWidget> buttons = Screens.getWidgets(screen);
+		final List<ClickableWidget> buttons = Screens.getWidgets(screen);
 		if (ModScreenConfig.MODIFY_TITLE_SCREEN.getValue()) {
 			int modsButtonIndex = -1;
 			final int spacing = 24;
 			int buttonsY = screen.height / 4 + 48;
 			for (int i = 0; i < buttons.size(); i++) {
-				AbstractWidget widget = buttons.get(i);
-				if (widget instanceof Button button) {
+				ClickableWidget widget = buttons.get(i);
+				if (widget instanceof ButtonWidget button) {
 					if (ModScreenConfig.MODS_BUTTON_STYLE.getValue() == ModScreenConfig.TitleMenuButtonStyle.CLASSIC) {
 						if (button.visible) {
 							shiftButtons(button, modsButtonIndex == -1, spacing);
@@ -91,17 +91,17 @@ public class ModScreenEventHandler {
 					}
 					if (buttonHasText(button, "menu.online")) {
 						if (ModScreenConfig.MODS_BUTTON_STYLE.getValue() ==
-							ModScreenConfig.TitleMenuButtonStyle.REPLACE_REALMS) {
+								ModScreenConfig.TitleMenuButtonStyle.REPLACE_REALMS) {
 							buttons.set(i, new ModScreenButtonWidget(button.getX(),
-								button.getY(),
-								button.getWidth(),
-								button.getHeight(),
-								ModScreenCreator.createModsButtonText(),
-								screen
+									button.getY(),
+									button.getWidth(),
+									button.getHeight(),
+									ModScreenCreator.createModsButtonText(),
+									screen
 							));
 						} else {
 							if (ModScreenConfig.MODS_BUTTON_STYLE.getValue() ==
-								ModScreenConfig.TitleMenuButtonStyle.SHRINK) {
+									ModScreenConfig.TitleMenuButtonStyle.SHRINK) {
 								button.setWidth(98);
 							}
 							modsButtonIndex = i + 1;
@@ -116,35 +116,35 @@ public class ModScreenEventHandler {
 			if (modsButtonIndex != -1) {
 				if (ModScreenConfig.MODS_BUTTON_STYLE.getValue() == ModScreenConfig.TitleMenuButtonStyle.CLASSIC) {
 					buttons.add(modsButtonIndex, new ModScreenButtonWidget(screen.width / 2 - 100,
-						buttonsY + spacing,
-						200,
-						20,
-						ModScreenCreator.createModsButtonText(),
-						screen
-					));
-				} else if (ModScreenConfig.MODS_BUTTON_STYLE.getValue() == ModScreenConfig.TitleMenuButtonStyle.SHRINK) {
-					buttons.add(modsButtonIndex,
-						new ModScreenButtonWidget(screen.width / 2 + 2,
-							buttonsY,
-							98,
+							buttonsY + spacing,
+							200,
 							20,
 							ModScreenCreator.createModsButtonText(),
 							screen
-						)
+					));
+				} else if (ModScreenConfig.MODS_BUTTON_STYLE.getValue() == ModScreenConfig.TitleMenuButtonStyle.SHRINK) {
+					buttons.add(modsButtonIndex,
+							new ModScreenButtonWidget(screen.width / 2 + 2,
+									buttonsY,
+									98,
+									20,
+									ModScreenCreator.createModsButtonText(),
+									screen
+							)
 					);
 				} else if (ModScreenConfig.MODS_BUTTON_STYLE.getValue() == ModScreenConfig.TitleMenuButtonStyle.ICON) {
 					buttons.add(modsButtonIndex, new UpdateCheckerTexturedButtonWidget(screen.width / 2 + 104,
-						buttonsY,
-						20,
-						20,
-						0,
-						0,
-						20,
-						MODS_BUTTON_TEXTURE,
-						32,
-						64,
-						button -> Minecraft.getInstance().setScreen(new ModsScreen(screen)),
-						ModScreenCreator.createModsButtonText()
+							buttonsY,
+							20,
+							20,
+							0,
+							0,
+							20,
+							MODS_BUTTON_TEXTURE,
+							32,
+							64,
+							button -> Minecraft.getInstance().setScreen(new ModsScreen(screen)),
+							ModScreenCreator.createModsButtonText()
 					));
 				}
 			}
@@ -153,27 +153,27 @@ public class ModScreenEventHandler {
 	}
 
 	private static void onClientEndTick(Minecraft client) {
-		while (MENU_KEY_BIND.consumeClick()) {
-			client.setScreen(new ModsScreen(client.screen));
+		while (MENU_KEY_BIND.wasPressed()) {
+			client.setScreen(new ModsScreen(client.currentScreen));
 		}
 	}
 
-	public static boolean buttonHasText(LayoutElement widget, String... translationKeys) {
-		if (widget instanceof Button button) {
-			Component text = button.getMessage();
-			ComponentContents textContent = text.getContents();
+	public static boolean buttonHasText(Widget widget, String... translationKeys) {
+		if (widget instanceof ButtonWidget button) {
+			Text text = button.getMessage();
+			TextComponent textContent = text.asComponent();
 
-			return textContent instanceof TranslatableContents && Arrays.stream(translationKeys)
-				.anyMatch(s -> ((TranslatableContents) textContent).getKey().equals(s));
+			return textContent instanceof TranslatableComponent && Arrays.stream(translationKeys)
+					.anyMatch(s -> ((TranslatableComponent) textContent).getKey().equals(s));
 		}
 		return false;
 	}
 
-	public static void shiftButtons(LayoutElement widget, boolean shiftUp, int spacing) {
+	public static void shiftButtons(Widget widget, boolean shiftUp, int spacing) {
 		if (shiftUp) {
 			widget.setY(widget.getY() - spacing / 2);
-		} else if (!(widget instanceof AbstractWidget button &&
-			button.getMessage().equals(Component.translatable("title.credits"))
+		} else if (!(widget instanceof ClickableWidget button &&
+				button.getMessage().equals(Text.translatable("title.credits"))
 		)) {
 			widget.setY(widget.getY() + spacing / 2);
 		}

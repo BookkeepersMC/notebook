@@ -24,7 +24,7 @@ package com.bookkeepersmc.notebook.impl.mod.screen.config.option;
 
 import java.util.Set;
 
-import net.minecraft.network.chat.Component;
+import net.minecraft.text.Text;
 
 import com.bookkeepersmc.notebook.impl.mod.screen.util.TranslationUtil;
 
@@ -52,8 +52,8 @@ public class StringSetConfigOption {
 		ConfigOptionStorage.setStringSet(key, value);
 	}
 
-	public Component getMessage() {
-		return Component.translatable(translationKey);
+	public Text getMessage() {
+		return Text.translatable(translationKey);
 	}
 
 	public Set<String> getDefaultValue() {

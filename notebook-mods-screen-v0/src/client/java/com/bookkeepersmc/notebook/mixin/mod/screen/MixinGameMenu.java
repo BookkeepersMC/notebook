@@ -30,28 +30,28 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.layouts.GridLayout;
-import net.minecraft.client.gui.layouts.LayoutElement;
-import net.minecraft.client.gui.screens.PauseScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.screen.GameMenuScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.client.gui.widget.layout.GridWidget;
+import net.minecraft.text.Text;
 
 import com.bookkeepersmc.notebook.api.mod.screen.v0.ModScreenCreator;
 import com.bookkeepersmc.notebook.impl.mod.screen.config.ModScreenConfig;
 import com.bookkeepersmc.notebook.impl.mod.screen.event.ModScreenEventHandler;
 import com.bookkeepersmc.notebook.impl.mod.screen.gui.widget.ModScreenButtonWidget;
 
-@Mixin(PauseScreen.class)
+@Mixin(GameMenuScreen.class)
 public abstract class MixinGameMenu extends Screen {
-	protected MixinGameMenu(Component title) {
+	protected MixinGameMenu(Text title) {
 		super(title);
 	}
 
-	@Inject(method = "createPauseMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/GridLayout;visitWidgets(Ljava/util/function/Consumer;)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-	private void onInitWidgets(CallbackInfo ci, GridLayout gridWidget, GridLayout.RowHelper adder, Component text) {
+	@Inject(method = "initWidgets", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/layout/GridWidget;visitWidgets(Ljava/util/function/Consumer;)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
+	private void onInitWidgets(CallbackInfo ci, GridWidget gridWidget) {
 		if (gridWidget != null) {
-			final List<LayoutElement> buttons = ((AccessorGridWidget) gridWidget).getChildren();
+			final List<Widget> buttons = ((AccessorGridWidget) gridWidget).getChildren();
 			if (ModScreenConfig.MODIFY_GAME_MENU.getValue()) {
 				int modsButtonIndex = -1;
 				final int spacing = 24;
@@ -60,8 +60,8 @@ public abstract class MixinGameMenu extends Screen {
 				final int fullWidthButton = 204;
 
 				for (int i = 0; i < buttons.size(); i++) {
-					LayoutElement widget = buttons.get(i);
-						if (!(widget instanceof AbstractWidget button) || button.visible) {
+					Widget widget = buttons.get(i);
+						if (!(widget instanceof ClickableWidget button) || button.visible) {
 							ModScreenEventHandler.shiftButtons(widget, modsButtonIndex == -1 || ModScreenEventHandler.buttonHasText(widget, "menu.reportBugs", "menu.server_links"), spacing);
 							ModScreenEventHandler.shiftButtons(widget, modsButtonIndex == 1 || ModScreenEventHandler.buttonHasText(widget, "menu.options", "menu.shareToLan"), spacing);
 							if (modsButtonIndex == -1) {
@@ -76,7 +76,7 @@ public abstract class MixinGameMenu extends Screen {
 						modsButtonIndex = i + 1;
 						vanillaButtonsY = widget.getY();
 							modsButtonIndex = i + 1;
-							if (!(widget instanceof AbstractWidget button) || button.visible) {
+							if (!(widget instanceof ClickableWidget button) || button.visible) {
 								buttonsY = widget.getY();
 							}
 

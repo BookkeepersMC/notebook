@@ -27,11 +27,11 @@ import java.util.List;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import net.minecraft.client.gui.layouts.GridLayout;
-import net.minecraft.client.gui.layouts.LayoutElement;
+import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.client.gui.widget.layout.GridWidget;
 
-@Mixin(GridLayout.class)
+@Mixin(GridWidget.class)
 public interface AccessorGridWidget {
 	@Accessor
-	List<LayoutElement> getChildren();
+	List<Widget> getChildren();
 }

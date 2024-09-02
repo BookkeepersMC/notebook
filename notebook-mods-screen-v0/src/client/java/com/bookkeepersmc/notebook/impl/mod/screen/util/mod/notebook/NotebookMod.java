@@ -24,18 +24,7 @@ package com.bookkeepersmc.notebook.impl.mod.screen.util.mod.notebook;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
@@ -47,16 +36,12 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.texture.NativeImageBackedTexture;
 
 import com.bookkeepersmc.loader.api.ModContainer;
 import com.bookkeepersmc.loader.api.NotebookLoader;
-import com.bookkeepersmc.loader.api.metadata.CustomValue;
-import com.bookkeepersmc.loader.api.metadata.ModEnvironment;
-import com.bookkeepersmc.loader.api.metadata.ModMetadata;
-import com.bookkeepersmc.loader.api.metadata.ModOrigin;
-import com.bookkeepersmc.loader.api.metadata.Person;
+import com.bookkeepersmc.loader.api.metadata.*;
 import com.bookkeepersmc.notebook.api.mod.screen.v0.UpdateChecker;
 import com.bookkeepersmc.notebook.api.mod.screen.v0.UpdateInfo;
 import com.bookkeepersmc.notebook.impl.mod.screen.NotebookModScreen;
@@ -66,7 +51,7 @@ import com.bookkeepersmc.notebook.impl.mod.screen.util.VersionUtil;
 import com.bookkeepersmc.notebook.impl.mod.screen.util.mod.Mod;
 
 public class NotebookMod implements Mod {
-	private static final Logger LOGGER = LoggerFactory.getLogger("Notebook Mod Screen | NotebookMod");
+	private static final Logger LOGGER = LoggerFactory.getLogger("Mod Menu | FabricMod");
 
 	protected final ModContainer container;
 	protected final ModMetadata metadata;
@@ -100,7 +85,7 @@ public class NotebookMod implements Mod {
 		Optional<String> parentId = Optional.empty();
 		ModMenuData.DummyParentData parentData = null;
 		Set<String> badgeNames = new HashSet<>();
-		CustomValue modMenuValue = metadata.getCustomValue("modscreen");
+		CustomValue modMenuValue = metadata.getCustomValue("modmenu");
 		if (modMenuValue != null && modMenuValue.getType() == CustomValue.CvType.OBJECT) {
 			CustomValue.CvObject modMenuObject = modMenuValue.getAsObject();
 			CustomValue parentCv = modMenuObject.get("parent");
@@ -191,7 +176,7 @@ public class NotebookMod implements Mod {
 	}
 
 	@Override
-	public @NotNull DynamicTexture getIcon(IconHandler iconHandler, int i) {
+	public @NotNull NativeImageBackedTexture getIcon(IconHandler iconHandler, int i) {
 		String iconSourceId = getId();
 		String iconPath = metadata.getIconPath(i).orElse("assets/" + getId() + "/icon.png");
 		if ("minecraft".equals(getId())) {
@@ -205,7 +190,7 @@ public class NotebookMod implements Mod {
 		ModContainer iconSource = NotebookLoader.getInstance()
 			.getModContainer(iconSourceId)
 			.orElseThrow(() -> new RuntimeException("Cannot get ModContainer for Fabric mod with id " + finalIconSourceId));
-		DynamicTexture icon = iconHandler.createIcon(iconSource, iconPath);
+		NativeImageBackedTexture icon = iconHandler.createIcon(iconSource, iconPath);
 		if (icon == null) {
 			if (defaultIconWarning) {
 				LOGGER.warn("Warning! Mod {} has a broken icon, loading default icon", metadata.getId());
@@ -230,7 +215,7 @@ public class NotebookMod implements Mod {
 	public @NotNull String getTranslatedDescription() {
 		var description = Mod.super.getTranslatedDescription();
 		if (getId().equals("java")) {
-			description = description + "\n" + I18n.get("modscreen.javaDistributionName", getName());
+			description = description + "\n" + I18n.translate("modscreen.javaDistributionName", getName());
 		}
 		return description;
 	}

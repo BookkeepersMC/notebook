@@ -23,22 +23,15 @@
 package com.bookkeepersmc.notebook.impl.mod.screen.util.mod;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.texture.NativeImageBackedTexture;
+import net.minecraft.text.Text;
 
 import com.bookkeepersmc.notebook.api.mod.screen.v0.UpdateChecker;
 import com.bookkeepersmc.notebook.api.mod.screen.v0.UpdateInfo;
@@ -54,15 +47,14 @@ public interface Mod {
 	@NotNull
 	default String getTranslatedName() {
 		String translationKey = "modscreen.nameTranslation." + getId();
-		if ((getId().equals("minecraft") || getId().equals("java") || ModScreenConfig.TRANSLATE_NAMES.getValue()) && I18n.exists(
+		if ((getId().equals("minecraft") || getId().equals("java") || ModScreenConfig.TRANSLATE_NAMES.getValue()) && I18n.hasTranslation(
 			translationKey)) {
-			return I18n.get(translationKey);
+			return I18n.translate(translationKey);
 		}
 		return getName();
 	}
 
-	@NotNull
-	DynamicTexture getIcon(IconHandler iconHandler, int i);
+	@NotNull NativeImageBackedTexture getIcon(IconHandler iconHandler, int i);
 
 	@NotNull
 	default String getSummary() {
@@ -72,9 +64,9 @@ public interface Mod {
 	@NotNull
 	default String getTranslatedSummary() {
 		String translationKey = "modscreen.summaryTranslation." + getId();
-		if ((getId().equals("minecraft") || getId().equals("java") || ModScreenConfig.TRANSLATE_DESCRIPTIONS.getValue()) && I18n.exists(
+		if ((getId().equals("minecraft") || getId().equals("java") || ModScreenConfig.TRANSLATE_DESCRIPTIONS.getValue()) && I18n.hasTranslation(
 			translationKey)) {
-			return I18n.get(translationKey);
+			return I18n.translate(translationKey);
 		}
 		return getTranslatedDescription();
 	}
@@ -84,15 +76,15 @@ public interface Mod {
 	@NotNull
 	default String getTranslatedDescription() {
 		String translatableDescriptionKey = "modscreen.descriptionTranslation." + getId();
-		if ((getId().equals("minecraft") || getId().equals("java") || ModScreenConfig.TRANSLATE_DESCRIPTIONS.getValue()) && I18n.exists(
+		if ((getId().equals("minecraft") || getId().equals("java") || ModScreenConfig.TRANSLATE_DESCRIPTIONS.getValue()) && I18n.hasTranslation(
 			translatableDescriptionKey)) {
-			return I18n.get(translatableDescriptionKey);
+			return I18n.translate(translatableDescriptionKey);
 		}
 		return getDescription();
 	}
 
-	default Component getFormattedDescription() {
-		return Component.literal(getTranslatedDescription());
+	default Text getFormattedDescription() {
+		return Text.literal(getTranslatedDescription());
 	}
 
 	@NotNull String getVersion();
@@ -173,19 +165,19 @@ public interface Mod {
 			null
 		);
 
-		private final Component text;
+		private final Text text;
 		private final int outlineColor, fillColor;
 		private final String key;
 		private static final Map<String, Badge> KEY_MAP = new HashMap<>();
 
 		Badge(String translationKey, int outlineColor, int fillColor, String key) {
-			this.text = Component.translatable(translationKey);
+			this.text = Text.translatable(translationKey);
 			this.outlineColor = outlineColor;
 			this.fillColor = fillColor;
 			this.key = key;
 		}
 
-		public Component getText() {
+		public Text getText() {
 			return this.text;
 		}
 

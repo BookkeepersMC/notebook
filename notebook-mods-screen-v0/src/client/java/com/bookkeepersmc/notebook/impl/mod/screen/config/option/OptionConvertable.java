@@ -22,8 +22,8 @@
  */
 package com.bookkeepersmc.notebook.impl.mod.screen.config.option;
 
-import net.minecraft.client.OptionInstance;
+import net.minecraft.client.option.Option;
 
 public interface OptionConvertable {
-	OptionInstance<?> asOption();
+	Option<?> asOption();
 }

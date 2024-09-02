@@ -25,8 +25,8 @@ package com.bookkeepersmc.notebook.api.mod.screen.v0;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.text.Text;
 
 import com.bookkeepersmc.notebook.impl.mod.screen.NotebookModScreen;
 import com.bookkeepersmc.notebook.impl.mod.screen.gui.ModsScreen;
@@ -45,12 +45,12 @@ public interface ModScreenCreator {
 	}
 
 	/**
-	 * Used for creating a {@link Component} just like what would appear
+	 * Used for creating a {@link Text} just like what would appear
 	 * on a Mod Menu Mods button
 	 *
 	 * @return The text that would be displayed on a Mods button
 	 */
-	static Component createModsButtonText() {
+	static Text createModsButtonText() {
 		return NotebookModScreen.createModsButtonText(true);
 	}
 

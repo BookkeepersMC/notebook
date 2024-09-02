@@ -26,7 +26,7 @@ import java.util.Set;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.text.OrderedText;
 
 import com.bookkeepersmc.notebook.impl.mod.screen.gui.ModsScreen;
 import com.bookkeepersmc.notebook.impl.mod.screen.util.DrawingUtil;
@@ -55,7 +55,7 @@ public class ModBadgeRenderer {
 
 	public void drawBadge(GuiGraphics guiGraphics, Mod.Badge badge, int mouseX, int mouseY) {
 		this.drawBadge(guiGraphics,
-			badge.getText().getVisualOrderText(),
+			badge.getText().asOrderedText(),
 			badge.getOutlineColor(),
 			badge.getFillColor(),
 			mouseX,
@@ -65,13 +65,13 @@ public class ModBadgeRenderer {
 
 	public void drawBadge(
 		GuiGraphics guiGraphics,
-		FormattedCharSequence text,
+		OrderedText text,
 		int outlineColor,
 		int fillColor,
 		int mouseX,
 		int mouseY
 	) {
-		int width = client.font.width(text) + 6;
+		int width = client.textRenderer.getWidth(text) + 6;
 		if (badgeX + width < badgeMax) {
 			DrawingUtil.drawBadge(guiGraphics, badgeX, badgeY, width, text, outlineColor, fillColor, 0xCACACA);
 			badgeX += width + 3;

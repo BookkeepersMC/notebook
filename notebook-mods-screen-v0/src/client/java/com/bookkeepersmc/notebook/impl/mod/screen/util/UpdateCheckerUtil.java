@@ -28,15 +28,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
@@ -48,10 +40,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.minecraft.SharedConstants;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.toast.SystemToast;
+import net.minecraft.text.Text;
+import net.minecraft.util.Util;
 
 import com.bookkeepersmc.notebook.api.mod.screen.v0.UpdateChannel;
 import com.bookkeepersmc.notebook.api.mod.screen.v0.UpdateChecker;
@@ -62,7 +54,7 @@ import com.bookkeepersmc.notebook.impl.mod.screen.util.mod.Mod;
 import com.bookkeepersmc.notebook.impl.mod.screen.util.mod.ModrinthUpdateInfo;
 
 public class UpdateCheckerUtil {
-	public static final Logger LOGGER = LoggerFactory.getLogger("Notebook Mod Screen/Update Checker");
+	public static final Logger LOGGER = LoggerFactory.getLogger("Mod Menu/Update Checker");
 
 	private static boolean modrinthApiV2Deprecated = false;
 
@@ -76,7 +68,7 @@ public class UpdateCheckerUtil {
 		}
 
 		LOGGER.info("Checking mod updates...");
-		Util.backgroundExecutor().execute(UpdateCheckerUtil::checkForUpdates0);
+		Util.getMainWorkerExecutor().execute(UpdateCheckerUtil::checkForUpdates0);
 	}
 
 	private static void checkForUpdates0() {
@@ -190,9 +182,9 @@ public class UpdateCheckerUtil {
 
 	public static void triggerV2DeprecatedToast() {
 		if (modrinthApiV2Deprecated && ModScreenConfig.UPDATE_CHECKER.getValue()) {
-			Minecraft.getInstance().getToasts().addToast(new SystemToast(SystemToast.SystemToastId.PERIODIC_NOTIFICATION,
-				Component.translatable("modscreen.modrinth.v2_deprecated.title"),
-				Component.translatable("modscreen.modrinth.v2_deprecated.description")
+			Minecraft.getInstance().method_1566().method_1999(new SystemToast(SystemToast.Id.PERIODIC_NOTIFICATION,
+				Text.translatable("modscreen.modrinth.v2_deprecated.title"),
+				Text.translatable("modscreen.modrinth.v2_deprecated.description")
 			));
 		}
 	}
@@ -258,8 +250,8 @@ public class UpdateCheckerUtil {
 	}
 
 	private static @Nullable Map<String, VersionUpdate> getUpdatedVersions(Collection<String> modHashes) {
-		String mcVer = SharedConstants.getCurrentVersion().getName();
-		List<String> loaders = List.of("fabric");
+		String mcVer = SharedConstants.getGameVersion().getName();
+		List<String> loaders = List.of("notebook");
 
 		List<UpdateChannel> updateChannels;
 		UpdateChannel preferredChannel = UpdateChannel.getUserPreference();
