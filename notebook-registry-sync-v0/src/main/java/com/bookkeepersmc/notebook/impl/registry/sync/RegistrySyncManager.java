@@ -162,7 +162,7 @@ public final class RegistrySyncManager {
 		Map<Identifier, Object2IntMap<Identifier>> map = new LinkedHashMap<>();
 
 		for (Identifier registryId : BuiltInRegistries.ROOT.getIds()) {
-			Registry registry = BuiltInRegistries.ROOT.get(registryId);
+			Registry registry = BuiltInRegistries.ROOT.method_63535(registryId);
 
 			if (DEBUG_WRITE_REGISTRY_DATA) {
 				File location = new File(".fabric" + File.separatorChar + "debug" + File.separatorChar + "registry");
@@ -233,8 +233,8 @@ public final class RegistrySyncManager {
 					int rawId = registry.getRawId(o);
 
 					if (DEBUG) {
-						if (registry.get(id) != o) {
-							LOGGER.error("[notebook-registry-sync] Inconsistency detected in " + registryId + ": object " + o + " -> string ID " + id + " -> object " + registry.get(id) + "!");
+						if (registry.method_63535(id) != o) {
+							LOGGER.error("[notebook-registry-sync] Inconsistency detected in " + registryId + ": object " + o + " -> string ID " + id + " -> object " + registry.method_63535(id) + "!");
 						}
 
 						if (registry.get(rawId) != o) {
@@ -273,7 +273,7 @@ public final class RegistrySyncManager {
 			}
 
 			Object2IntMap<Identifier> registryMap = map.get(registryId);
-			Registry<?> registry = BuiltInRegistries.ROOT.get(registryId);
+			Registry<?> registry = BuiltInRegistries.ROOT.method_63535(registryId);
 
 			RegistryAttributeHolder attributeHolder = RegistryAttributeHolder.get(registry.getKey());
 
@@ -367,7 +367,7 @@ public final class RegistrySyncManager {
 
 	public static void unmap() throws RemapException {
 		for (Identifier registryId : BuiltInRegistries.ROOT.getIds()) {
-			Registry registry = BuiltInRegistries.ROOT.get(registryId);
+			Registry registry = BuiltInRegistries.ROOT.method_63535(registryId);
 
 			if (registry instanceof RemappableRegistry) {
 				((RemappableRegistry) registry).unmap(registryId.toString());

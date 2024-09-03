@@ -38,7 +38,6 @@ import net.minecraft.registry.BuiltInRegistries;
 
 import com.bookkeepersmc.notebook.impl.registry.sync.RegistrySyncManager;
 import com.bookkeepersmc.notebook.impl.registry.sync.trackers.StateIdTracker;
-import com.bookkeepersmc.notebook.impl.registry.sync.trackers.vanilla.BlockInitTracker;
 import com.bookkeepersmc.notebook.impl.registry.sync.trackers.vanilla.BlockItemTracker;
 
 @Mixin(Bootstrap.class)
@@ -59,9 +58,6 @@ public class BootstrapMixin {
 
 		// map tracking
 		BlockItemTracker.register(BuiltInRegistries.ITEM);
-
-		// block initialization, like Blocks
-		BlockInitTracker.register(BuiltInRegistries.BLOCK);
 
 		RegistrySyncManager.bootstrapRegistries();
 	}

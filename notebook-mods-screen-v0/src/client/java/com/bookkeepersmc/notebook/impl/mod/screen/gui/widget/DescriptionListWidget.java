@@ -38,6 +38,7 @@ import com.mojang.blaze3d.vertex.VertexFormats;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gl.CoreShaders;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.Selectable;
@@ -49,7 +50,6 @@ import net.minecraft.client.gui.widget.list.ElementListWidget;
 import net.minecraft.client.gui.widget.list.EntryListWidget;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
-import net.minecraft.unmapped.C_qrsmnkgy;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
@@ -308,7 +308,7 @@ public class DescriptionListWidget extends EntryListWidget<DescriptionListWidget
 			GlStateManager.DestFactor.ONE
 		);
 //		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-		RenderSystem.setShader(C_qrsmnkgy.POSITION_COLOR);
+		RenderSystem.setShader(CoreShaders.POSITION_COLOR);
 
 		bufferBuilder = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 		bufferBuilder.xyz(this.getX(), (this.getY() + 4), 0.0F).

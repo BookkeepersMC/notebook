@@ -119,13 +119,11 @@ transitive-accessible method net/minecraft/entity/damage/DamageSources create (L
 transitive-accessible field net/minecraft/client/Minecraft attackCooldown I
 
 # Creating certain types of blocks
-transitive-accessible method net/minecraft/block/Blocks pottedVariant (Lnet/minecraft/block/Block;)Lnet/minecraft/block/Block;
-transitive-accessible method net/minecraft/block/Blocks leavesOf (Lnet/minecraft/sound/BlockSoundGroup;)Lnet/minecraft/block/Block;
-transitive-accessible method net/minecraft/block/Blocks logOf (Lnet/minecraft/block/MapColor;Lnet/minecraft/block/MapColor;)Lnet/minecraft/block/Block;
-transitive-accessible method net/minecraft/block/Blocks logOf (Lnet/minecraft/block/MapColor;Lnet/minecraft/block/MapColor;Lnet/minecraft/sound/BlockSoundGroup;)Lnet/minecraft/block/Block;
-transitive-accessible method net/minecraft/block/Blocks netherStemOf (Lnet/minecraft/block/MapColor;)Lnet/minecraft/block/Block;
-transitive-accessible method net/minecraft/block/Blocks createStoneButton ()Lnet/minecraft/block/Block;
-transitive-accessible method net/minecraft/block/Blocks buttonOf (Lnet/minecraft/block/BlockSetType;)Lnet/minecraft/block/Block;
+transitive-accessible method net/minecraft/block/Blocks method_63061 (Lnet/minecraft/block/MapColor;Lnet/minecraft/block/MapColor;Lnet/minecraft/sound/BlockSoundGroup;)Lnet/minecraft/block/AbstractBlock$Settings;
+transitive-accessible method net/minecraft/block/Blocks method_63121 (Lnet/minecraft/block/MapColor;)Lnet/minecraft/block/AbstractBlock$Settings;
+transitive-accessible method net/minecraft/block/Blocks method_63058 (Lnet/minecraft/sound/BlockSoundGroup;)Lnet/minecraft/block/AbstractBlock$Settings;
+transitive-accessible method net/minecraft/block/Blocks method_63117 ()Lnet/minecraft/block/AbstractBlock$Settings;
+transitive-accessible method net/minecraft/block/Blocks method_63176 ()Lnet/minecraft/block/AbstractBlock$Settings;
 
 # Methods used in block creation
 transitive-accessible method net/minecraft/block/Blocks solid (Lnet/minecraft/block/BlockState;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z
@@ -134,5 +132,9 @@ transitive-accessible method net/minecraft/block/Blocks allowOcelotsAndParrots (
 transitive-accessible method net/minecraft/block/Blocks luminanceOf (I)Ljava/util/function/ToIntFunction;
 transitive-accessible method net/minecraft/block/Blocks nonSolid (Lnet/minecraft/block/BlockState;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Z
 transitive-accessible method net/minecraft/block/Blocks nonSpawnable (Lnet/minecraft/block/BlockState;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/EntityType;)Ljava/lang/Boolean;
+
+# Methods used in block registration
+transitive-accessible method net/minecraft/block/Blocks method_63053 (Lnet/minecraft/registry/ResourceKey;Ljava/util/function/Function;Lnet/minecraft/block/AbstractBlock$Settings;)Lnet/minecraft/block/Block;
+transitive-accessible method net/minecraft/block/Blocks method_63052 (Lnet/minecraft/registry/ResourceKey;Lnet/minecraft/block/AbstractBlock$Settings;)Lnet/minecraft/block/Block;
 
 ### Generated access wideners below

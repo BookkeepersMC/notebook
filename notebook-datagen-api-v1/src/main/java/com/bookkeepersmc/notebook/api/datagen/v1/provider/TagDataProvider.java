@@ -60,7 +60,7 @@ public abstract class TagDataProvider<T> extends AbstractTagProvider<T> {
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	protected ResourceKey<T> reverseLookup(T element) {
-		Registry registry = BuiltInRegistries.ROOT.get((ResourceKey) key);
+		Registry registry = BuiltInRegistries.ROOT.method_31140((ResourceKey) key);
 
 		if (registry != null) {
 			Optional<Holder<T>> key = registry.getKey(element);

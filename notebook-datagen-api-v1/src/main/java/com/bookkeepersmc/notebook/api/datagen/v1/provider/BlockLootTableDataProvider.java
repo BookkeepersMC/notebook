@@ -25,6 +25,7 @@ package com.bookkeepersmc.notebook.api.datagen.v1.provider;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
@@ -36,7 +37,6 @@ import net.minecraft.data.DataWriter;
 import net.minecraft.data.server.loot_table.BlockLootTableGenerator;
 import net.minecraft.feature_flags.FeatureFlags;
 import net.minecraft.loot.LootTable;
-import net.minecraft.loot.LootTables;
 import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.registry.BuiltInRegistries;
 import net.minecraft.registry.HolderLookup;
@@ -79,10 +79,6 @@ public abstract class BlockLootTableDataProvider extends BlockLootTableGenerator
 		for (Map.Entry<ResourceKey<LootTable>, LootTable.Builder> entry : lootTables.entrySet()) {
 			ResourceKey<LootTable> registryKey = entry.getKey();
 
-			if (registryKey == LootTables.EMPTY) {
-				continue;
-			}
-
 			biConsumer.accept(registryKey, entry.getValue());
 		}
 
@@ -91,10 +87,10 @@ public abstract class BlockLootTableDataProvider extends BlockLootTableGenerator
 
 			for (Identifier blockId : BuiltInRegistries.BLOCK.getIds()) {
 				if (blockId.getNamespace().equals(output.getModId())) {
-					ResourceKey<LootTable> blockLootTableId = BuiltInRegistries.BLOCK.get(blockId).getLootTableId();
+					Optional<ResourceKey<LootTable>> blockLootTableId = BuiltInRegistries.BLOCK.method_63535(blockId).getLootTableId();
 
-					if (blockLootTableId.getValue().getNamespace().equals(output.getModId())) {
-						if (!lootTables.containsKey(blockLootTableId)) {
+					if (blockLootTableId.isPresent() && blockLootTableId.get().getValue().getNamespace().equals(output.getModId())) {
+						if (!lootTables.containsKey(blockLootTableId.get())) {
 							missing.add(blockId);
 						}
 					}

@@ -32,7 +32,7 @@ import net.minecraft.registry.DynamicRegistrySync;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.ResourceKey;
 
-@Mixin(targets = "net/minecraft/unmapped/C_jcuvnmyx$C_wzbwncua")
+@Mixin(targets = "net/minecraft/client/network/ClientRegistries$DynamicRegistries")
 public interface ClientRegistriesDynamicRegistriesAccessor {
 	@Accessor("field_48769")
 	Map<ResourceKey<? extends Registry<?>>, List<DynamicRegistrySync.SerializedRegistryEntry>> getDynamicRegistries();

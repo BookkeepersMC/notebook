@@ -71,7 +71,7 @@ public final class TagUtil {
 		Objects.requireNonNull(entry);
 
 		if (registryManager != null) {
-			maybeRegistry = registryManager.getOptional(tagKey.registry());
+			maybeRegistry = registryManager.getLookup(tagKey.registry());
 		} else {
 			maybeRegistry = BuiltInRegistries.ROOT.getOrEmpty(tagKey.registry().getValue());
 		}

@@ -32,6 +32,7 @@ import com.bookkeepersmc.notebook.api.networking.v1.ServerConfigurationConnectio
 import com.bookkeepersmc.notebook.api.networking.v1.ServerConfigurationNetworking;
 import com.bookkeepersmc.notebook.impl.registry.sync.packet.DirectRegistryPacketHandler;
 
+
 public class RegistrySyncInit implements ModInitializer {
 	@Override
 	public void onInitialize() {
@@ -212,6 +213,9 @@ public class RegistrySyncInit implements ModInitializer {
 
 		// Synced via PacketCodecs.registry
 		RegistryAttributeHolder.get(BuiltInRegistries.ARMOR_MATERIAL)
+				.addAttribute(RegistryAttribute.SYNCED);
+
+		RegistryAttributeHolder.get(BuiltInRegistries.CONSUME_EFFECT_TYPE)
 				.addAttribute(RegistryAttribute.SYNCED);
 	}
 }

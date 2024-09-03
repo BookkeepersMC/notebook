@@ -127,11 +127,11 @@ public abstract class LanguageDataProvider implements DataProvider {
 		}
 
 		default void add(Block block, String value) {
-			add(block.getTranslationKey(), value);
+			add(block.method_63499(), value);
 		}
 
 		default void add(ResourceKey<ItemGroup> registryKey, String value) {
-			final ItemGroup group = BuiltInRegistries.ITEM_GROUP.getOrThrow(registryKey);
+			final ItemGroup group = BuiltInRegistries.ITEM_GROUP.method_31140(registryKey);
 			final TextComponent content = group.getName().asComponent();
 
 			if (content instanceof TranslatableComponent translatableTextContent) {

@@ -78,7 +78,7 @@ public class TranslationConventionLogWarnings implements ModInitializer {
 		// Log missing item tag translations only when world is started.
 		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
 			Language language = Language.getInstance();
-			Registry<Item> itemRegistry = server.getRegistryManager().get(Registries.ITEM);
+			Registry<Item> itemRegistry = server.getRegistryManager().getLookupOrThrow(Registries.ITEM);
 			List<TagKey<Item>> untranslatedItemTags = new ObjectArrayList<>();
 			itemRegistry.getTags().forEach(itemTagKey -> {
 				// We do not translate vanilla's tags at this moment.

@@ -36,10 +36,10 @@ import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gl.CoreShaders;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.widget.list.AlwaysSelectedEntryListWidget;
 import net.minecraft.text.Text;
-import net.minecraft.unmapped.C_qrsmnkgy;
 import net.minecraft.util.math.MathHelper;
 
 import com.bookkeepersmc.notebook.impl.mod.screen.NotebookModScreen;
@@ -259,7 +259,7 @@ public class ModListWidget extends AlwaysSelectedEntryListWidget<ModListEntry> i
 					entryLeft = getRowLeft() - 2 + entry.getXOffset();
 					int selectionRight = this.getRowLeft() + rowWidth + 2;
 					float float_2 = this.isFocused() ? 1.0F : 0.5F;
-					RenderSystem.setShader(C_qrsmnkgy.POSITION);
+					RenderSystem.setShader(CoreShaders.POSITION);
 					RenderSystem.setShaderColor(float_2, float_2, float_2, 1.0F);
 					Matrix4f matrix = guiGraphics.getMatrices().peek().getModel();
 					BuiltBuffer builtBuffer;
@@ -275,7 +275,7 @@ public class ModListWidget extends AlwaysSelectedEntryListWidget<ModListEntry> i
 					} catch (Exception e) {
 						// Ignored
 					}
-					RenderSystem.setShader(C_qrsmnkgy.POSITION);
+					RenderSystem.setShader(CoreShaders.POSITION);
 					RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, 1.0F);
 					buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
 					buffer.xyz(matrix, entryLeft + 1, entryTop + entryHeight + 1, 0.0F);

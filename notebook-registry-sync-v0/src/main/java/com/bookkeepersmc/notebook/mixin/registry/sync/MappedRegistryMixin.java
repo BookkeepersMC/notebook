@@ -94,7 +94,7 @@ public abstract class MappedRegistryMixin<T> implements MutableRegistry<T>, Rema
 	public abstract Optional<ResourceKey<T>> getKey(T entry);
 
 	@Shadow
-	public abstract @Nullable T get(@Nullable Identifier id);
+	public abstract @Nullable T method_63535(@Nullable Identifier id);
 
 	@Shadow
 	public abstract ResourceKey<? extends Registry<T>> getKey();
@@ -379,7 +379,7 @@ public abstract class MappedRegistryMixin<T> implements MutableRegistry<T>, Rema
 			remap(name, notebook_prevIndexedEntries, RemapMode.AUTHORITATIVE);
 
 			for (Identifier id : addedIds) {
-				notebook_getAddObjectEvent().invoker().onEntryAdded(entryToRawId.getInt(byId.get(id)), id, get(id));
+				notebook_getAddObjectEvent().invoker().onEntryAdded(entryToRawId.getInt(byId.get(id)), id, method_63535(id));
 			}
 
 			notebook_prevIndexedEntries = null;

@@ -33,16 +33,16 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Coerce;
 
+import net.minecraft.client.network.ClientRegistries;
 import net.minecraft.registry.DynamicRegistrySync;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryLoader;
 import net.minecraft.registry.ResourceKey;
 import net.minecraft.resource.ResourceFactory;
-import net.minecraft.unmapped.C_jcuvnmyx;
 
 import com.bookkeepersmc.notebook.impl.registry.sync.DynamicRegistriesImpl;
 
-@Mixin(C_jcuvnmyx.class)
+@Mixin(ClientRegistries.class)
 public class RegistryDataCollectorContentsCollectorMixin {
 	@WrapOperation(method = "method_62155", at = @At(value = "FIELD", target = "Lnet/minecraft/registry/RegistryLoader;SYNCED_REGISTRIES:Ljava/util/List;", opcode = Opcodes.GETSTATIC))
 	private List<RegistryLoader.DecodingData<?>> skipEmptyRegistries(Operation<List<RegistryLoader.DecodingData<?>>> operation, ResourceFactory resourceFactory, @Coerce ClientRegistriesDynamicRegistriesAccessor storage, boolean bl) {

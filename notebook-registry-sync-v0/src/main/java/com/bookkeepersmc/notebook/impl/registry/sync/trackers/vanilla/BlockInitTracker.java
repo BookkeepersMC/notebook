@@ -24,35 +24,13 @@ package com.bookkeepersmc.notebook.impl.registry.sync.trackers.vanilla;
 
 import java.util.List;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.registry.BuiltInRegistries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
-import com.bookkeepersmc.notebook.api.event.registry.RegistryEntryAddedCallback;
 import com.bookkeepersmc.notebook.mixin.registry.sync.DebugChunkGeneratorAccessor;
 
-public final class BlockInitTracker implements RegistryEntryAddedCallback<Block> {
-	private final Registry<Block> registry;
-
-	private BlockInitTracker(Registry<Block> registry) {
-		this.registry = registry;
-	}
-
-	public static void register(Registry<Block> registry) {
-		BlockInitTracker tracker = new BlockInitTracker(registry);
-		RegistryEntryAddedCallback.event(registry).register(tracker);
-	}
-
-	@Override
-	public void onEntryAdded(int rawId, Identifier id, Block object) {
-		// if false, getLootTableKey() will generate an invalid loot table key
-		assert id.equals(registry.getKey(object));
-
-		object.getLootTableId();
-	}
+public final class BlockInitTracker {
 
 	public static void postFreeze() {
 		final List<BlockState> blockStateList = BuiltInRegistries.BLOCK.stream()

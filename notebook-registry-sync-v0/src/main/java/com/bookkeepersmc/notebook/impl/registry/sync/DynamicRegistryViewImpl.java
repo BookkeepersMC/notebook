@@ -45,7 +45,7 @@ public final class DynamicRegistryViewImpl implements DynamicRegistryView {
 		return new DynamicRegistryManager.Frozen() {
 			@SuppressWarnings("unchecked")
 			@Override
-			public <T> Optional<Registry<T>> getOptional(ResourceKey<? extends Registry<? extends T>> resourceKey) {
+			public <T> Optional<Registry<T>> getLookup(ResourceKey<? extends Registry<? extends T>> resourceKey) {
 				return Optional.ofNullable((Registry<T>) DynamicRegistryViewImpl.this.registries.get(resourceKey));
 			}
 

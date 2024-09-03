@@ -53,18 +53,18 @@ public abstract class SynchronizeRegistriesTaskMixin {
 	private List<KnownPack> packs;
 
 	@Shadow
-	protected abstract void method_56925(Consumer<Packet<?>> sender, Set<KnownPack> commonKnownPacks);
+	protected abstract void syncRegistriesAndTags(Consumer<Packet<?>> sender, Set<KnownPack> commonKnownPacks);
 
-	@Inject(method = "method_56923", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "handleResponse", at = @At("HEAD"), cancellable = true)
 	public void onSelectKnownPacks(List<KnownPack> clientKnownPacks, Consumer<Packet<?>> sender, CallbackInfo ci) {
 		if (new HashSet<>(this.packs).containsAll(clientKnownPacks)) {
-			this.method_56925(sender, Set.copyOf(clientKnownPacks));
+			this.syncRegistriesAndTags(sender, Set.copyOf(clientKnownPacks));
 			ci.cancel();
 		}
 	}
 
-	@Inject(method = "method_56925", at = @At("HEAD"))
-	public void method_56925(Consumer<Packet<?>> sender, Set<KnownPack> commonKnownPacks, CallbackInfo ci) {
+	@Inject(method = "syncRegistriesAndTags", at = @At("HEAD"))
+	public void syncRegistriesAndTags(Consumer<Packet<?>> sender, Set<KnownPack> commonKnownPacks, CallbackInfo ci) {
 		LOGGER.debug("Synchronizing registries with common known packs: {}", commonKnownPacks);
 	}
 

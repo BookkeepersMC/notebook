@@ -222,7 +222,7 @@ allprojects {
 
 	dependencies {
 		minecraft "com.mojang:minecraft:$rootProject.minecraft_version"
-		mappings "com.bookkeepersmc:book-mappings:24w34a+build.2:intermediary-v2"
+		mappings "com.bookkeepersmc:book-mappings:${minecraft_version}+build.${mappings_build}:intermediary-v2"
 		modApi "com.bookkeepersmc:notebook-loader:${project.loader_version}"
 
 		testmodImplementation sourceSets.main.output
