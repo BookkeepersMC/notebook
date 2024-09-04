@@ -262,6 +262,7 @@ allprojects {
 	spotless {
 		java {
 			licenseHeaderFile(rootProject.file("HEADER"))
+			targetExclude("**/src/generated/**")
 			removeUnusedImports()
 			importOrder('java', 'javax', '', 'net.minecraft', 'com.bookkeepersmc')
 			indentWithTabs()
