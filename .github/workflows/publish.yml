@@ -8,6 +8,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/openjdk/jdk:21
+      options: --user root
     steps:
       - run: apt update && apt install git -y && git --version
       - run: git config --global --add safe.directory /__w/notebook/notebook
@@ -24,15 +27,6 @@ jobs:
           path: './m2/'
           ref: 'master'
           token: ${{ secrets.CHECKOUT_TOKEN }}
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
 
       - name: Build and Publish
         run: ./gradlew build publish --stacktrace
