@@ -212,9 +212,6 @@ public class RegistrySyncInit implements ModInitializer {
 				.addAttribute(RegistryAttribute.SYNCED);
 
 		// Synced via PacketCodecs.registry
-		RegistryAttributeHolder.get(BuiltInRegistries.ARMOR_MATERIAL)
-				.addAttribute(RegistryAttribute.SYNCED);
-
 		RegistryAttributeHolder.get(BuiltInRegistries.CONSUME_EFFECT_TYPE)
 				.addAttribute(RegistryAttribute.SYNCED);
 	}

@@ -41,7 +41,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.HolderLookup;
 import net.minecraft.resource.PackPosition;
 import net.minecraft.resource.ResourceReloader;
@@ -235,8 +234,8 @@ public class ResourceManagerHelperImpl implements ResourceManagerHelper {
 		}
 
 		for (ResourceReloader resourceReloader : listeners) {
-			if (resourceReloader instanceof RecipeManager recipeManager) {
-				return recipeManager.lookupProvider;
+			if (resourceReloader instanceof NotebookRecipeManager recipeManager) {
+				return recipeManager.notebook_getRegistries();
 			}
 		}
 

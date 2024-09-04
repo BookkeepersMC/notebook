@@ -22,51 +22,61 @@
  */
 package com.bookkeepersmc.notebook.mixin.resource.conditions;
 
-import java.util.Iterator;
 import java.util.Map;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.registry.RegistryOps;
 import net.minecraft.resource.JsonDataLoader;
-import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.profiler.Profiler;
 
 import com.bookkeepersmc.notebook.impl.resource.conditions.ResourceConditionsImpl;
 
 @Mixin(JsonDataLoader.class)
-public class SimpleJsonResourceReloadListenerMixin extends SimplePreparableReloadListenerMixin {
-	@Shadow
-	@Final
-	private String dataType;
+public class SimpleJsonResourceReloadListenerMixin {
+	@Unique
+	private static final Object SKIP_DATA_MARKER = new Object();
 
-	@Override
-	@SuppressWarnings("unchecked")
-	protected void notebook_applyResourceConditions(ResourceManager resourceManager, Profiler profiler, Object object, @Nullable RegistryOps.RegistryInfoLookup registryLookup) {
-		profiler.push("Notebook resource conditions: %s".formatted(dataType));
+	@WrapOperation(method = "prepare(Lnet/minecraft/resource/ResourceManager;Ljava/lang/String;Lcom/mojang/serialization/DynamicOps;Lcom/mojang/serialization/Codec;Ljava/util/Map;)V", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;parse(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;"))
+	private static DataResult<?> applyResourceConditions(Codec<?> instance, DynamicOps<JsonElement> dynamicOps, Object object, Operation<DataResult<?>> original,
+														@Local(argsOnly = true) String dataType,
+														@Local Map.Entry<Identifier, Resource> entry) {
+		final JsonElement resourceData = (JsonElement) object;
+		@Nullable RegistryOps.RegistryInfoLookup registryInfo = null;
 
-		Iterator<Map.Entry<Identifier, JsonElement>> it = ((Map<Identifier, JsonElement>) object).entrySet().iterator();
+		if (dynamicOps instanceof RegistryOpsAccessor registryOps) {
+			registryInfo = registryOps.getInfoLookup();
+		}
 
-		while (it.hasNext()) {
-			Map.Entry<Identifier, JsonElement> entry = it.next();
+		if (resourceData.isJsonObject()) {
+			JsonObject obj = resourceData.getAsJsonObject();
 
-			JsonElement resourceData = entry.getValue();
-
-			if (resourceData.isJsonObject()) {
-				JsonObject obj = resourceData.getAsJsonObject();
-
-				if (!ResourceConditionsImpl.applyResourceConditions(obj, dataType, entry.getKey(), notebook_getRegistryLookup())) {
-					it.remove();
-				}
+			if (!ResourceConditionsImpl.applyResourceConditions(obj, dataType, entry.getKey(), registryInfo)) {
+				return DataResult.success(SKIP_DATA_MARKER);
 			}
 		}
 
-		profiler.pop();
+		return original.call(instance, dynamicOps, object);
+	}
+
+	@Inject(method = "method_63568", at = @At("HEAD"), cancellable = true)
+	private static void skipData(Map<?, ?> map, Identifier identifier, Object object, CallbackInfo info) {
+		if (object == SKIP_DATA_MARKER) {
+			info.cancel();
+		}
 	}
 }

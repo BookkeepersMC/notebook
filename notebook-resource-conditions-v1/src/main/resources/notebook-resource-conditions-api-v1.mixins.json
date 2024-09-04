@@ -5,13 +5,11 @@
   "mixins": [
     "DataProviderMixin",
     "PackMixin",
-    "RecipeManagerMixin",
     "RegistryDataLoaderMixin",
+    "RegistryOpsAccessor",
     "ReloadableServerRegistriesMixin",
     "ReloadableServerResourcesMixin",
-    "ServerAdvancementManagerMixin",
-    "SimpleJsonResourceReloadListenerMixin",
-    "SimplePreparableReloadListenerMixin"
+    "SimpleJsonResourceReloadListenerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

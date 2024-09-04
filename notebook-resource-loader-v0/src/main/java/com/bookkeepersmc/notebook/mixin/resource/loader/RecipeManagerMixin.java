@@ -20,32 +20,33 @@
  * SOFTWARE.
  *
  */
-package com.bookkeepersmc.notebook.mixin.resource.conditions;
+package com.bookkeepersmc.notebook.mixin.resource.loader;
 
-import org.jetbrains.annotations.Nullable;
+import java.util.Objects;
+
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.registry.RegistryOps;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.SinglePreparationResourceReloader;
-import net.minecraft.util.profiler.Profiler;
+import net.minecraft.recipe.RecipeManager;
+import net.minecraft.registry.HolderLookup;
 
-@Mixin(SinglePreparationResourceReloader.class)
-public class SimplePreparableReloadListenerMixin {
+import com.bookkeepersmc.notebook.impl.resource.loader.NotebookRecipeManager;
 
-	@Inject(method = "method_18790", at = @At("HEAD"))
-	private void applyResourceConditions(ResourceManager resourceManager, Profiler profilerFiller, Object object, CallbackInfo info) {
-		notebook_applyResourceConditions(resourceManager, profilerFiller, object, notebook_getRegistryLookup());
+@Mixin(RecipeManager.class)
+public class RecipeManagerMixin implements NotebookRecipeManager {
+	@Unique
+	private HolderLookup.Provider provider;
+
+	@Inject(method = "<init>", at = @At("TAIL"))
+	private void init(HolderLookup.Provider provider, CallbackInfo info) {
+		this.provider = provider;
 	}
 
-	protected void notebook_applyResourceConditions(ResourceManager resourceManager, Profiler profiler, Object object, @Nullable RegistryOps.RegistryInfoLookup registryLookup) {
-	}
-
-	@Nullable
-	protected RegistryOps.RegistryInfoLookup notebook_getRegistryLookup() {
-		return null;
+	@Override
+	public HolderLookup.Provider notebook_getRegistries() {
+		return Objects.requireNonNull(provider);
 	}
 }

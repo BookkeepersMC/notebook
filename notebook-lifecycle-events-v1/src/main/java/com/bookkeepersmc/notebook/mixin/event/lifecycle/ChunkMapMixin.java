@@ -37,6 +37,8 @@ import net.minecraft.world.chunk.WorldChunk;
 
 import com.bookkeepersmc.notebook.api.event.lifecycle.v1.ServerChunkEvents;
 
+import java.util.concurrent.CompletableFuture;
+
 @Mixin(ThreadedChunkManager.class)
 public abstract class ChunkMapMixin {
 	@Shadow
@@ -51,7 +53,7 @@ public abstract class ChunkMapMixin {
 	 * We inject just after "setLoadedToWorld" is made false, since here the WorldChunk is guaranteed to be unloaded.
 	 */
 	@Inject(method = "method_60440", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/WorldChunk;setLoadedToWorld(Z)V", shift = At.Shift.AFTER))
-	private void onChunkUnload(ChunkHolder chunkHolder, long l, CallbackInfo ci, @Local WorldChunk chunk) {
+	private void onChunkUnload(ChunkHolder chunkHolder, CompletableFuture<?> future, long l, CallbackInfo ci, @Local WorldChunk chunk) {
 		ServerChunkEvents.CHUNK_UNLOAD.invoker().onChunkUnload(this.world, chunk);
 	}
 }

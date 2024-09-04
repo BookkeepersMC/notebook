@@ -123,11 +123,11 @@ public abstract class LanguageDataProvider implements DataProvider {
 		void add(String translationKey, String value);
 
 		default void add(Item item, String value) {
-			add(item.getTranslationKey(), value);
+			add(item.method_7876(), value);
 		}
 
 		default void add(Block block, String value) {
-			add(block.method_63499(), value);
+			add(block.getTranslationKey(), value);
 		}
 
 		default void add(ResourceKey<ItemGroup> registryKey, String value) {

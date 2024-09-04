@@ -622,6 +622,24 @@ publishing {
 	}
 }
 
+publishMods {
+	file = remapJar.archiveFile
+	changelog = providers.environmentVariable("CHANGELOG").getOrElse("No changelog was provided")
+	type = prerelease == "true" ? BETA : STABLE
+	displayName = "[${minecraft_version} Notebook API $project.version]"
+
+	curseforge {
+		accessToken = providers.environmentVariable("CF_TOKEN")
+		projectId = "1097004"
+		minecraftVersions.add(curseforge_minecraft_version)
+	}
+	github {
+		accessToken = providers.environmentVariable("GITHUB_TOKEN")
+		repository = providers.environmentVariable("GITHUB_REPOSITORY").getOrElse("BookkeepersMC/dryrun")
+		commitish = providers.environmentVariable("GITHUB_REF_NAME").getOrElse("dryrun")
+	}
+}
+
 // Required until the deprecation is removed. Fabric API's main jar that is published to maven does not contain sub modules.
 loom.disableDeprecatedPomGeneration(publishing.publications.mavenJava)
 
@@ -676,7 +694,7 @@ import java.util.stream.Collectors
 // A task to ensure that the version being released has not already been released.
 tasks.register('checkVersion') {
 	doFirst {
-		def xml = new URL("https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml").text
+		def xml = new URL("https://bookkeepersmc.github.io/m2/com/bookkeepersmc/notebook-api/notebook-api/maven-metadata.xml").text
 		def metadata = new XmlSlurper().parseText(xml)
 		def versions = metadata.versioning.versions.version*.text();
 		if (versions.contains(version)) {

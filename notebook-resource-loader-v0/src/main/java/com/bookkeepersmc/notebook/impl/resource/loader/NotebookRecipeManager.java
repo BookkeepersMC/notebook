@@ -20,25 +20,10 @@
  * SOFTWARE.
  *
  */
-package com.bookkeepersmc.notebook.mixin.resource.conditions;
-
-import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+package com.bookkeepersmc.notebook.impl.resource.loader;
 
 import net.minecraft.registry.HolderLookup;
-import net.minecraft.registry.RegistryOps;
-import net.minecraft.server.ServerAdvancementLoader;
 
-@Mixin(ServerAdvancementLoader.class)
-public class ServerAdvancementManagerMixin extends SimplePreparableReloadListenerMixin {
-	@Shadow
-	@Final
-	private HolderLookup.Provider provider;
-
-	@Override
-	protected @Nullable RegistryOps.RegistryInfoLookup notebook_getRegistryLookup() {
-		return new RegistryOps.C_tbnrbtat(this.provider);
-	}
+public interface NotebookRecipeManager {
+	HolderLookup.Provider notebook_getRegistries();
 }
