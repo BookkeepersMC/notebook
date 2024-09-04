@@ -22,6 +22,8 @@
  */
 package com.bookkeepersmc.notebook.mixin.event.lifecycle;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.llamalad7.mixinextras.sugar.Local;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,8 +38,6 @@ import net.minecraft.server.world.ThreadedChunkManager;
 import net.minecraft.world.chunk.WorldChunk;
 
 import com.bookkeepersmc.notebook.api.event.lifecycle.v1.ServerChunkEvents;
-
-import java.util.concurrent.CompletableFuture;
 
 @Mixin(ThreadedChunkManager.class)
 public abstract class ChunkMapMixin {
