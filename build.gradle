@@ -626,7 +626,7 @@ publishMods {
 	file = remapJar.archiveFile
 	changelog = providers.environmentVariable("CHANGELOG").getOrElse("No changelog was provided")
 	type = prerelease == "true" ? BETA : STABLE
-	displayName = "[${minecraft_version} Notebook API $project.version]"
+	displayName = "[${minecraft_version}] Notebook API $project.version"
 
 	curseforge {
 		accessToken = providers.environmentVariable("CF_TOKEN")
