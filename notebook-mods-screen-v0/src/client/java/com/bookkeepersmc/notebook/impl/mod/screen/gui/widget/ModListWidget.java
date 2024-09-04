@@ -405,7 +405,7 @@ public class ModListWidget extends AlwaysSelectedEntryListWidget<ModListEntry> i
 		iconHandler.close();
 	}
 
-	public IconHandler getFabricIconHandler() {
+	public IconHandler getIconHandler() {
 		return iconHandler;
 	}
 }

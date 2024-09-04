@@ -40,7 +40,7 @@ import com.bookkeepersmc.notebook.impl.resource.loader.NotebookResourcePackProfi
 import com.bookkeepersmc.notebook.impl.resource.loader.ResourcePackSourceTracker;
 
 /**
- * Implements resource pack source tracking (for {@link net.fabricmc.fabric.impl.resource.loader.FabricResource}).
+ * Implements resource pack source tracking (for {@link com.bookkeepersmc.notebook.impl.resource.loader.NotebookResource}).
  * {@link PackResources} doesn't hold a reference to its {@link PackSource}
  * so we store the source in a global tracker when the resource packs are created.
  *

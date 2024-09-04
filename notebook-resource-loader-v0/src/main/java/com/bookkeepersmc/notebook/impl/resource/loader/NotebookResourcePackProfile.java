@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 /**
- * Fabric addition to ResourcePackProfile.
+ * Addition to ResourcePackProfile.
  * @see ModResourcePackCreator
  */
 public interface NotebookResourcePackProfile {
@@ -40,7 +40,7 @@ public interface NotebookResourcePackProfile {
 	/**
 	 * Returns whether every parent is enabled. If this is not empty, the pack's status
 	 * is synced to that of the parent pack(s), where the pack gets enabled if and only
-	 * if each of the parent is enabled. Note that non-Fabric packs always return {@code true}.
+	 * if each of the parent is enabled. Note that non-Notebook packs always return {@code true}.
 	 *
 	 * @return whether every parent is enabled.
 	 */

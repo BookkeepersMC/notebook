@@ -42,7 +42,7 @@ import net.minecraft.util.profiler.Profiler;
  * the apply stage is guaranteed to run on the game thread.
  *
  * <p>For a fully synchronous alternative, consider using
- * {@link ResourceManagerReloadListener} in conjunction with
+ * {@link net.minecraft.resource.SynchronousResourceReloader} in conjunction with
  * {@link IdentifiableResourceReloadListener}.
  *
  * @param <T> The data object.

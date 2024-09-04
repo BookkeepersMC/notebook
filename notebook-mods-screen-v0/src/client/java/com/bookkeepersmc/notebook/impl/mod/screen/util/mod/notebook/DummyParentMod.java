@@ -58,8 +58,8 @@ public class DummyParentMod implements Mod {
 		if (parentData != null) {
 			return parentData.getName().orElse("");
 		}
-		if (id.equals("fabric-api")) {
-			return "Fabric API";
+		if (id.equals("notebook-api")) {
+			return "Notebook API";
 		}
 		return id;
 	}
@@ -86,7 +86,7 @@ public class DummyParentMod implements Mod {
 		final String finalIconSourceId = iconSourceId;
 		ModContainer iconSource = NotebookLoader.getInstance()
 			.getModContainer(iconSourceId)
-			.orElseThrow(() -> new RuntimeException("Cannot get ModContainer for Fabric mod with id " + finalIconSourceId));
+			.orElseThrow(() -> new RuntimeException("Cannot get ModContainer for Notebook mod with id " + finalIconSourceId));
 		return Objects.requireNonNull(
 			iconHandler.createIcon(iconSource, iconPath),
 			"Mod icon for " + getId() + " is null somehow (should be filled with default in this case)"
@@ -134,7 +134,7 @@ public class DummyParentMod implements Mod {
 			return parentData.getBadges();
 		}
 		var badges = new HashSet<Badge>();
-		if (id.equals("fabric-api")) {
+		if (id.equals("notebook-api")) {
 			badges.add(Badge.LIBRARY);
 		}
 

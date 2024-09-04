@@ -1,9 +1,9 @@
 import groovy.json.JsonSlurper
 
 /*
- * This buildscript contains tasks related to the validation of each module in fabric api.
+ * This buildscript contains tasks related to the validation of each module in notebook api.
  *
- * Right now this task verifies each Fabric API module has a module lifecycle specified.
+ * Right now this task verifies each API module has a module lifecycle specified.
  * More functionality will probably be added in the future.
  */
 

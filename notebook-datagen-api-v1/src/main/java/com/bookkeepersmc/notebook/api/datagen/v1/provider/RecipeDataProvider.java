@@ -118,8 +118,8 @@ public abstract class RecipeDataProvider extends RecipesProvider.C_ujfsvkmt {
 				}
 
 				@Override
+				@SuppressWarnings("removal")
 				public Advancement.Builder accept() {
-					//noinspection removal
 					return Advancement.Builder.create().parent(RecipeJsonFactory.ROOT_ID);
 				}
 

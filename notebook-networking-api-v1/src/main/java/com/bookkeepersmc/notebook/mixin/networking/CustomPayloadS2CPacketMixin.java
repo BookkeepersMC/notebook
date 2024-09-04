@@ -50,8 +50,8 @@ public class CustomPayloadS2CPacketMixin {
 	)
 	private static PacketCodec<RegistryByteBuf, CustomPayload> wrapPlayCodec(CustomPayload.CodecFactory<RegistryByteBuf> unknownCodecFactory, List<CustomPayload.Type<RegistryByteBuf, ?>> types, Operation<PacketCodec<RegistryByteBuf, CustomPayload>> original) {
 		PacketCodec<RegistryByteBuf, CustomPayload> codec = original.call(unknownCodecFactory, types);
-		NotebookCustomPayloadPacketCodec<RegistryByteBuf> fabricCodec = (NotebookCustomPayloadPacketCodec<RegistryByteBuf>) codec;
-		fabricCodec.fabric_setPacketCodecProvider((packetByteBuf, identifier) -> PayloadTypeRegistryImpl.PLAY_S2C.get(identifier));
+		NotebookCustomPayloadPacketCodec<RegistryByteBuf> notebookCodec = (NotebookCustomPayloadPacketCodec<RegistryByteBuf>) codec;
+		notebookCodec.notebook_setPacketCodecProvider((packetByteBuf, identifier) -> PayloadTypeRegistryImpl.PLAY_S2C.get(identifier));
 		return codec;
 	}
 
@@ -65,8 +65,8 @@ public class CustomPayloadS2CPacketMixin {
 	)
 	private static PacketCodec<PacketByteBuf, CustomPayload> wrapConfigCodec(CustomPayload.CodecFactory<PacketByteBuf> unknownCodecFactory, List<CustomPayload.Type<PacketByteBuf, ?>> types, Operation<PacketCodec<PacketByteBuf, CustomPayload>> original) {
 		PacketCodec<PacketByteBuf, CustomPayload> codec = original.call(unknownCodecFactory, types);
-		NotebookCustomPayloadPacketCodec<PacketByteBuf> fabricCodec = (NotebookCustomPayloadPacketCodec<PacketByteBuf>) codec;
-		fabricCodec.fabric_setPacketCodecProvider((packetByteBuf, identifier) -> PayloadTypeRegistryImpl.CONFIGURATION_S2C.get(identifier));
+		NotebookCustomPayloadPacketCodec<PacketByteBuf> notebookCodec = (NotebookCustomPayloadPacketCodec<PacketByteBuf>) codec;
+		notebookCodec.notebook_setPacketCodecProvider((packetByteBuf, identifier) -> PayloadTypeRegistryImpl.CONFIGURATION_S2C.get(identifier));
 		return codec;
 	}
 }

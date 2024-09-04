@@ -53,7 +53,7 @@ public final class NotebookLootTableProviderImpl {
 			DataWriter writer,
 			LootTableDataProvider provider,
 			LootContextType lootContextType,
-			NotebookDataOutput fabricDataOutput,
+			NotebookDataOutput dataOutput,
 			CompletableFuture<HolderLookup.Provider> registryLookup) {
 		HashMap<Identifier, LootTable> builders = Maps.newHashMap();
 		HashMap<Identifier, ResourceCondition[]> conditionMap = new HashMap<>();
@@ -74,7 +74,7 @@ public final class NotebookLootTableProviderImpl {
 			for (Map.Entry<Identifier, LootTable> entry : builders.entrySet()) {
 				JsonObject tableJson = (JsonObject) LootTable.field_50021.encodeStart(ops, entry.getValue()).getOrThrow(IllegalStateException::new);
 				NotebookDatagenHelper.addConditions(tableJson, conditionMap.remove(entry.getKey()));
-				futures.add(DataProvider.writeToPath(writer, tableJson, getOutputPath(fabricDataOutput, entry.getKey())));
+				futures.add(DataProvider.writeToPath(writer, tableJson, getOutputPath(dataOutput, entry.getKey())));
 			}
 
 			return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));

@@ -43,7 +43,7 @@ public abstract class CustomPayloadPacketCodecMixin<B extends PacketByteBuf> imp
 	private CustomPayloadTypeProvider<B> customPayloadTypeProvider;
 
 	@Override
-	public void fabric_setPacketCodecProvider(CustomPayloadTypeProvider<B> customPayloadTypeProvider) {
+	public void notebook_setPacketCodecProvider(CustomPayloadTypeProvider<B> customPayloadTypeProvider) {
 		if (this.customPayloadTypeProvider != null) {
 			throw new IllegalStateException("Payload codec provider is already set!");
 		}

@@ -23,6 +23,7 @@
 package com.bookkeepersmc.notebook.api.networking.v1;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.server.network.EntityTrackerEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import com.bookkeepersmc.notebook.api.event.Event;
@@ -35,7 +36,7 @@ public final class EntityTrackingEvents {
 	/**
 	 * An event that is called before player starts tracking an entity.
 	 * Typically, this occurs when an entity enters a client's view distance.
-	 * This event is called before the player's client is sent the entity's {@link Entity#createSpawnPacket() spawn packet}.
+	 * This event is called before the player's client is sent the entity's {@link Entity#createSpawnPacket(EntityTrackerEntry)}  spawn packet}.
 	 */
 	public static final Event<StartTracking> START_TRACKING = EventFactory.createArrayBacked(StartTracking.class, callbacks -> (trackedEntity, player) -> {
 		for (StartTracking callback : callbacks) {
@@ -45,7 +46,7 @@ public final class EntityTrackingEvents {
 
 	/**
 	 * An event that is called after a player has stopped tracking an entity.
-	 * The client at this point was sent a packet to {@link net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket destroy} the entity on the client.
+	 * The client at this point was sent a packet to {@link net.minecraft.network.packet.s2c.play.EntityDestructionS2CPacket destroy} the entity on the client.
 	 * The entity still exists on the server.
 	 */
 	public static final Event<StopTracking> STOP_TRACKING = EventFactory.createArrayBacked(StopTracking.class, callbacks -> (trackedEntity, player) -> {

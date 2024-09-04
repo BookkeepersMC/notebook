@@ -49,8 +49,8 @@ public class CustomPayloadC2SPacketMixin {
 	)
 	private static PacketCodec<PacketByteBuf, CustomPayload> wrapCodec(CustomPayload.CodecFactory<PacketByteBuf> unknownCodecFactory, List<CustomPayload.Type<PacketByteBuf, ?>> types, Operation<PacketCodec<PacketByteBuf, CustomPayload>> original) {
 		PacketCodec<PacketByteBuf, CustomPayload> codec = original.call(unknownCodecFactory, types);
-		NotebookCustomPayloadPacketCodec<PacketByteBuf> fabricCodec = (NotebookCustomPayloadPacketCodec<PacketByteBuf>) codec;
-		fabricCodec.fabric_setPacketCodecProvider((packetByteBuf, identifier) -> {
+		NotebookCustomPayloadPacketCodec<PacketByteBuf> notebookCodec = (NotebookCustomPayloadPacketCodec<PacketByteBuf>) codec;
+		notebookCodec.notebook_setPacketCodecProvider((packetByteBuf, identifier) -> {
 			// CustomPayloadC2SPacket does not have a separate codec for play/configuration. We know if the packetByteBuf is a PacketByteBuf we are in the play phase.
 			if (packetByteBuf instanceof RegistryByteBuf) {
 				return (CustomPayload.Type<PacketByteBuf, ? extends CustomPayload>) (Object) PayloadTypeRegistryImpl.PLAY_C2S.get(identifier);

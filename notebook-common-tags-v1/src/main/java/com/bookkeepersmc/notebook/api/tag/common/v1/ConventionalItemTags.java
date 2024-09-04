@@ -23,12 +23,13 @@
 package com.bookkeepersmc.notebook.api.tag.common.v1;
 
 import net.minecraft.item.Item;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.TagKey;
 
 import com.bookkeepersmc.notebook.impl.tag.common.v1.TagRegistration;
 
 /**
- * See {@link net.minecraft.tags.ItemTags} for vanilla tags.
+ * See {@link net.minecraft.registry.tag.ItemTags} for vanilla tags.
  * Note that addition to some vanilla tags implies having certain functionality.
  */
 public final class ConventionalItemTags {
@@ -255,7 +256,7 @@ public final class ConventionalItemTags {
 	/**
 	 * Tag that holds all blocks and items that can be dyed a specific color.
 	 * (Does not include color blending items like leather armor.
-	 * Use {@link net.minecraft.tags.ItemTags#DYEABLE} tag instead for color blending items)
+	 * Use {@link net.minecraft.registry.tag.ItemTags#DYEABLE} tag instead for color blending items)
 	 * <p></p>
 	 * Note: Use custom ingredients in recipes to do tag intersections and/or tag exclusions
 	 * to make more powerful recipes utilizing multiple tags such as dyed tags for an ingredient.
@@ -363,7 +364,7 @@ public final class ConventionalItemTags {
 	@Deprecated
 	public static final TagKey<Item> COPPER_RAW_BLOCKS = register("raw_blocks/copper");
 	/**
-	 * This tag is redundant. Please use {@link net.minecraft.tags.ItemTags#COALS} tag instead.
+	 * This tag is redundant. Please use {@link net.minecraft.registry.tag.ItemTags#COALS} tag instead.
 	 */
 	@Deprecated
 	public static final TagKey<Item> COAL = register("coal");

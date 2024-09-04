@@ -28,7 +28,7 @@ import net.minecraft.registry.tag.TagKey;
 import com.bookkeepersmc.notebook.impl.tag.common.v1.TagRegistration;
 
 /**
- * See {@link net.minecraft.tags.EntityTypeTags} for vanilla tags.
+ * See {@link net.minecraft.registry.tag.EntityTypeTags} for vanilla tags.
  * Note that addition to some vanilla tags implies having certain functionality.
  */
 public final class ConventionalEntityTypeTags {

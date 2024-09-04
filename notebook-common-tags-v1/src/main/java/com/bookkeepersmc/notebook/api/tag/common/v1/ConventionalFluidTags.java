@@ -28,7 +28,7 @@ import net.minecraft.registry.tag.TagKey;
 import com.bookkeepersmc.notebook.impl.tag.common.v1.TagRegistration;
 
 /**
- * See {@link net.minecraft.tags.FluidTags} for vanilla tags.
+ * See {@link net.minecraft.registry.tag.FluidTags} for vanilla tags.
  * Note that addition to some vanilla tags implies having certain functionality.
  * <p></p>
  * Note, fluid tags should not be plural to match the vanilla standard.

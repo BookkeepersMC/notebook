@@ -60,7 +60,7 @@ public abstract class BlockLootTableDataProvider extends BlockLootTableGenerator
 	/**
 	 * Implement this method to add block drops.
 	 *
-	 * <p>Use the range of {@link BlockLootSubProvider#dropSelf} methods to generate block drops.
+	 * <p>Use the range of {@link BlockLootTableGenerator#addDrop} methods to generate block drops.
 	 */
 	@Override
 	public abstract void generate();

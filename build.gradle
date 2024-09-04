@@ -395,21 +395,21 @@ loom {
 			name "Game Test"
 
 			// Enable the gametest runner
-			vmArg "-Dfabric-api.gametest"
-			vmArg "-Dfabric-api.gametest.report-file=${project.buildDir}/junit.xml"
+			vmArg "-Dnotebook.gametest"
+			vmArg "-Dnotebook.gametest.report-file=${project.buildDir}/junit.xml"
 			runDir "build/gametest"
 		}
 		autoTestServer {
 			inherit testmodServer
 			name  "Auto Test Server"
-			vmArg "-Dfabric.autoTest"
+			vmArg "-Dnotebook.autoTest"
 		}
 		autoTestClient {
 			inherit testmodClient
 			name "Auto Test Client"
-			vmArg "-Dfabric.autoTest"
-			vmArg "-Dfabric-tag-conventions-v2.missingTagTranslationWarning=fail"
-			vmArg "-Dfabric-tag-conventions-v1.legacyTagWarning=fail"
+			vmArg "-Dnotebook.autoTest"
+			vmArg "-Dnotebook-tag-conventions-v2.missingTagTranslationWarning=fail"
+			vmArg "-Dnotebook-tag-conventions-v1.legacyTagWarning=fail"
 		}
 
 		// Create duplicate tasks for this, as jacoco slows things down a bit

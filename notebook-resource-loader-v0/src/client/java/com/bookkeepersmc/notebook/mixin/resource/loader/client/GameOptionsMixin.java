@@ -104,7 +104,7 @@ public class GameOptionsMixin {
 		ModResourcePackCreator.CLIENT_RESOURCE_PACK_PROVIDER.loadPacks(profiles::add);
 
 		for (PackProfile profile : profiles) {
-			// Always add "Fabric Mods" pack to enabled resource packs.
+			// Always add "Notebook Mods" pack to enabled resource packs.
 			if (profile.getName().equals(ModResourcePackCreator.NOTEBOOK)) {
 				resourcePacks.add(profile.getName());
 				continue;

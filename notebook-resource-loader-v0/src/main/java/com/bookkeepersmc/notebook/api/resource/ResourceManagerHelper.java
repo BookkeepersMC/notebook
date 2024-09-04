@@ -27,6 +27,7 @@ import java.util.function.Function;
 import org.jetbrains.annotations.ApiStatus;
 
 import net.minecraft.registry.HolderLookup;
+import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -134,7 +135,7 @@ public interface ResourceManagerHelper {
 	 * @param displayName    the display name of the resource pack, should include mod name for clarity
 	 * @param activationType the activation type of the resource pack
 	 * @return {@code true} if successfully registered the resource pack, else {@code false}
-	 * @deprecated Use {@link #registerBuiltinResourcePack(ResourceLocation, ModContainer, Component, ResourcePackActivationType)} instead.
+	 * @deprecated Use {@link #registerBuiltinResourcePack(Identifier, ModContainer, Text, ResourcePackActivationType)} instead.
 	 */
 	@Deprecated
 	static boolean registerBuiltinResourcePack(Identifier id, ModContainer container, String displayName, ResourcePackActivationType activationType) {
@@ -159,7 +160,7 @@ public interface ResourceManagerHelper {
 	 * @param container        the mod container
 	 * @param enabledByDefault {@code true} if enabled by default, else {@code false}
 	 * @return {@code true} if successfully registered the resource pack, else {@code false}
-	 * @deprecated Please use {@link #registerBuiltinResourcePack(ResourceLocation, ModContainer, ResourcePackActivationType)} instead, the {@code sub path} should be removed in a future
+	 * @deprecated Please use {@link #registerBuiltinResourcePack(Identifier, ModContainer, ResourcePackActivationType)} instead, the {@code sub path} should be removed in a future
 	 * release in favor of the identifier path.
 	 */
 	@Deprecated

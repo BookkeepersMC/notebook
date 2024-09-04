@@ -36,9 +36,9 @@ import net.minecraft.registry.tag.TagKey;
 
 /**
  * A Helper class for checking whether a {@link TagKey} contains some entry.
- * This can be useful for {@link TagKey}s whose type has no easy way of querying if they are in a tag, such as {@link net.minecraft.world.item.enchantment.Enchantment}s.
+ * This can be useful for {@link TagKey}s whose type has no easy way of querying if they are in a tag, such as {@link net.minecraft.enchantment.Enchantment}s.
  *
- * <p>For dynamic registry entries, use {@link #isIn(RegistryAccess, TagKey, Object)} with a non-null dynamic registry manager.
+ * <p>For dynamic registry entries, use {@link #isIn(DynamicRegistryManager, TagKey, Object)} with a non-null dynamic registry manager.
  * For non-dynamic registry entries, the simpler {@link #isIn(TagKey, Object)} can be used.
  */
 public final class TagUtil {
@@ -49,8 +49,8 @@ public final class TagUtil {
 	}
 
 	/**
-	 * See {@link TagUtil#isIn(RegistryAccess, TagKey, Object)} to check tags that refer to entries in dynamic
-	 * registries, such as {@link net.minecraft.world.level.biome.Biome}s.
+	 * See {@link TagUtil#isIn(DynamicRegistryManager, TagKey, Object)} to check tags that refer to entries in dynamic
+	 * registries, such as {@link net.minecraft.world.biome.Biome}s.
 	 * @return if the entry is in the provided tag.
 	 */
 	public static <T> boolean isIn(TagKey<T> tagKey, T entry) {
@@ -59,9 +59,9 @@ public final class TagUtil {
 
 	/**
 	 * @param registryManager the registry manager instance of the client or server. If the tag refers to entries
-	 *                        within a dynamic registry, such as {@link net.minecraft.world.level.biome.Biome}s,
+	 *                        within a dynamic registry, such as {@link net.minecraft.world.biome.Biome}s,
 	 *                        this must be passed to correctly evaluate the tag. Otherwise, the registry is found by
-	 *                        looking in {@link BuiltInRegistries#REGISTRY}.
+	 *                        looking in {@link BuiltInRegistries#ROOT}.
 	 * @return if the entry is in the provided tag.
 	 */
 	@SuppressWarnings("unchecked")

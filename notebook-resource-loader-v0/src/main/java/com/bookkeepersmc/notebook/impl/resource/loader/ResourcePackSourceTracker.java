@@ -31,7 +31,7 @@ import net.minecraft.resource.pack.ResourcePack;
  * Tracks the sources of resource packs in a global weak hash map.
  * {@link PackResources} doesn't hold a reference to its {@link PackSource}
  * so we store the source in the map when the resource packs are created.
- * See {@link net.fabricmc.fabric.mixin.resource.loader.ResourcePackProfileMixin ResourcePackProfileMixin}.
+ * See {@link com.bookkeepersmc.notebook.mixin.resource.loader.ResourcePackProfileMixin ResourcePackProfileMixin}.
  *
  * <p>The sources are later read for use in {@link NotebookResource} and {@link FabricResourceImpl}.
  */

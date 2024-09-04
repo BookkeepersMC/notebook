@@ -50,7 +50,7 @@ public class MinecraftMixin {
 		try {
 			RegistrySyncManager.unmap();
 		} catch (RemapException e) {
-			LOGGER.warn("Failed to unmap Fabric registries!", e);
+			LOGGER.warn("Failed to unmap Notebook registries!", e);
 		}
 	}
 

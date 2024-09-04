@@ -1,5 +1,5 @@
 /**
- * This task should be used to easily bump the major/minor/patch version of a fabric-api module.
+ * This task should be used to easily bump the major/minor/patch version of a notebook-api module.
  * It will automatically bump the versions of dependent modules.
  */
 tasks.register("bumpVersions", BumpVersionTask)

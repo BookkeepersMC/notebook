@@ -31,5 +31,5 @@ public interface ChannelInfoHolder {
 	/**
 	 * @return Channels which are declared as receivable by the other side but have not been declared yet.
 	 */
-	Collection<Identifier> fabric_getPendingChannelsNames(NetworkPhase state);
+	Collection<Identifier> notebook_getPendingChannelsNames(NetworkPhase state);
 }

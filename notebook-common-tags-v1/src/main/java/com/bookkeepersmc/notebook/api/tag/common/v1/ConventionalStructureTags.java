@@ -28,7 +28,7 @@ import net.minecraft.world.gen.feature.StructureFeature;
 import com.bookkeepersmc.notebook.impl.tag.common.v1.TagRegistration;
 
 /**
- * See {@link net.minecraft.tags.StructureTags} for vanilla tags.
+ * See {@link net.minecraft.data.server.tag.StructureTags} for vanilla tags.
  */
 public final class ConventionalStructureTags {
 	private ConventionalStructureTags() {

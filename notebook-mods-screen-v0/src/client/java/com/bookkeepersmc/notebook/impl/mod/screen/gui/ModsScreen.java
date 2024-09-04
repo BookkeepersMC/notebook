@@ -634,7 +634,7 @@ public class ModsScreen extends Screen {
 		Path modsDirectory = NotebookLoader.getInstance().getGameDir().resolve("mods");
 
 		// Filter out none mods
-		List<Path> mods = paths.stream().filter(ModsScreen::isFabricMod).collect(Collectors.toList());
+		List<Path> mods = paths.stream().filter(ModsScreen::isNotebookMod).collect(Collectors.toList());
 
 		if (mods.isEmpty()) {
 			return;
@@ -672,9 +672,9 @@ public class ModsScreen extends Screen {
 		}, ModScreenTexts.DROP_CONFIRM, Text.literal(modList)));
 	}
 
-	private static boolean isFabricMod(Path mod) {
+	private static boolean isNotebookMod(Path mod) {
 		try (JarFile jarFile = new JarFile(mod.toFile())) {
-			return jarFile.getEntry("fabric.mod.json") != null;
+			return jarFile.getEntry("notebook.mod.json") != null;
 		} catch (IOException e) {
 			return false;
 		}

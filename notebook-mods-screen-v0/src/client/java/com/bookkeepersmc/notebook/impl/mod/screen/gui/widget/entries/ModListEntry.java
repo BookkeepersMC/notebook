@@ -217,7 +217,7 @@ public class ModListEntry extends AlwaysSelectedEntryListWidget.Entry<ModListEnt
 	public Identifier getIconTexture() {
 		if (this.iconLocation == null) {
 			this.iconLocation = Identifier.of(NotebookModScreen.MOD_ID, mod.getId() + "_icon");
-			NativeImageBackedTexture icon = mod.getIcon(list.getFabricIconHandler(),
+			NativeImageBackedTexture icon = mod.getIcon(list.getIconHandler(),
 				64 * this.client.options.getGuiScale().get()
 			);
 			if (icon != null) {

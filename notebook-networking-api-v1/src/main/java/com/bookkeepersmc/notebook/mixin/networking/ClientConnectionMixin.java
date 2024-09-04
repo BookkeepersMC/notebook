@@ -90,7 +90,7 @@ abstract class ClientConnectionMixin implements ChannelInfoHolder {
 	}
 
 	@Override
-	public Collection<Identifier> fabric_getPendingChannelsNames(NetworkPhase state) {
+	public Collection<Identifier> notebook_getPendingChannelsNames(NetworkPhase state) {
 		return this.playChannels.computeIfAbsent(state, (key) -> Collections.newSetFromMap(new ConcurrentHashMap<>()));
 	}
 }

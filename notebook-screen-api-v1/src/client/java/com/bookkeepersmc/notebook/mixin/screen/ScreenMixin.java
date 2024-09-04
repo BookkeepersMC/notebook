@@ -60,7 +60,7 @@ abstract class ScreenMixin implements ScreenExtensions {
 	protected List<Drawable> drawables;
 
 	@Unique
-	private ButtonList fabricButtons;
+	private ButtonList notebookButtons;
 	@Unique
 	private Event<ScreenEvents.Remove> removeEvent;
 	@Unique
@@ -129,7 +129,7 @@ abstract class ScreenMixin implements ScreenExtensions {
 	@Unique
 	private void beforeInit(Minecraft client, int width, int height) {
 		// All elements are repopulated on the screen, so we need to reinitialize all events
-		this.fabricButtons = null;
+		this.notebookButtons = null;
 		this.removeEvent = ScreenEventFactory.createRemoveEvent();
 		this.beforeRenderEvent = ScreenEventFactory.createBeforeRenderEvent();
 		this.afterRenderEvent = ScreenEventFactory.createAfterRenderEvent();
@@ -166,17 +166,17 @@ abstract class ScreenMixin implements ScreenExtensions {
 	@Override
 	public List<ClickableWidget> notebook_getButtons() {
 		// Lazy init to make the list access safe after Screen#init
-		if (this.fabricButtons == null) {
-			this.fabricButtons = new ButtonList(this.drawables, this.selectables, this.children);
+		if (this.notebookButtons == null) {
+			this.notebookButtons = new ButtonList(this.drawables, this.selectables, this.children);
 		}
 
-		return this.fabricButtons;
+		return this.notebookButtons;
 	}
 
 	@Unique
 	private <T> Event<T> ensureEventsAreInitialized(Event<T> event) {
 		if (event == null) {
-			throw new IllegalStateException(String.format("[fabric-screen-api-v1] The current screen (%s) has not been correctly initialised, please send this crash log to the mod author. This is usually caused by calling setScreen on the wrong thread.", this.getClass().getName()));
+			throw new IllegalStateException(String.format("[notebook-screen-api-v1] The current screen (%s) has not been correctly initialised, please send this crash log to the mod author. This is usually caused by calling setScreen on the wrong thread.", this.getClass().getName()));
 		}
 
 		return event;

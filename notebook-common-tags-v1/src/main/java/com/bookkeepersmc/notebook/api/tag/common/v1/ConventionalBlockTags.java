@@ -22,13 +22,14 @@
  */
 package com.bookkeepersmc.notebook.api.tag.common.v1;
 
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.registry.tag.TagKey;
 
 import com.bookkeepersmc.notebook.impl.tag.common.v1.TagRegistration;
 
 /**
- * See {@link net.minecraft.tags.BlockTags} for vanilla tags.
+ * See {@link net.minecraft.registry.tag.BlockTags} for vanilla tags.
  * Note that addition to some vanilla tags implies having certain functionality.
  */
 public final class ConventionalBlockTags {
@@ -148,7 +149,7 @@ public final class ConventionalBlockTags {
 	 * Blocks should be included in this tag if their movement/relocation can cause serious issues such
 	 * as world corruption upon being moved or for balance reason where the block should not be able to be relocated.
 	 * Example: Chunk loaders or pipes where other mods that move blocks do not respect
-	 * {@link BlockBehaviour.BlockStateBase#getPistonPushReaction}.
+	 * {@link AbstractBlock.AbstractBlockState#getPistonBehavior()}.
 	 */
 	public static final TagKey<Block> RELOCATION_NOT_SUPPORTED = register("relocation_not_supported");
 	/**
@@ -165,7 +166,7 @@ public final class ConventionalBlockTags {
 	public static final TagKey<Block> HIDDEN_FROM_RECIPE_VIEWERS = register("hidden_from_recipe_viewers");
 
 	/**
-	 * This tag is redundant. Please use {@link net.minecraft.tags.BlockTags#SHULKER_BOXES} tag instead.
+	 * This tag is redundant. Please use {@link net.minecraft.registry.tag.BlockTags#SHULKER_BOXES} tag instead.
 	 */
 	@Deprecated
 	public static final TagKey<Block> SHULKER_BOXES = register("shulker_boxes");

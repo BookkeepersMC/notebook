@@ -165,7 +165,7 @@ public final class RegistrySyncManager {
 			Registry registry = BuiltInRegistries.ROOT.method_63535(registryId);
 
 			if (DEBUG_WRITE_REGISTRY_DATA) {
-				File location = new File(".fabric" + File.separatorChar + "debug" + File.separatorChar + "registry");
+				File location = new File(".notebook" + File.separatorChar + "debug" + File.separatorChar + "registry");
 				boolean c = true;
 
 				if (!location.exists()) {

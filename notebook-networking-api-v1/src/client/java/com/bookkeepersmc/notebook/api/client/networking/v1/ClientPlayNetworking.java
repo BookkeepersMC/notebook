@@ -214,7 +214,7 @@ public final class ClientPlayNetworking {
 	/**
 	 * Creates a payload which may be sent to the connected server.
 	 *
-	 * @param packet the fabric payload
+	 * @param packet the notebook payload
 	 * @return a new payload
 	 */
 	public static <T extends CustomPayload> Packet<ServerCommonPacketListener> createC2SPacket(T packet) {

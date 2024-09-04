@@ -40,7 +40,7 @@ import net.minecraft.client.texture.NativeImageBackedTexture;
 import com.bookkeepersmc.loader.api.ModContainer;
 
 public class IconHandler implements Closeable {
-	private static final Logger LOGGER = LoggerFactory.getLogger("Mod Menu | FabricIconHandler");
+	private static final Logger LOGGER = LoggerFactory.getLogger("Mod Screen/IconHandler");
 
 	private final Map<Path, NativeImageBackedTexture> modIconCache = new HashMap<>();
 

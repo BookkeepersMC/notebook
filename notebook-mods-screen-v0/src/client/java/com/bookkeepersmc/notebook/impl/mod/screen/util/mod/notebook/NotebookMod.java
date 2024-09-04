@@ -51,7 +51,7 @@ import com.bookkeepersmc.notebook.impl.mod.screen.util.VersionUtil;
 import com.bookkeepersmc.notebook.impl.mod.screen.util.mod.Mod;
 
 public class NotebookMod implements Mod {
-	private static final Logger LOGGER = LoggerFactory.getLogger("Mod Menu | FabricMod");
+	private static final Logger LOGGER = LoggerFactory.getLogger("Mod Screen/NotebookMod");
 
 	protected final ModContainer container;
 	protected final ModMetadata metadata;
@@ -119,7 +119,6 @@ public class NotebookMod implements Mod {
 		}
 		this.modMenuData = new ModMenuData(badgeNames, parentId, parentData, id);
 
-		/* Hardcode parents and badges for Fabric API & Fabric Loader */
 		if ((id.startsWith("notebook") && !id.equals("notebook-mods-screen-v0")) && metadata.containsCustomValue("notebook-api:module-lifecycle")) {
 			if (NotebookLoader.getInstance().isModLoaded("notebook-api") || !NotebookLoader.getInstance()
 				.isModLoaded("notebook")) {
@@ -142,12 +141,12 @@ public class NotebookMod implements Mod {
 			badges.add(Badge.CLIENT);
 		}
 		if (OptionalUtil.isPresentAndTrue(CustomValueUtil.getBoolean(
-			"fabric-loom:generated",
+			"notebook-loom:generated",
 			metadata
 		)) || "java".equals(id)) {
 			badges.add(Badge.LIBRARY);
 		}
-		if ("deprecated".equals(CustomValueUtil.getString("fabric-api:module-lifecycle", metadata).orElse(null))) {
+		if ("deprecated".equals(CustomValueUtil.getString("notebook-api:module-lifecycle", metadata).orElse(null))) {
 			badges.add(Badge.DEPRECATED);
 		}
 		if (metadata.containsCustomValue("patchwork:patcherMeta")) {
@@ -189,7 +188,7 @@ public class NotebookMod implements Mod {
 		final String finalIconSourceId = iconSourceId;
 		ModContainer iconSource = NotebookLoader.getInstance()
 			.getModContainer(iconSourceId)
-			.orElseThrow(() -> new RuntimeException("Cannot get ModContainer for Fabric mod with id " + finalIconSourceId));
+			.orElseThrow(() -> new RuntimeException("Cannot get ModContainer for Notebook mod with id " + finalIconSourceId));
 		NativeImageBackedTexture icon = iconHandler.createIcon(iconSource, iconPath);
 		if (icon == null) {
 			if (defaultIconWarning) {
@@ -199,7 +198,7 @@ public class NotebookMod implements Mod {
 			return iconHandler.createIcon(
 				NotebookLoader.getInstance()
 					.getModContainer(NotebookModScreen.MOD_ID)
-					.orElseThrow(() -> new RuntimeException("Cannot get ModContainer for Fabric mod with id " + NotebookModScreen.MOD_ID)),
+					.orElseThrow(() -> new RuntimeException("Cannot get ModContainer for Notebook mod with id " + NotebookModScreen.MOD_ID)),
 				"assets/" + NotebookModScreen.MOD_ID + "/unknown_icon.png"
 			);
 		}
