@@ -89,7 +89,7 @@ public abstract class ResourcePackManagerMixin {
 		}
 	}
 
-	@Inject(method = "buildEnabledProfiles", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/ImmutableList;copyOf(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;", shift = At.Shift.BEFORE))
+	@Inject(method = "buildEnabledProfiles", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/ImmutableList;copyOf(Ljava/util/Collection;)Lcom/google/common/collect/ImmutableList;", remap = false, shift = At.Shift.BEFORE))
 	private void handleAutoEnableDisable(Collection<String> enabledNames, CallbackInfoReturnable<List<PackProfile>> cir, @Local List<PackProfile> enabledAfterFirstRun) {
 		ModResourcePackUtil.refreshAutoEnabledPacks(enabledAfterFirstRun, this.profiles);
 	}

@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import com.google.gson.JsonObject;
@@ -111,7 +112,7 @@ public final class ResourceConditionsImpl implements ModInitializer {
 		return and;
 	}
 
-	public static final ThreadLocal<Map<ResourceKey<?>, Set<Identifier>>> LOADED_TAGS = new ThreadLocal<>();
+	public static final AtomicReference<Map<ResourceKey<?>, Set<Identifier>>> LOADED_TAGS = new AtomicReference<>();
 
 	public static void setTags(List<Registry.TagPending<?>> tags) {
 		Map<ResourceKey<?>, Set<Identifier>> tagMap = new IdentityHashMap<>();
@@ -120,7 +121,9 @@ public final class ResourceConditionsImpl implements ModInitializer {
 			tagMap.put(registryTags.getKey(), registryTags.asLookup().streamTagKeys().map(TagKey::id).collect(Collectors.toSet()));
 		}
 
-		LOADED_TAGS.set(tagMap);
+		if (LOADED_TAGS.getAndSet(tagMap) != null) {
+			throw new IllegalStateException("Tags already captured, this shouldn't happen!");
+		}
 	}
 
 	// Cannot use registry because tags are not loaded to the registry at this stage yet.

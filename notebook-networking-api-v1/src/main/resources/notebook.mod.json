@@ -14,7 +14,7 @@
     ]
   },
   "depends": {
-    "notebookloader": ">=0.3.2",
+    "notebookloader": ">=0.3.3",
     "notebook-api-base": "*"
   },
   "mixins": [

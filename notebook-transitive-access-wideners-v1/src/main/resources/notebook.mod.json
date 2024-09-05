@@ -4,7 +4,7 @@
   "name": "Notebook Transitive Access Wideners (v1)",
   "version": "${version}",
   "depends": {
-    "notebookloader": ">=0.3.2"
+    "notebookloader": ">=0.3.3"
   },
   "custom": {
     "notebook-api:module-lifecycle": "stable"
