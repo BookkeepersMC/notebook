@@ -20,18 +20,27 @@
  * SOFTWARE.
  *
  */
-package com.bookkeepersmc.notebook.api.renderer.v1.mesh;
+package com.bookkeepersmc.notebook.mixin.renderer.client.debug;
 
-import java.util.function.Consumer;
+import java.util.List;
 
-public interface Mesh {
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-	void forEach(Consumer<QuadView> consumer);
+import net.minecraft.client.gui.hud.debug.DebugHud;
 
-	default void outputTo(QuadEmitter emitter) {
-		forEach(quad -> {
-			emitter.copyFrom(quad);
-			emitter.emit();
-		});
+import com.bookkeepersmc.notebook.api.renderer.v1.RendererAccess;
+
+@Mixin(DebugHud.class)
+public class DebugHudMixin {
+	@Inject(method = "getLeftText", at = @At("RETURN"))
+	protected void getLeftText(CallbackInfoReturnable<List<String>> info) {
+		if (RendererAccess.INSTANCE.hasRenderer()) {
+			info.getReturnValue().add("[Notebook] Current Active renderer: " + RendererAccess.INSTANCE.getRenderer().getClass().getSimpleName());
+		} else {
+			info.getReturnValue().add("[Notebook] Current Active renderer: none (vanilla)");
+		}
 	}
 }

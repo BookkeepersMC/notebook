@@ -20,39 +20,15 @@
  * SOFTWARE.
  *
  */
-package com.bookkeepersmc.notebook.impl.renderer;
+package com.bookkeepersmc.notebook.mixin.renderer.client;
 
-import com.bookkeepersmc.notebook.api.renderer.v1.Renderer;
-import com.bookkeepersmc.notebook.api.renderer.v1.RendererAccess;
+import org.spongepowered.asm.mixin.Mixin;
 
-public final class RendererAccessImpl implements RendererAccess {
-	public static final RendererAccessImpl INSTANCE = new RendererAccessImpl();
+import net.minecraft.client.render.model.BakedModel;
 
-	private RendererAccessImpl() { }
+import com.bookkeepersmc.notebook.api.renderer.v1.model.NotebookBakedModel;
 
-	@Override
-	public void registerRenderer(Renderer renderer) {
-		if (renderer == null) {
-			throw new NullPointerException("Attempt to register a NULL rendering plug-in.");
-		} else if (activeRenderer != null) {
-			throw new UnsupportedOperationException("A second rendering plug-in attempted to register. Multiple rendering plug-ins are not supported.");
-		} else {
-			activeRenderer = renderer;
-			hasActiveRenderer = true;
-		}
-	}
-
-	private Renderer activeRenderer = null;
-
-	private boolean hasActiveRenderer = false;
-
-	@Override
-	public Renderer getRenderer() {
-		return activeRenderer;
-	}
-
-	@Override
-	public boolean hasRenderer() {
-		return hasActiveRenderer;
-	}
+// Avoids instanceof checks and enabled consistent paths for all BakedModel's.
+@Mixin(BakedModel.class)
+public interface BakedModelMixin extends NotebookBakedModel {
 }

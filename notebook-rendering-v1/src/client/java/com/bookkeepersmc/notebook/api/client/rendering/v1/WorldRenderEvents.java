@@ -22,6 +22,8 @@
  */
 package com.bookkeepersmc.notebook.api.client.rendering.v1;
 
+
+
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -87,7 +89,7 @@ public final class WorldRenderEvents {
 	 *
 	 * <p>Note that 3rd-party renderers may combine these passes or otherwise alter the
 	 * rendering pipeline for sake of performance or features. This can break direct writes to the
-	 * framebuffer.  Use this event for cases that cannot be satisfied by FabricBakedModel,
+	 * framebuffer.  Use this event for cases that cannot be satisfied by NotebookBakedModel,
 	 * BlockEntityRenderer or other existing abstraction. If at all possible, use an existing terrain
 	 * RenderLayer instead of outputting to the framebuffer directly with GL calls.
 	 *
@@ -176,7 +178,7 @@ public final class WorldRenderEvents {
 	 * outline render for <em>all</em> blocks because all event subscribers will
 	 * always render - only the default outline render can be cancelled.  That should
 	 * be accomplished by mixin to the block outline render routine itself, typically
-	 * by targeting {@link net.minecraft.client.render.VertexRendering#drawOutline}.
+	 * by targeting {@link net.minecraft.client.render.ShapeRenderer#renderShape}.
 	 */
 	public static final Event<BlockOutline> BLOCK_OUTLINE = EventFactory.createArrayBacked(BlockOutline.class, (worldRenderContext, blockOutlineContext) -> true, callbacks -> (worldRenderContext, blockOutlineContext) -> {
 		boolean shouldRender = true;
