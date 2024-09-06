@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-rendering-v1",
+  "name": "Notebook Rendering (v1)",
+  "version": "${version}",
+  "environment": "client",
+  "depends": {
+    "notebookloader": ">=0.3.3",
+    "notebook-api-base": "*"
+  },
+  "mixins": [
+    "notebook-rendering-v1.mixins.json"
+  ],
+  "custom": {
+    "notebook-api:module-lifecycle": "stable"
+  }
+}
