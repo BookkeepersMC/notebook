@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-renderer",
+  "name": "Notebook Renderer",
+  "version": "${version}",
+  "environment": "client",
+  "depends": {
+    "notebookloader": ">=0.3.3",
+    "minecraft": ">=1.15-alpha.19.39.a",
+    "notebook-api-base": "*",
+    "notebook-renderer-api-v1": "*"
+  },
+  "mixins": [
+    "notebook-renderer.mixins.json"
+  ],
+  "entrypoints": {
+    "client": [
+      "com.bookkeepersmc.notebook.impl.client.rendering.NotebookBuiltinRenderer"
+    ]
+  },
+  "custom": {
+    "notebook-api:module-lifecycle": "stable"
+  },
+  "accessWidener" : "notebook-renderer.accesswidener"
+}

@@ -22,11 +22,16 @@
  */
 package com.bookkeepersmc.notebook.api.renderer.v1.render;
 
+import java.util.function.Consumer;
+
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.util.math.Direction;
 
+import com.bookkeepersmc.notebook.api.renderer.v1.mesh.Mesh;
 import com.bookkeepersmc.notebook.api.renderer.v1.mesh.MutableQuadView;
 import com.bookkeepersmc.notebook.api.renderer.v1.mesh.QuadEmitter;
 
@@ -115,6 +120,14 @@ public interface RenderContext {
 		return ModelTransformationMode.NONE;
 	}
 
+	@Deprecated
+	default Consumer<Mesh> meshConsumer() {
+		return mesh -> mesh.outputTo(getEmitter());
+	}
+
+	@Deprecated
+	BakedModelConsumer bakedModelConsumer();
+
 	@FunctionalInterface
 	interface QuadTransform {
 		/**
@@ -124,4 +137,28 @@ public interface RenderContext {
 		boolean transform(MutableQuadView quad);
 	}
 
+	@Deprecated
+	interface BakedModelConsumer extends Consumer<BakedModel> {
+		/**
+		 * Render a baked model by processing its {@linkplain BakedModel#getQuads} using the rendered block state.
+		 *
+		 * <p>For block contexts, this will pass the block state being rendered to {@link BakedModel#getQuads}.
+		 * For item contexts, this will pass a {@code null} block state to {@link BakedModel#getQuads}.
+		 * {@link #accept(BakedModel, BlockState)} can be used instead to pass the block state explicitly.
+		 */
+		@Override
+		void accept(BakedModel model);
+
+		/**
+		 * Render a baked model by processing its {@linkplain BakedModel#getQuads} with an explicit block state.
+		 *
+		 * <p>This overload allows passing the block state (or {@code null} to query the item quads).
+		 * This is useful when a model is being wrapped, and expects a different
+		 * block state than the one of the block being rendered.
+		 *
+		 * <p>For item render contexts, you can use this function if you want to render the model with a specific block state.
+		 * Otherwise, use {@linkplain #accept(BakedModel)} the other overload} to render the usual item quads.
+		 */
+		void accept(BakedModel model, @Nullable BlockState state);
+	}
 }
