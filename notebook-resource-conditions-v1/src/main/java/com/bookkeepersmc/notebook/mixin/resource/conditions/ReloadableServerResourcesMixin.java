@@ -23,6 +23,7 @@
 package com.bookkeepersmc.notebook.mixin.resource.conditions;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -52,6 +53,6 @@ public class ReloadableServerResourcesMixin {
 
 	@Inject(method = "method_61248", at = @At("TAIL"))
 	private void removeLoadedTags(CallbackInfo ci) {
-		ResourceConditionsImpl.LOADED_TAGS.remove();
+		Objects.requireNonNull(ResourceConditionsImpl.LOADED_TAGS.getAndSet(null), "loaded tags not set");
 	}
 }

@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "com.bookkeepersmc.notebook.mixin.client.rendering.renderer",
+  "plugin": "com.bookkeepersmc.notebook.impl.client.rendering.RendererMixinConfigPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "BlockModelRendererMixin",
+    "ChunkRendererRegionMixin",
+    "ItemRendererAccessor",
+    "ItemRendererMixin",
+    "SectionBuilderMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

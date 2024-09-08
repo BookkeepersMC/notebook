@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-renderer-api-v1",
+  "name": "Notebook Renderer API (v1)",
+  "version": "${version}",
+  "environment": "client",
+  "depends": {
+    "notebookloader": ">=0.3.3",
+    "notebook-api-base": "*"
+  },
+  "mixins": [
+    "notebook-renderer-api-v1.mixins.json",
+    "notebook-renderer-api-v1.debug.mixins.json"
+  ],
+  "custom": {
+    "notebook-api:module-lifecycle": "stable",
+    "loom:injected_interfaces": {
+      "net/minecraft/class_1087": ["com/bookkeepersmc/notebook/api/renderer/v1/model/NotebookBakedModel"]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "required": true,
+  "package": "com.bookkeepersmc.notebook.mixin.client.rendering",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "ArmorFeatureRendererMixin",
+    "BlockColorsMixin",
+    "BlockEntityRendererFactoriesMixin",
+    "BuiltinModelItemRendererMixin",
+    "CapeFeatureRendererMixin",
+    "ClientWorldMixin",
+    "DimensionVisualEffectsAccessor",
+    "EntityModelLayersAccessor",
+    "EntityModelsMixin",
+    "EntityRenderersMixin",
+    "InGameHudMixin",
+    "ItemColorsMixin",
+    "LivingEntityRendererAccessor",
+    "SpriteSourcesAccessor",
+    "TooltipComponentMixin",
+    "WorldRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -51,7 +51,7 @@ public class SimpleJsonResourceReloadListenerMixin {
 	@Unique
 	private static final Object SKIP_DATA_MARKER = new Object();
 
-	@WrapOperation(method = "prepare(Lnet/minecraft/resource/ResourceManager;Ljava/lang/String;Lcom/mojang/serialization/DynamicOps;Lcom/mojang/serialization/Codec;Ljava/util/Map;)V", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;parse(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;"))
+	@WrapOperation(method = "prepare(Lnet/minecraft/resource/ResourceManager;Ljava/lang/String;Lcom/mojang/serialization/DynamicOps;Lcom/mojang/serialization/Codec;Ljava/util/Map;)V", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;parse(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;", remap = false))
 	private static DataResult<?> applyResourceConditions(Codec<?> instance, DynamicOps<JsonElement> dynamicOps, Object object, Operation<DataResult<?>> original,
 														@Local(argsOnly = true) String dataType,
 														@Local Map.Entry<Identifier, Resource> entry) {

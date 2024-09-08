@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "package": "com.bookkeepersmc.notebook.mixin.renderer.client.debug",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "DebugHudMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -10,7 +10,7 @@
     ]
   },
   "depends": {
-    "notebookloader": ">=0.3.2",
+    "notebookloader": ">=0.3.3",
     "minecraft": ">=1.21",
     "notebook-lifecycle-events-v1": "*"
   },

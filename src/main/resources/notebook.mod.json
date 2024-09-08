@@ -8,7 +8,7 @@
     "CrypticVerse"
   ],
   "depends": {
-    "notebookloader": ">=0.3.2",
+    "notebookloader": ">=0.3.3",
     "java": ">=21",
     "minecraft": ">=1.21.2- <1.21.3-"
   }

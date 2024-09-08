@@ -33,7 +33,7 @@ import net.minecraft.resource.pack.ResourcePack;
  * so we store the source in the map when the resource packs are created.
  * See {@link com.bookkeepersmc.notebook.mixin.resource.loader.ResourcePackProfileMixin ResourcePackProfileMixin}.
  *
- * <p>The sources are later read for use in {@link NotebookResource} and {@link FabricResourceImpl}.
+ * <p>The sources are later read for use in {@link NotebookResource} and {@link NotebookResourceImpl}.
  */
 public final class ResourcePackSourceTracker {
 	// Use a weak hash map so that if resource packs would be deleted, this won't keep them alive.

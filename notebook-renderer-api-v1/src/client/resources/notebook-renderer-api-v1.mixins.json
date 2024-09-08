@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "com.bookkeepersmc.notebook.mixin.renderer.client",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "BakedModelMixin",
+    "MultipartBakedModelMixin",
+    "WeightedBakedModelMixin",
+    "SpriteAtlasTextureMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
