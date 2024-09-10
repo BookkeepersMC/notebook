@@ -91,7 +91,7 @@ public abstract class RecipeDataProvider extends RecipesProvider.C_ujfsvkmt {
 		return provider.thenCompose((wrapperLookup -> {
 			Set<Identifier> generatedRecipes = Sets.newHashSet();
 			List<CompletableFuture<?>> list = new ArrayList<>();
-			method_62766(wrapperLookup, new RecipeExporter() {
+			RecipesProvider recipesProvider =  method_62766(wrapperLookup, new RecipeExporter() {
 				@Override
 				public void accept(Identifier recipeId, Recipe<?> recipe, @Nullable AdvancementHolder advancement) {
 					Identifier identifier = getRecipeIdentifier(recipeId);
@@ -127,6 +127,7 @@ public abstract class RecipeDataProvider extends RecipesProvider.C_ujfsvkmt {
 				public void method_62738() {
 				}
 			});
+			recipesProvider.generateRecipes();
 			return CompletableFuture.allOf(list.toArray(CompletableFuture[]::new));
 		}));
 	}

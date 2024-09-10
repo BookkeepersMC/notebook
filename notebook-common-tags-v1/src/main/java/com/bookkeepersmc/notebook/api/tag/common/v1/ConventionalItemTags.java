@@ -136,6 +136,7 @@ public final class ConventionalItemTags {
 
 	// Foods
 	public static final TagKey<Item> FOODS = register("foods");
+	public static final TagKey<Item> ANIMAL_FOODS = register("animal_foods");
 	/**
 	 * Apples and other foods that are considered fruits in the culinary field belong in this tag.
 	 * Cherries would go here as they are considered a "stone fruit" within culinary fields.

@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -60,6 +61,7 @@ import net.minecraft.util.path.SymlinkValidator;
 
 import com.bookkeepersmc.loader.api.ModContainer;
 import com.bookkeepersmc.loader.api.NotebookLoader;
+import com.bookkeepersmc.loader.api.metadata.CustomValue;
 import com.bookkeepersmc.loader.api.metadata.ModMetadata;
 import com.bookkeepersmc.notebook.api.resource.ModResourcePack;
 import com.bookkeepersmc.notebook.api.resource.ResourcePackActivationType;
@@ -70,6 +72,7 @@ import com.bookkeepersmc.notebook.api.resource.ResourcePackActivationType;
 public final class ModResourcePackUtil {
 	public static final Gson GSON = new Gson();
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModResourcePackUtil.class);
+	private static final String LOAD_ORDER_KEY = "notebook:resource_load_order";
 
 	private ModResourcePackUtil() {
 	}
@@ -82,17 +85,52 @@ public final class ModResourcePackUtil {
 	 * @param subPath the resource pack sub path directory in mods, may be {@code null}
 	 */
 	public static void appendModResourcePacks(List<ModResourcePack> packs, ResourceType type, @Nullable String subPath) {
-		for (ModContainer container : NotebookLoader.getInstance().getAllMods()) {
+		ModResourcePackSorter sorter = new ModResourcePackSorter();
+
+		Collection<ModContainer> containers = NotebookLoader.getInstance().getAllMods();
+		List<String> allIds = containers.stream().map(ModContainer::getMetadata).map(ModMetadata::getId).toList();
+
+		for (ModContainer container : containers) {
+			ModMetadata metadata = container.getMetadata();
+			String id = metadata.getId();
+
 			if (container.getMetadata().getType().equals("builtin")) {
 				continue;
 			}
 
-			ModResourcePack pack = ModNioResourcePack.create(container.getMetadata().getId(), container, subPath, type, ResourcePackActivationType.ALWAYS_ENABLED, true);
+			ModResourcePack pack = ModNioResourcePack.create(id, container, subPath, type, ResourcePackActivationType.ALWAYS_ENABLED, true);
 
-			if (pack != null) {
-				packs.add(pack);
+			if (pack == null) {
+				continue;
+			}
+
+			sorter.addPack(pack);
+
+			CustomValue loadOrder = metadata.getCustomValue(LOAD_ORDER_KEY);
+
+			if (loadOrder != null && loadOrder.getType() == CustomValue.CvType.OBJECT) {
+				CustomValue.CvObject object = loadOrder.getAsObject();
+				addLoadOrdering(object, allIds, sorter, true, id);
+				addLoadOrdering(object, allIds, sorter, false, id);
 			}
 		}
+
+		sorter.appendPacks(packs);
+	}
+
+	public static void addLoadOrdering(CustomValue.CvObject object, List<String> allIds, ModResourcePackSorter sorter, boolean before, String currentId) {
+		List<String> modIds = new ArrayList<>();
+		CustomValue array = object.get(before ? "before" : "after");
+
+		if (array != null && array.getType() == CustomValue.CvType.ARRAY) {
+			for (CustomValue id : array.getAsArray()) {
+				if (id.getType() == CustomValue.CvType.STRING) {
+					modIds.add(id.getAsString());
+				}
+			}
+		}
+
+		modIds.stream().filter(allIds::contains).forEach(modId -> sorter.addLoadOrdering(modId, currentId, before));
 	}
 
 	public static void refreshAutoEnabledPacks(List<PackProfile> enabledProfiles, Map<String, PackProfile> allProfiles) {

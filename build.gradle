@@ -260,6 +260,7 @@ allprojects {
 	}
 
 	spotless {
+		lineEndings = com.diffplug.spotless.LineEnding.UNIX
 		java {
 			licenseHeaderFile(rootProject.file("HEADER"))
 			targetExclude("**/src/generated/**")
