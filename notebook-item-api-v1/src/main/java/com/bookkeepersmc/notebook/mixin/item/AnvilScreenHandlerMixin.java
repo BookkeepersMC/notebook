@@ -20,29 +20,39 @@
  * SOFTWARE.
  *
  */
-package com.bookkeepersmc.notebook.mixin.client.rendering;
+package com.bookkeepersmc.notebook.mixin.item;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-import net.minecraft.client.render.entity.feature.CapeFeatureRenderer;
-import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.unmapped.C_mgbzsqdv;
+import net.minecraft.registry.Holder;
+import net.minecraft.screen.AnvilScreenHandler;
+import net.minecraft.screen.ForgingScreenHandler;
+import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.screen.ScreenHandlerType;
 
-import com.bookkeepersmc.notebook.api.client.rendering.v1.LivingEntityFeatureRenderEvents;
+import com.bookkeepersmc.notebook.api.item.v1.EnchantingContext;
 
-@Mixin(CapeFeatureRenderer.class)
-public class CapeFeatureRendererMixin {
-	@WrapOperation(method = "render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;ILnet/minecraft/client/render/entity/state/PlayerEntityRenderState;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/feature/CapeFeatureRenderer;method_64257(Lnet/minecraft/item/ItemStack;Lnet/minecraft/unmapped/C_mgbzsqdv$C_otwvbrdf;)Z"))
-	public boolean wrapCapeRenderCheck(CapeFeatureRenderer renderer, ItemStack stack, C_mgbzsqdv.C_otwvbrdf layerType, Operation<Boolean> original, @Local(argsOnly = true) PlayerEntityRenderState state) {
-		if (!LivingEntityFeatureRenderEvents.ALLOW_CAPE_RENDER.invoker().allowCapeRender(state)) {
-			return false;
-		}
+@Mixin(AnvilScreenHandler.class)
+abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
+	public AnvilScreenHandlerMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
+		super(type, syncId, playerInventory, context);
+	}
 
-		return original.call(renderer, stack, layerType);
+	@Redirect(
+			method = "updateResult",
+			at = @At(
+					value = "INVOKE",
+					target = "Lnet/minecraft/enchantment/Enchantment;isAcceptableItem(Lnet/minecraft/item/ItemStack;)Z"
+			)
+	)
+	private boolean callAllowEnchantingEvent(Enchantment instance, ItemStack stack, @Local Holder<Enchantment> holder) {
+		return stack.canBeEnchantedWith(holder, EnchantingContext.ACCEPTABLE);
 	}
 }

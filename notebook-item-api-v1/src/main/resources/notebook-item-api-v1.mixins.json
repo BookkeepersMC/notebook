@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "package": "com.bookkeepersmc.notebook.mixin.item",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "AbstractFurnaceBlockEntityMixin",
+    "AnvilScreenHandlerMixin",
+    "BrewingStandBlockEntityMixin",
+    "BuiltInRegistriesMixin",
+    "EnchantCommandMixin",
+    "EnchantmentHelperMixin",
+    "EnchantRandomlyLootFunctionMixin",
+    "ItemAccessor",
+    "ItemMixin",
+    "ItemSettingsMixin",
+    "ItemStackMixin",
+    "LivingEntityMixin",
+    "RecipeMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

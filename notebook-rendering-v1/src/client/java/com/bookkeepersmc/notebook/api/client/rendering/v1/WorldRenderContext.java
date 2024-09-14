@@ -38,7 +38,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.profiler.Profiler;
 
 /**
  * Except as noted below, the properties exposed here match the parameters passed to
@@ -78,13 +77,6 @@ public interface WorldRenderContext {
 	 * @return world renderer's client world instance
 	 */
 	ClientWorld world();
-
-	/**
-	 * Convenient access to game performance profiler.
-	 *
-	 * @return the active profiler
-	 */
-	Profiler profiler();
 
 	/**
 	 * Test to know if "fabulous" graphics mode is enabled.

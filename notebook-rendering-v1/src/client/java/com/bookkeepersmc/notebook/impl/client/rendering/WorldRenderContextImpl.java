@@ -38,7 +38,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.profiler.Profiler;
 
 import com.bookkeepersmc.notebook.api.client.rendering.v1.WorldRenderContext;
 
@@ -54,7 +53,6 @@ public final class WorldRenderContextImpl implements WorldRenderContext.BlockOut
 	private Matrix4f projectionMatrix;
 	private Matrix4f positionMatrix;
 	private VertexConsumerProvider consumers;
-	private Profiler profiler;
 	private boolean advancedTranslucency;
 	private ClientWorld world;
 
@@ -77,7 +75,6 @@ public final class WorldRenderContextImpl implements WorldRenderContext.BlockOut
 			Matrix4f projectionMatrix,
 			Matrix4f positionMatrix,
 			VertexConsumerProvider consumers,
-			Profiler profiler,
 			boolean advancedTranslucency,
 			ClientWorld world
 	) {
@@ -91,7 +88,6 @@ public final class WorldRenderContextImpl implements WorldRenderContext.BlockOut
 		this.projectionMatrix = projectionMatrix;
 		this.positionMatrix = positionMatrix;
 		this.consumers = consumers;
-		this.profiler = profiler;
 		this.advancedTranslucency = advancedTranslucency;
 		this.world = world;
 	}
@@ -178,11 +174,6 @@ public final class WorldRenderContextImpl implements WorldRenderContext.BlockOut
 	@Override
 	public LightmapTextureManager lightmapTextureManager() {
 		return lightmapTextureManager;
-	}
-
-	@Override
-	public Profiler profiler() {
-		return profiler;
 	}
 
 	@Override

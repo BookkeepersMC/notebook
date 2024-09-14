@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "com.bookkeepersmc.notebook.mixin.itemgroup",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ItemGroupAccessor",
+    "ItemGroupMixin",
+    "ItemGroupsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

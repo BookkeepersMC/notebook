@@ -26,7 +26,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.profiler.Profiler;
 
 /**
  * A simplified version of the "resource reload listener" interface, hiding the
@@ -49,9 +48,9 @@ import net.minecraft.util.profiler.Profiler;
  */
 public interface SimpleResourceReloadListener<T> extends IdentifiableResourceReloadListener {
 	@Override
-	default CompletableFuture<Void> reload(Synchronizer helper, ResourceManager manager, Profiler loadProfiler, Profiler applyProfiler, Executor loadExecutor, Executor applyExecutor) {
-		return load(manager, loadProfiler, loadExecutor).thenCompose(helper::whenPrepared).thenCompose(
-			(o) -> apply(o, manager, applyProfiler, applyExecutor)
+	default CompletableFuture<Void> reload(Synchronizer helper, ResourceManager manager, Executor loadExecutor, Executor applyExecutor) {
+		return load(manager, loadExecutor).thenCompose(helper::whenPrepared).thenCompose(
+			(o) -> apply(o, manager, applyExecutor)
 		);
 	}
 
@@ -60,19 +59,17 @@ public interface SimpleResourceReloadListener<T> extends IdentifiableResourceRel
 	 * must be thread-safe and not modify game state!
 	 *
 	 * @param manager  The resource manager used during reloading.
-	 * @param profiler The profiler which may be used for this stage.
 	 * @param executor The executor which should be used for this stage.
 	 * @return A CompletableFuture representing the "data loading" stage.
 	 */
-	CompletableFuture<T> load(ResourceManager manager, Profiler profiler, Executor executor);
+	CompletableFuture<T> load(ResourceManager manager, Executor executor);
 
 	/**
 	 * Synchronously apply loaded data to the game state.
 	 *
 	 * @param manager  The resource manager used during reloading.
-	 * @param profiler The profiler which may be used for this stage.
 	 * @param executor The executor which should be used for this stage.
 	 * @return A CompletableFuture representing the "data applying" stage.
 	 */
-	CompletableFuture<Void> apply(T data, ResourceManager manager, Profiler profiler, Executor executor);
+	CompletableFuture<Void> apply(T data, ResourceManager manager, Executor executor);
 }

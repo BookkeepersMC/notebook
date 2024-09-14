@@ -76,6 +76,9 @@ class BumpVersionTask extends DefaultTask {
 					def config = cp.configurations.api
 					config.allDependencies.forEach { dep ->
 						if (dep.name == p.name) {
+							if (cp.name == "notebook-mods-screen-v0") {
+								return
+							}
 							if (!toUpdate.containsKey(cp)) {
 								println "Bumping patch of ${cp.name} as it depends on ${p.name}"
 

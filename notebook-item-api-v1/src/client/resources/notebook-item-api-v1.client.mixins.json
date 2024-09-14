@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "com.bookkeepersmc.notebook.mixin.item.client",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "ClientPlayerInteractionManagerMixin",
+    "HeldItemRendererMixin",
+    "ItemStackMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
