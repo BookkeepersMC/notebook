@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "notebook-item-group-api-v1",
+  "name": "Notebook Item Group API (v1)",
+  "version": "${version}",
+  "environment": "*",
+  "depends": {
+    "notebookloader": ">=0.3.3",
+    "notebook-api-base": "*",
+    "notebook-resource-loader-v0": "*"
+  },
+  "mixins": [
+    "notebook-item-group-api-v1.mixins.json",
+    {
+      "config": "notebook-item-group-api-v1.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "accessWidener": "notebook-item-group-api-v1.accesswidener",
+  "custom": {
+    "notebook-api:module-lifecycle": "stable",
+    "loom:injected_interfaces": {
+      "net/minecraft/class_481": ["com/bookkeepersmc/notebook/api/client/itemgroup/v1/CreativeInventoryScreenExtensions"]
+    }
+  }
+
+}

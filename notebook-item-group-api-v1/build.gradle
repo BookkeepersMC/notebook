@@ -1,0 +1,10 @@
+version = getSubprojectVersion(project)
+
+moduleDependencies(project, [
+    'notebook-api-base',
+	'notebook-resource-loader-v0'
+])
+
+loom {
+	accessWidenerPath = file("src/main/resources/notebook-item-group-api-v1.accesswidener")
+}

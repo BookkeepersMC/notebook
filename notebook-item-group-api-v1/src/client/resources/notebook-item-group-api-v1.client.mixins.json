@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "com.bookkeepersmc.notebook.mixin.client.itemgroup",
+  "package": "com.bookkeepersmc.notebook.mixin.itemgroup.client",
   "compatibilityLevel": "JAVA_21",
   "client": [
     "CreativeInventoryScreenMixin"
