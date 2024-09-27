@@ -60,10 +60,10 @@ public abstract class TagDataProvider<T> extends AbstractTagProvider<T> {
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	protected ResourceKey<T> reverseLookup(T element) {
-		Registry registry = BuiltInRegistries.ROOT.method_31140((ResourceKey) key);
+		Registry root = BuiltInRegistries.ROOT.getOrThrow((ResourceKey) registry);
 
-		if (registry != null) {
-			Optional<Holder<T>> key = registry.getKey(element);
+		if (root != null) {
+			Optional<Holder<T>> key = root.getKey(element);
 
 			if (key.isPresent()) {
 				return (ResourceKey<T>) key.get();
@@ -154,10 +154,10 @@ public abstract class TagDataProvider<T> extends AbstractTagProvider<T> {
 		}
 	}
 
-	public final class NotebookTagBuilder extends ObjectBuilder<T> {
-		private final ObjectBuilder<T> parent;
+	public final class NotebookTagBuilder extends ElementAdder<T> {
+		private final ElementAdder<T> parent;
 
-		private NotebookTagBuilder(ObjectBuilder<T> parent) {
+		private NotebookTagBuilder(ElementAdder<T> parent) {
 			super(parent.builder);
 			this.parent = parent;
 		}
@@ -230,7 +230,7 @@ public abstract class TagDataProvider<T> extends AbstractTagProvider<T> {
 
 		@SafeVarargs
 		@Override
-		public final NotebookTagBuilder add(ResourceKey<T>... registryKeys) {
+		public final NotebookTagBuilder addAll(ResourceKey<T>... registryKeys) {
 			for (ResourceKey<T> registryKey : registryKeys) {
 				add(registryKey);
 			}

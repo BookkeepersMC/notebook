@@ -105,8 +105,8 @@ public abstract class RecipeDataProvider extends RecipesProvider.C_ujfsvkmt {
 					ResourceCondition[] conditions = NotebookDatagenHelper.consumeConditions(recipe);
 					NotebookDatagenHelper.addConditions(recipeJson, conditions);
 
-					final DataPackOutput.PathResolver recipesPathResolver = output.method_60917(Registries.RECIPE);
-					final DataPackOutput.PathResolver advancementsPathResolver = output.method_60917(Registries.ADVANCEMENT);
+					final DataPackOutput.PathResolver recipesPathResolver = output.createPathResolver(Registries.RECIPE);
+					final DataPackOutput.PathResolver advancementsPathResolver = output.createPathResolver(Registries.ADVANCEMENT);
 
 					list.add(DataProvider.writeToPath(writer, recipeJson, recipesPathResolver.resolveJsonFile(identifier)));
 

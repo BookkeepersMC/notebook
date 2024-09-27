@@ -44,7 +44,7 @@ public class NotebookCreativeGuiComponents {
 	private static final Identifier BUTTON_TEX = Identifier.of("fabric", "textures/gui/creative_buttons.png");
 	private static final double TABS_PER_PAGE = NotebookItemGroupImpl.TABS_PER_PAGE;
 	public static final Set<ItemGroup> COMMON_GROUPS = Set.of(ItemGroups.SEARCH_ITEMS, ItemGroups.SURVIVAL_INVENTORY, ItemGroups.SAVED_HOTBARS).stream()
-			.map(BuiltInRegistries.ITEM_GROUP::method_31140)
+			.map(BuiltInRegistries.ITEM_GROUP::getOrThrow)
 			.collect(Collectors.toSet());
 
 	public static int getPageCount() {

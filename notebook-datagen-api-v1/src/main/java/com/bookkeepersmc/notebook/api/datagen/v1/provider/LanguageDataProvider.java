@@ -113,7 +113,7 @@ public abstract class LanguageDataProvider implements DataProvider {
 	}
 
 	@Override
-	public String getName() {
+	public String getDescription() {
 		return "Language (%s)".formatted(languageCode);
 	}
 
@@ -131,7 +131,7 @@ public abstract class LanguageDataProvider implements DataProvider {
 		}
 
 		default void add(ResourceKey<ItemGroup> registryKey, String value) {
-			final ItemGroup group = BuiltInRegistries.ITEM_GROUP.method_31140(registryKey);
+			final ItemGroup group = BuiltInRegistries.ITEM_GROUP.getOrThrow(registryKey);
 			final TextComponent content = group.getName().asComponent();
 
 			if (content instanceof TranslatableComponent translatableTextContent) {
@@ -151,7 +151,7 @@ public abstract class LanguageDataProvider implements DataProvider {
 		}
 
 		default void add(Holder<EntityAttribute> entityAttribute, String value) {
-			add(entityAttribute.value().getTranslationKey(), value);
+			add(entityAttribute.getValue().getTranslationKey(), value);
 		}
 
 		default void add(StatType<?> statType, String value) {

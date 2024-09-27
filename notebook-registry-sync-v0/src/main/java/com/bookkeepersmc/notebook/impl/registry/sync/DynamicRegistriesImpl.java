@@ -46,7 +46,7 @@ public final class DynamicRegistriesImpl {
 
 	static {
 		for (RegistryLoader.DecodingData<?> loader : RegistryLoader.WORLDGEN_REGISTRIES) {
-			DYNAMIC_REGISTRY_KEYS.add(loader.key());
+			DYNAMIC_REGISTRY_KEYS.add(loader.registry());
 		}
 	}
 

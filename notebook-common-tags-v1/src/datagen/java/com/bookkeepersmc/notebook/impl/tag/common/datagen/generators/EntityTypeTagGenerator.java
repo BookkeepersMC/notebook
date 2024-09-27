@@ -26,6 +26,7 @@ import java.util.concurrent.CompletableFuture;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.registry.HolderLookup;
+import net.minecraft.registry.tag.EntityTypeTags;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 import com.bookkeepersmc.notebook.api.datagen.v1.provider.TagDataProvider;
@@ -50,8 +51,16 @@ public final class EntityTypeTagGenerator extends TagDataProvider.EntityTypeTagP
 				.add(EntityType.HOPPER_MINECART)
 				.add(EntityType.SPAWNER_MINECART);
 		getOrCreateTagBuilder(ConventionalEntityTypeTags.BOATS)
-				.add(EntityType.BOAT)
-				.add(EntityType.CHEST_BOAT);
+				.addOptionalTag(EntityTypeTags.BOAT)
+				.add(EntityType.OAK_CHEST_BOAT)
+				.add(EntityType.SPRUCE_CHEST_BOAT)
+				.add(EntityType.BIRCH_CHEST_BOAT)
+				.add(EntityType.JUNGLE_CHEST_BOAT)
+				.add(EntityType.ACACIA_CHEST_BOAT)
+				.add(EntityType.CHERRY_CHEST_BOAT)
+				.add(EntityType.DARK_OAK_CHEST_BOAT)
+				.add(EntityType.MANGROVE_CHEST_BOAT)
+				.add(EntityType.BAMBOO_CHEST_RAFT);
 		getOrCreateTagBuilder(ConventionalEntityTypeTags.CAPTURING_NOT_SUPPORTED);
 		getOrCreateTagBuilder(ConventionalEntityTypeTags.TELEPORTING_NOT_SUPPORTED);
 	}

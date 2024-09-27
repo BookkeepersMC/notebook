@@ -52,7 +52,7 @@ public class RegistryDataLoaderMixin {
 	@Unique
 	private static final ThreadLocal<Boolean> IS_SERVER = ThreadLocal.withInitial(() -> false);
 
-	@WrapOperation(method = "method_56515", at = @At(value = "INVOKE", target = "Lnet/minecraft/registry/RegistryLoader;method_45121(Lnet/minecraft/registry/RegistryLoader$LoadingFunction;Ljava/util/List;Ljava/util/List;)Lnet/minecraft/registry/DynamicRegistryManager$Frozen;"))
+	@WrapOperation(method = "loadFromResource", at = @At(value = "INVOKE", target = "Lnet/minecraft/registry/RegistryLoader;load(Lnet/minecraft/registry/RegistryLoader$LoadingFunction;Ljava/util/List;Ljava/util/List;)Lnet/minecraft/registry/DynamicRegistryManager$Frozen;"))
 	private static DynamicRegistryManager.Frozen wrapIsServerCall(@Coerce Object registryLoadable, List<HolderLookup.RegistryLookup<?>> baseRegistries, List<RegistryLoader.DecodingData<?>> entries, Operation<DynamicRegistryManager.Frozen> original) {
 		try {
 			IS_SERVER.set(true);
@@ -63,7 +63,7 @@ public class RegistryDataLoaderMixin {
 	}
 
 	@Inject(
-			method = "method_45121",
+			method = "load",
 			at = @At(
 					value = "INVOKE",
 					target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V",

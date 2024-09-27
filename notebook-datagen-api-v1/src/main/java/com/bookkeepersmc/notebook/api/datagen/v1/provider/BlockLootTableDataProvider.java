@@ -87,7 +87,7 @@ public abstract class BlockLootTableDataProvider extends BlockLootTableGenerator
 
 			for (Identifier blockId : BuiltInRegistries.BLOCK.getIds()) {
 				if (blockId.getNamespace().equals(output.getModId())) {
-					Optional<ResourceKey<LootTable>> blockLootTableId = BuiltInRegistries.BLOCK.method_63535(blockId).getLootTableId();
+					Optional<ResourceKey<LootTable>> blockLootTableId = BuiltInRegistries.BLOCK.get(blockId).getLootTableId();
 
 					if (blockLootTableId.isPresent() && blockLootTableId.get().getValue().getNamespace().equals(output.getModId())) {
 						if (!lootTables.containsKey(blockLootTableId.get())) {
@@ -111,7 +111,7 @@ public abstract class BlockLootTableDataProvider extends BlockLootTableGenerator
 	}
 
 	@Override
-	public String getName() {
+	public String getDescription() {
 		return "Block Loot Tables";
 	}
 }

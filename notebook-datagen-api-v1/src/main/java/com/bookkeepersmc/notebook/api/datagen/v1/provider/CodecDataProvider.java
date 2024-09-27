@@ -62,7 +62,7 @@ public abstract class CodecDataProvider<T> implements DataProvider {
 	}
 
 	protected CodecDataProvider(NotebookDataOutput dataOutput, CompletableFuture<HolderLookup.Provider> registriesFuture, ResourceKey<? extends Registry<?>> key, Codec<T> codec) {
-		this(dataOutput.method_60917(key), registriesFuture, codec);
+		this(dataOutput.createPathResolver(key), registriesFuture, codec);
 	}
 
 	@Override

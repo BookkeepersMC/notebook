@@ -189,7 +189,7 @@ public class NotebookDatagenHelper {
 		Map<ResourceKey<?>, BuilderData> builderDataMap = new HashMap<>();
 
 		for (RegistryLoader.DecodingData<?> key : DynamicRegistries.getDynamicRegistries()) {
-			builderDataMap.computeIfAbsent(key.key(), BuilderData::new);
+			builderDataMap.computeIfAbsent(key.registry(), BuilderData::new);
 		}
 
 		for (RegistrySetBuilder builder : builders) {

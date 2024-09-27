@@ -48,7 +48,7 @@ public class RegistryDataCollectorContentsCollectorMixin {
 	private List<RegistryLoader.DecodingData<?>> skipEmptyRegistries(Operation<List<RegistryLoader.DecodingData<?>>> operation, ResourceFactory resourceFactory, @Coerce ClientRegistriesDynamicRegistriesAccessor storage, boolean bl) {
 		Map<ResourceKey<? extends Registry<?>>, List<DynamicRegistrySync.SerializedRegistryEntry>> dynamicRegistries = storage.getDynamicRegistries();
 		List<RegistryLoader.DecodingData<?>> result = new ArrayList<>(operation.call());
-		result.removeIf(entry -> DynamicRegistriesImpl.SKIP_EMPTY_SYNC_REGISTRIES.contains(entry.key()) && !dynamicRegistries.containsKey(entry.key()));
+		result.removeIf(entry -> DynamicRegistriesImpl.SKIP_EMPTY_SYNC_REGISTRIES.contains(entry.registry()) && !dynamicRegistries.containsKey(entry.registry()));
 		return result;
 	}
 }

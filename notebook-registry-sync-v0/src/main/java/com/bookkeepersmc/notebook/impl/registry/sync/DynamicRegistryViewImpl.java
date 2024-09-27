@@ -49,7 +49,7 @@ public final class DynamicRegistryViewImpl implements DynamicRegistryView {
 				return Optional.ofNullable((Registry<T>) DynamicRegistryViewImpl.this.registries.get(resourceKey));
 			}
 
-			public Stream<RegistryEntry<?>> registries() {
+			public Stream<RegistryEntry<?>> streamRegistries() {
 				return DynamicRegistryViewImpl.this.stream()
 						.map(this::entry);
 			}

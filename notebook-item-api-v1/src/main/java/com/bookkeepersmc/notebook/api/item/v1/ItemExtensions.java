@@ -111,8 +111,8 @@ public interface ItemExtensions {
 	 */
 	default boolean canBeEnchantedWith(ItemStack stack, Holder<Enchantment> enchantment, EnchantingContext context) {
 		return context == EnchantingContext.PRIMARY
-				? enchantment.value().isPrimaryItem(stack)
-				: enchantment.value().isAcceptableItem(stack);
+				? enchantment.getValue().isPrimaryItem(stack)
+				: enchantment.getValue().isAcceptableItem(stack);
 	}
 
 	/**

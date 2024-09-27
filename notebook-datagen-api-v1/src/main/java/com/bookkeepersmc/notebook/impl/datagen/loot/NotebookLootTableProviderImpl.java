@@ -82,7 +82,7 @@ public final class NotebookLootTableProviderImpl {
 	}
 
 	private static Path getOutputPath(NotebookDataOutput dataOutput, Identifier lootTableId) {
-		return dataOutput.method_60917(Registries.LOOT_TABLE).resolveJsonFile(lootTableId);
+		return dataOutput.createPathResolver(Registries.LOOT_TABLE).resolveJsonFile(lootTableId);
 	}
 
 	private NotebookLootTableProviderImpl() {

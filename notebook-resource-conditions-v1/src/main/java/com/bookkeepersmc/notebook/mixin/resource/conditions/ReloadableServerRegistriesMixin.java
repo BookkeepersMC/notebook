@@ -62,7 +62,7 @@ public class ReloadableServerRegistriesMixin {
 	}
 
 	@Inject(method = "reload", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/registry/HolderLookup$Provider;createSerializationContext(Lcom/mojang/serialization/DynamicOps;)Lnet/minecraft/registry/RegistryOps;", shift = At.Shift.AFTER))
-	private static void storeWrapperLookup(LayeredRegistryManager<ServerRegistryLayer> dynamicRegistries, List<Registry.TagPending<?>> pendingTagLoads, ResourceManager resourceManager, Executor prepareExecutor, CallbackInfoReturnable<CompletableFuture<ReloadableRegistries.C_ssgyvsmu>> cir, @Local RegistryOps ops, @Share("wrapper") LocalRef<HolderLookup.Provider> share) {
+	private static void storeWrapperLookup(LayeredRegistryManager<ServerRegistryLayer> dynamicRegistries, List<Registry.TagPending<?>> pendingTagLoads, ResourceManager resourceManager, Executor prepareExecutor, CallbackInfoReturnable<CompletableFuture<ReloadableRegistries.LoadResult>> cir, @Local RegistryOps ops, @Share("wrapper") LocalRef<HolderLookup.Provider> share) {
 		REGISTRY_LOOKUPS.put(ops, share.get());
 	}
 }

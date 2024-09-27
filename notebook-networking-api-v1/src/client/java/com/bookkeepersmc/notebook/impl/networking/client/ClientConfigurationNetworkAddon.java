@@ -50,7 +50,7 @@ public final class ClientConfigurationNetworkAddon extends ClientCommonNetworkAd
 
 	public ClientConfigurationNetworkAddon(ClientConfigurationNetworkHandler handler, Minecraft client) {
 		super(ClientNetworkingImpl.CONFIGURATION, ((ClientCommonNetworkHandlerAccessor) handler).getConnection(), "ClientPlayNetworkAddon for " + ((ClientConfigurationNetworkHandlerAccessor) handler).getProfile().getName(), handler, client);
-		this.context = new ContextImpl(client, this);
+		this.context = new ContextImpl(client, handler, this);
 
 		// Must register pending channels via lateinit
 		this.registerPendingChannels((ChannelInfoHolder) this.connection, NetworkPhase.CONFIGURATION);
@@ -134,9 +134,10 @@ public final class ClientConfigurationNetworkAddon extends ClientCommonNetworkAd
 		return (ChannelInfoHolder) ((ClientCommonNetworkHandlerAccessor) handler).getConnection();
 	}
 
-	private record ContextImpl(Minecraft client, PacketSender responseSender) implements ClientConfigurationNetworking.Context {
+	private record ContextImpl(Minecraft client, ClientConfigurationNetworkHandler networkHandler, PacketSender responseSender) implements ClientConfigurationNetworking.Context {
 		private ContextImpl {
 			Objects.requireNonNull(client, "client");
+			Objects.requireNonNull(networkHandler, "networkHandler");
 			Objects.requireNonNull(responseSender, "responseSender");
 		}
 	}

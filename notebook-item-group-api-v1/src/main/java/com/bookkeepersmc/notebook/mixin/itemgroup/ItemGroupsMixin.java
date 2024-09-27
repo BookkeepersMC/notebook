@@ -77,7 +77,7 @@ public class ItemGroupsMixin {
 
 		Comparator<Holder.Reference<ItemGroup>> entryComparator = (e1, e2) -> {
 			// Non-displayable groups should come last for proper pagination
-			int displayCompare = Boolean.compare(e1.value().shouldDisplay(), e2.value().shouldDisplay());
+			int displayCompare = Boolean.compare(e1.getValue().shouldDisplay(), e2.getValue().shouldDisplay());
 
 			if (displayCompare != 0) {
 				return -displayCompare;
@@ -86,12 +86,12 @@ public class ItemGroupsMixin {
 				return e1.getRegistryKey().getValue().compareTo(e2.getRegistryKey().getValue());
 			}
 		};
-		final List<Holder.Reference<ItemGroup>> sortedItemGroups = BuiltInRegistries.ITEM_GROUP.holders()
+		final List<Holder.Reference<ItemGroup>> sortedItemGroups = BuiltInRegistries.ITEM_GROUP.streamHolders()
 				.sorted(entryComparator)
 				.toList();
 
 		for (Holder.Reference<ItemGroup> reference : sortedItemGroups) {
-			final ItemGroup itemGroup = reference.value();
+			final ItemGroup itemGroup = reference.getValue();
 			final NotebookItemGroupImpl fabricItemGroup = (NotebookItemGroupImpl) itemGroup;
 
 			if (vanillaGroups.contains(reference.getRegistryKey())) {
@@ -115,7 +115,7 @@ public class ItemGroupsMixin {
 		var map = new HashMap<ItemGroupPosition, String>();
 
 		for (ResourceKey<ItemGroup> registryKey : BuiltInRegistries.ITEM_GROUP.getKeys()) {
-			final ItemGroup itemGroup = BuiltInRegistries.ITEM_GROUP.method_31140(registryKey);
+			final ItemGroup itemGroup = BuiltInRegistries.ITEM_GROUP.getOrThrow(registryKey);
 			final NotebookItemGroupImpl notebookItemGroup = (NotebookItemGroupImpl) itemGroup;
 			final String displayName = itemGroup.getName().getString();
 			final var position = new ItemGroupPosition(itemGroup.getLocation(), itemGroup.getColumn(), notebookItemGroup.notebook_getPage());

@@ -20,23 +20,30 @@
  * SOFTWARE.
  *
  */
-package com.bookkeepersmc.notebook.mixin.registry.sync;
+package com.bookkeepersmc.notebook.mixin.item;
 
 import java.util.List;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-import net.minecraft.registry.RegistryLoader;
-import net.minecraft.server.WorldLoader;
+import net.minecraft.component.DataComponentMap;
+import net.minecraft.component.DataComponentType;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.registry.HolderSet;
 
-import com.bookkeepersmc.notebook.api.event.registry.DynamicRegistries;
+@Mixin(Enchantment.Builder.class)
+public interface EnchantmentBuilderAccessor {
+	@Accessor("properties")
+	Enchantment.Properties getDefinition();
 
-@Mixin(WorldLoader.class)
-abstract class WorldLoaderMixin {
-	@ModifyArg(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/registry/RegistryLoader;loadFromResource(Lnet/minecraft/resource/ResourceManager;Ljava/util/List;Ljava/util/List;)Lnet/minecraft/registry/DynamicRegistryManager$Frozen;", ordinal = 0), index = 2, allow = 1)
-	private static List<RegistryLoader.DecodingData<?>> modifyLoadedEntries(List<RegistryLoader.DecodingData<?>> entries) {
-		return DynamicRegistries.getDynamicRegistries();
-	}
+	@Accessor("exclusiveSet")
+	HolderSet<Enchantment> getExclusiveSet();
+
+	@Accessor("effectMapBuilder")
+	DataComponentMap.Builder getEffectMap();
+
+	@Invoker("getEffectsList")
+	<E> List<E> invokeGetEffectsList(DataComponentType<List<E>> type);
 }

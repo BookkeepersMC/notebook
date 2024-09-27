@@ -50,7 +50,7 @@ public abstract class SimpleLootTableDataProvider implements LootTableDataProvid
 	}
 
 	@Override
-	public String getName() {
+	public String getDescription() {
 		return Objects.requireNonNull(LootContextTypes.MAP.inverse().get(lootContextType), "Could not get id for loot context type") + " Loot Table";
 	}
 }

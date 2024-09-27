@@ -92,7 +92,7 @@ public class ComponentsIngredient implements CustomIngredient {
 	public List<Holder<Item>> getMatchingStacks() {
 		return base.method_8105().stream()
 				.filter(itemHolder -> {
-					ItemStack stack = itemHolder.value().getDefaultStack();
+					ItemStack stack = itemHolder.getValue().getDefaultStack();
 					stack.applyPatchAndValidate(components);
 					return base.test(stack);
 				}).toList();

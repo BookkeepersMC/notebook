@@ -29,6 +29,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.ClientConfigurationNetworkHandler;
 import net.minecraft.network.packet.payload.CustomPayload;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.thread.ThreadExecutor;
@@ -285,6 +286,11 @@ public final class ClientConfigurationNetworking {
 		 * @return The Minecraft instance
 		 */
 		Minecraft client();
+
+		/**
+		 * @return The ClientConfigurationNetworkHandler instance
+		 */
+		ClientConfigurationNetworkHandler networkHandler();
 
 		/**
 		 * @return The packet sender

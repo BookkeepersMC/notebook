@@ -20,23 +20,39 @@
  * SOFTWARE.
  *
  */
-package com.bookkeepersmc.notebook.mixin.registry.sync;
+package com.bookkeepersmc.notebook.api.item.v1;
 
-import java.util.List;
-
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-
-import net.minecraft.registry.RegistryLoader;
-import net.minecraft.server.WorldLoader;
-
-import com.bookkeepersmc.notebook.api.event.registry.DynamicRegistries;
-
-@Mixin(WorldLoader.class)
-abstract class WorldLoaderMixin {
-	@ModifyArg(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/registry/RegistryLoader;loadFromResource(Lnet/minecraft/resource/ResourceManager;Ljava/util/List;Ljava/util/List;)Lnet/minecraft/registry/DynamicRegistryManager$Frozen;", ordinal = 0), index = 2, allow = 1)
-	private static List<RegistryLoader.DecodingData<?>> modifyLoadedEntries(List<RegistryLoader.DecodingData<?>> entries) {
-		return DynamicRegistries.getDynamicRegistries();
+/**
+ * Determines where an enchantment has been loaded from.
+ */
+public enum EnchantmentSource {
+	/**
+	 * An enchantment loaded from the vanilla data pack.
+	 */
+	VANILLA(true),
+	/**
+	 * An enchantment loaded from mods' bundled resources.
+	 *
+	 * <p>This includes the additional builtin data packs registered by mods
+	 * with Fabric Resource Loader.
+	 */
+	MOD(true),
+	/**
+	 * An enchantment loaded from an external data pack.
+	 */
+	DATA_PACK(false);
+	private final boolean builtin;
+	EnchantmentSource(boolean builtin) {
+		this.builtin = builtin;
+	}
+	/**
+	 * Returns whether this enchantment source is builtin and bundled in the vanilla or mod resources.
+	 *
+	 * <p>{@link #VANILLA} and {@link #MOD} are builtin.
+	 *
+	 * @return {@code true} if builtin, {@code false} otherwise
+	 */
+	public boolean isBuiltin() {
+		return builtin;
 	}
 }

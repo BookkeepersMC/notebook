@@ -87,9 +87,9 @@ public abstract class DynamicRegistryDataProvider implements DataProvider {
 			this.registries = registries;
 			this.queuedEntries = DynamicRegistries.getDynamicRegistries().stream()
 					// Some modded dynamic registries might not be in the wrapper lookup, filter them out
-					.filter(e -> registries.getLookup(e.key()).isPresent())
+					.filter(e -> registries.getLookup(e.registry()).isPresent())
 					.collect(Collectors.toMap(
-							e -> e.key().getValue(),
+							e -> e.registry().getValue(),
 							e -> RegistryEntries.create(registries, e)
 					));
 			this.modId = modId;
@@ -125,19 +125,19 @@ public abstract class DynamicRegistryDataProvider implements DataProvider {
 		}
 
 		public <T> void add(Holder.Reference<T> object) {
-			add(object.getRegistryKey(), object.value());
+			add(object.getRegistryKey(), object.getValue());
 		}
 
 		public <T> void add(Holder.Reference<T> object, ResourceCondition... conditions) {
-			add(object.getRegistryKey(), object.value(), conditions);
+			add(object.getRegistryKey(), object.getValue(), conditions);
 		}
 
 		public <T> Holder<T> add(HolderLookup.RegistryLookup<T> registry, ResourceKey<T> valueKey) {
-			return add(valueKey, registry.getHolderOrThrow(valueKey).value());
+			return add(valueKey, registry.getHolderOrThrow(valueKey).getValue());
 		}
 
 		public <T> Holder<T> add(HolderLookup.RegistryLookup<T> registry, ResourceKey<T> valueKey, ResourceCondition... conditions) {
-			return add(valueKey, registry.getHolderOrThrow(valueKey).value(), conditions);
+			return add(valueKey, registry.getHolderOrThrow(valueKey).getValue(), conditions);
 		}
 
 		public <T> List<Holder<T>> addAll(HolderLookup.RegistryLookup<T> registry) {
@@ -177,8 +177,8 @@ public abstract class DynamicRegistryDataProvider implements DataProvider {
 		}
 
 		static <T> RegistryEntries<T> create(HolderLookup.Provider lookups, RegistryLoader.DecodingData<T> loaderEntry) {
-			HolderLookup.RegistryLookup<T> lookup = lookups.getLookupOrThrow(loaderEntry.key());
-			return new RegistryEntries<>(lookup, loaderEntry.key(), loaderEntry.elementCodec());
+			HolderLookup.RegistryLookup<T> lookup = lookups.getLookupOrThrow(loaderEntry.registry());
+			return new RegistryEntries<>(lookup, loaderEntry.registry(), loaderEntry.elementCodec());
 		}
 
 		Holder<T> add(ResourceKey<T> key, T value, @Nullable ResourceCondition[] conditions) {

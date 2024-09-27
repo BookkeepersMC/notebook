@@ -66,7 +66,7 @@ public class AllIngredient extends CombinedIngredient {
 
 		for (int i = 1; i < ingredients.size(); ++i) {
 			Ingredient ing = ingredients.get(i);
-			previewStacks.removeIf(entry -> !ing.test(entry.value().getDefaultStack()));
+			previewStacks.removeIf(entry -> !ing.test(entry.getValue().getDefaultStack()));
 		}
 
 		return previewStacks;

@@ -171,7 +171,7 @@ public final class ResourceConditionsImpl implements ModInitializer {
 			return false;
 		}
 
-		Optional<RegistryOps.RegistryInfo<Object>> wrapper = registryLookup.lookup(registryKey);
+		Optional<RegistryOps.RegistryInfo<Object>> wrapper = registryLookup.getInfo(registryKey);
 
 		if (wrapper.isPresent()) {
 			for (Identifier id : entries) {

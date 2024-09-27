@@ -9,9 +9,9 @@ mutable	field	net/minecraft/data/DataGenerator	output	Lnet/minecraft/data/DataPa
 accessible class net/minecraft/data/server/RecipesProvider$C_ujfsvkmt
 extendable method net/minecraft/data/server/RecipesProvider$C_ujfsvkmt run (Lnet/minecraft/data/DataWriter;)Ljava/util/concurrent/CompletableFuture;
 
-accessible	field	net/minecraft/data/server/tag/AbstractTagProvider$ObjectBuilder	builder	Lnet/minecraft/registry/tag/TagBuilder;
-extendable	method	net/minecraft/data/server/tag/AbstractTagProvider$ObjectBuilder	add	(Lnet/minecraft/registry/ResourceKey;)Lnet/minecraft/data/server/tag/AbstractTagProvider$ObjectBuilder;
-extendable	method	net/minecraft/data/server/tag/AbstractTagProvider$ObjectBuilder	add	([Lnet/minecraft/registry/ResourceKey;)Lnet/minecraft/data/server/tag/AbstractTagProvider$ObjectBuilder;
+accessible	field	net/minecraft/data/server/tag/AbstractTagProvider$ElementAdder	builder	Lnet/minecraft/registry/tag/TagBuilder;
+extendable	method	net/minecraft/data/server/tag/AbstractTagProvider$ElementAdder	add	(Lnet/minecraft/registry/ResourceKey;)Lnet/minecraft/data/server/tag/AbstractTagProvider$ElementAdder;
+extendable	method	net/minecraft/data/server/tag/AbstractTagProvider$ElementAdder	addAll	([Lnet/minecraft/registry/ResourceKey;)Lnet/minecraft/data/server/tag/AbstractTagProvider$ElementAdder;
 
 accessible	field	net/minecraft/data/server/tag/AbstractTagProvider	tagBuilders	Ljava/util/Map;
 
@@ -45,7 +45,7 @@ transitive-accessible	field	net/minecraft/data/client/ItemModelGenerator	writer	
 transitive-accessible	method	net/minecraft/data/client/model/TextureKey	of	(Ljava/lang/String;)Lnet/minecraft/data/client/model/TextureKey;
 transitive-accessible	method	net/minecraft/data/client/model/TextureKey	of	(Ljava/lang/String;Lnet/minecraft/data/client/model/TextureKey;)Lnet/minecraft/data/client/model/TextureKey;
 
-transitive-extendable	method	net/minecraft/data/server/tag/AbstractTagProvider$ObjectBuilder	add	([Lnet/minecraft/registry/ResourceKey;)Lnet/minecraft/data/server/tag/AbstractTagProvider$ObjectBuilder;
+transitive-extendable	method	net/minecraft/data/server/tag/AbstractTagProvider$ElementAdder	addAll	([Lnet/minecraft/registry/ResourceKey;)Lnet/minecraft/data/server/tag/AbstractTagProvider$ElementAdder;
 
 transitive-accessible	method	net/minecraft/data/client/model/TexturedModel	makeFactory	(Ljava/util/function/Function;Lnet/minecraft/data/client/model/Model;)Lnet/minecraft/data/client/model/TexturedModel$Factory;
 
@@ -319,16 +319,3 @@ transitive-accessible	method	net/minecraft/data/client/ItemModelGenerator	upload
 transitive-accessible	method	net/minecraft/data/client/ItemModelGenerator	suffixTrim	(Lnet/minecraft/util/Identifier;Ljava/lang/String;)Lnet/minecraft/util/Identifier;
 transitive-accessible	method	net/minecraft/data/client/ItemModelGenerator	createArmorJson	(Lnet/minecraft/util/Identifier;Ljava/util/Map;Lnet/minecraft/util/Identifier;)Lcom/google/gson/JsonObject;
 transitive-accessible	method	net/minecraft/data/client/ItemModelGenerator	registerArmor	(Lnet/minecraft/item/Item;Lnet/minecraft/util/Identifier;Lnet/minecraft/unmapped/C_mgbzsqdv;Lnet/minecraft/entity/EquipmentSlot;)V
-transitive-extendable	method	net/minecraft/data/PackMetadataProvider	getName	()Ljava/lang/String;
-transitive-extendable	method	net/minecraft/data/SnbtProvider	getName	()Ljava/lang/String;
-transitive-extendable	method	net/minecraft/data/client/BlockStateDefinitionProvider	getName	()Ljava/lang/String;
-transitive-extendable	method	net/minecraft/data/dev/NbtProvider	getName	()Ljava/lang/String;
-transitive-extendable	method	net/minecraft/data/report/BiomeParametersProvider	getName	()Ljava/lang/String;
-transitive-extendable	method	net/minecraft/data/report/BlockListProvider	getName	()Ljava/lang/String;
-transitive-extendable	method	net/minecraft/data/report/CommandSyntaxProvider	getName	()Ljava/lang/String;
-transitive-extendable	method	net/minecraft/data/report/ItemListProvider	getName	()Ljava/lang/String;
-transitive-extendable	method	net/minecraft/data/report/RegistriesDataPackProvider	getName	()Ljava/lang/String;
-transitive-extendable	method	net/minecraft/data/report/RegistryDumpProvider	getName	()Ljava/lang/String;
-transitive-extendable	method	net/minecraft/data/server/AdvancementsProvider	getName	()Ljava/lang/String;
-transitive-extendable	method	net/minecraft/data/server/LootTablesProvider	getName	()Ljava/lang/String;
-transitive-extendable	method	net/minecraft/data/server/tag/AbstractTagProvider	getName	()Ljava/lang/String;

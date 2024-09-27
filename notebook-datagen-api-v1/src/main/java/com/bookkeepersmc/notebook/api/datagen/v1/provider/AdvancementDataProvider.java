@@ -56,7 +56,7 @@ public abstract class AdvancementDataProvider implements DataProvider {
 
 	protected AdvancementDataProvider(NotebookDataOutput output,  CompletableFuture<HolderLookup.Provider> registryLookup) {
 		this.output = output;
-		this.pathResolver = output.method_60917(Registries.ADVANCEMENT);
+		this.pathResolver = output.createPathResolver(Registries.ADVANCEMENT);
 		this.registryLookup = registryLookup;
 	}
 
@@ -101,7 +101,7 @@ public abstract class AdvancementDataProvider implements DataProvider {
 	}
 
 	@Override
-	public String getName() {
+	public String getDescription() {
 		return "Advancements";
 	}
 }

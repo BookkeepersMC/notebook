@@ -25,6 +25,7 @@ package com.bookkeepersmc.notebook.api.item.v1;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Holder;
+import net.minecraft.registry.ResourceKey;
 
 import com.bookkeepersmc.notebook.api.event.Event;
 import com.bookkeepersmc.notebook.api.event.EventFactory;
@@ -67,6 +68,27 @@ public final class EnchantmentEvents {
 			}
 	);
 
+	/**
+	 * An event that allows an {@link Enchantment} to be modified without needing to fully override an enchantment.
+	 *
+	 * <p>This should only be used to modify the behavior of <em>external</em> enchantments, where 'external' means
+	 * either vanilla or from another mod. For instance, a mod might add a bleed effect to Sharpness (and only Sharpness).
+	 * For your own enchantments, you should simply define them in your mod's data pack. See the
+	 * <a href="https://minecraft.wiki/w/Enchantment_definition">Enchantment Definition page</a> on the Minecraft Wiki
+	 * for more information.
+	 *
+	 * <p>Note: If you wish to modify the exclusive set of the enchantment, consider extending the
+	 * {@linkplain net.minecraft.registry.tag.EnchantmentTags relevant tag} through your mod's data pack instead.
+	 */
+	public static final Event<Modify> MODIFY = EventFactory.createArrayBacked(
+			Modify.class,
+			callbacks -> (key, builder, source) -> {
+				for (Modify callback : callbacks) {
+					callback.modify(key, builder, source);
+				}
+			}
+	);
+
 	@FunctionalInterface
 	public interface AllowEnchanting {
 		/**
@@ -83,6 +105,22 @@ public final class EnchantmentEvents {
 				Holder<Enchantment> enchantment,
 				ItemStack target,
 				EnchantingContext enchantingContext
+		);
+	}
+
+	@FunctionalInterface
+	public interface Modify {
+		/**
+		 * Modifies the effects of an {@link Enchantment}.
+		 *
+		 * @param key The ID of the enchantment
+		 * @param builder The enchantment builder
+		 * @param source The source of the enchantment
+		 */
+		void modify(
+				ResourceKey<Enchantment> key,
+				Enchantment.Builder builder,
+				EnchantmentSource source
 		);
 	}
 }

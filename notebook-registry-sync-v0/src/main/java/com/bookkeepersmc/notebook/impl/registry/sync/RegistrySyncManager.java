@@ -153,16 +153,16 @@ public final class RegistrySyncManager {
 	}
 
 	/**
-	 * Creates a {@link CompoundTag} used to sync the registry ids.
+	 * Creates a {@link net.minecraft.nbt.NbtCompound} used to sync the registry ids.
 	 *
-	 * @return a {@link CompoundTag} to sync, null when empty
+	 * @return a {@link net.minecraft.nbt.NbtCompound} to sync, null when empty
 	 */
 	@Nullable
 	public static Map<Identifier, Object2IntMap<Identifier>> createAndPopulateRegistryMap() {
 		Map<Identifier, Object2IntMap<Identifier>> map = new LinkedHashMap<>();
 
 		for (Identifier registryId : BuiltInRegistries.ROOT.getIds()) {
-			Registry registry = BuiltInRegistries.ROOT.method_63535(registryId);
+			Registry registry = BuiltInRegistries.ROOT.get(registryId);
 
 			if (DEBUG_WRITE_REGISTRY_DATA) {
 				File location = new File(".notebook" + File.separatorChar + "debug" + File.separatorChar + "registry");
@@ -233,8 +233,8 @@ public final class RegistrySyncManager {
 					int rawId = registry.getRawId(o);
 
 					if (DEBUG) {
-						if (registry.method_63535(id) != o) {
-							LOGGER.error("[notebook-registry-sync] Inconsistency detected in " + registryId + ": object " + o + " -> string ID " + id + " -> object " + registry.method_63535(id) + "!");
+						if (registry.get(id) != o) {
+							LOGGER.error("[notebook-registry-sync] Inconsistency detected in " + registryId + ": object " + o + " -> string ID " + id + " -> object " + registry.get(id) + "!");
 						}
 
 						if (registry.get(rawId) != o) {
@@ -273,7 +273,7 @@ public final class RegistrySyncManager {
 			}
 
 			Object2IntMap<Identifier> registryMap = map.get(registryId);
-			Registry<?> registry = BuiltInRegistries.ROOT.method_63535(registryId);
+			Registry<?> registry = BuiltInRegistries.ROOT.get(registryId);
 
 			RegistryAttributeHolder attributeHolder = RegistryAttributeHolder.get(registry.getKey());
 
@@ -367,7 +367,7 @@ public final class RegistrySyncManager {
 
 	public static void unmap() throws RemapException {
 		for (Identifier registryId : BuiltInRegistries.ROOT.getIds()) {
-			Registry registry = BuiltInRegistries.ROOT.method_63535(registryId);
+			Registry registry = BuiltInRegistries.ROOT.get(registryId);
 
 			if (registry instanceof RemappableRegistry) {
 				((RemappableRegistry) registry).unmap(registryId.toString());

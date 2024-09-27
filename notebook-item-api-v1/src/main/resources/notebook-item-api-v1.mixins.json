@@ -7,6 +7,8 @@
     "AnvilScreenHandlerMixin",
     "BrewingStandBlockEntityMixin",
     "BuiltInRegistriesMixin",
+    "DataComponentMapBuilderMixin",
+    "EnchantmentBuilderAccessor",
     "EnchantCommandMixin",
     "EnchantmentHelperMixin",
     "EnchantRandomlyLootFunctionMixin",
@@ -15,7 +17,8 @@
     "ItemSettingsMixin",
     "ItemStackMixin",
     "LivingEntityMixin",
-    "RecipeMixin"
+    "RecipeMixin",
+    "RegistryLoaderMixin"
   ],
   "injectors": {
     "defaultRequire": 1
