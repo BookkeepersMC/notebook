@@ -23,7 +23,9 @@
 package com.bookkeepersmc.notebook.mixin.client.rendering;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
+import com.mojang.blaze3d.framegraph.FramePass;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import org.joml.Matrix4f;
@@ -47,6 +49,7 @@ import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.WorldFramebuffers;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
@@ -68,6 +71,9 @@ public abstract class WorldRendererMixin {
 	@Final
 	@Shadow
 	private Minecraft client;
+	@Shadow
+	@Final
+	private WorldFramebuffers framebuffers;
 	@Unique private final WorldRenderContextImpl context = new WorldRenderContextImpl();
 
 	@Inject(method = "render", at = @At("HEAD"))
@@ -121,7 +127,7 @@ public abstract class WorldRendererMixin {
 
 	@SuppressWarnings("ConstantConditions")
 	@Inject(method = "drawBlockOutline", at = @At("HEAD"), cancellable = true)
-	private void onDrawBlockOutline(MatrixStack matrixStack, VertexConsumer vertexConsumer, Entity entity, double cameraX, double cameraY, double cameraZ, BlockPos blockPos, BlockState blockState, CallbackInfo ci) {
+	private void onDrawBlockOutline(MatrixStack matrixStack, VertexConsumer vertexConsumer, Entity entity, double cameraX, double cameraY, double cameraZ, BlockPos blockPos, BlockState blockState, int i, CallbackInfo ci) {
 		if (!context.renderBlockOutline) {
 			// Was cancelled before we got here, so do not
 			// fire the BLOCK_OUTLINE event per contract of the API.
@@ -156,8 +162,9 @@ public abstract class WorldRendererMixin {
 	}
 
 	@Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/GameOptions;getCloudRenderMode()Lnet/minecraft/client/option/CloudRenderMode;"))
-	private void beforeClouds(CallbackInfo ci) {
-		WorldRenderEvents.AFTER_TRANSLUCENT.invoker().afterTranslucent(context);
+	private void beforeClouds(CallbackInfo ci, @Local FrameGraphBuilder frameGraphBuilder) {
+		FramePass afterTranslucentPass = frameGraphBuilder.addPass("afterTranslucent");
+		framebuffers.main = afterTranslucentPass.readsAndWrites(framebuffers.main);
 	}
 
 	@Inject(method = "method_62214", at = @At("RETURN"))

@@ -46,6 +46,7 @@ import net.minecraft.recipe.Recipe;
 import net.minecraft.registry.HolderLookup;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryOps;
+import net.minecraft.registry.ResourceKey;
 import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
@@ -69,9 +70,9 @@ public abstract class RecipeDataProvider extends RecipesProvider.C_ujfsvkmt {
 		Preconditions.checkArgument(conditions.length > 0, "Must add at least one condition.");
 		return new RecipeExporter() {
 			@Override
-			public void accept(Identifier identifier, Recipe<?> recipe, @Nullable AdvancementHolder advancementEntry) {
+			public void accept(ResourceKey<Recipe<?>> key, Recipe<?> recipe, @Nullable AdvancementHolder advancementEntry) {
 				NotebookDatagenHelper.addConditions(recipe, conditions);
-				exporter.accept(identifier, recipe, advancementEntry);
+				exporter.accept(key, recipe, advancementEntry);
 			}
 
 			@Override
@@ -93,8 +94,8 @@ public abstract class RecipeDataProvider extends RecipesProvider.C_ujfsvkmt {
 			List<CompletableFuture<?>> list = new ArrayList<>();
 			RecipesProvider recipesProvider =  method_62766(wrapperLookup, new RecipeExporter() {
 				@Override
-				public void accept(Identifier recipeId, Recipe<?> recipe, @Nullable AdvancementHolder advancement) {
-					Identifier identifier = getRecipeIdentifier(recipeId);
+				public void accept(ResourceKey<Recipe<?>> key, Recipe<?> recipe, @Nullable AdvancementHolder advancement) {
+					Identifier identifier = getRecipeIdentifier(key.getValue());
 
 					if (!generatedRecipes.add(identifier)) {
 						throw new IllegalStateException("Duplicate recipe " + identifier);

@@ -3,7 +3,7 @@ pluginManagement {
 		gradlePluginPortal()
 		mavenCentral()
 		maven {
-			url = "https://bookkeepersmc.github.io/m2/"
+			url = "https://maven.bookkeepersmc.com/"
 		}
 
 		maven {
@@ -14,9 +14,21 @@ pluginManagement {
 
 rootProject.name = "notebook-api"
 
-include("notebook-api-base")
 include("notebook-api-bom")
 include("notebook-api-catalog")
+
+def focus = new File("focus.txt")
+
+if (focus.exists()) {
+	focus.eachLine {
+		include it
+	}
+
+	return
+}
+
+include("notebook-api-base")
+
 include("notebook-common-tags-v1")
 include("notebook-crash-details-v1")
 include("notebook-datagen-api-v1")

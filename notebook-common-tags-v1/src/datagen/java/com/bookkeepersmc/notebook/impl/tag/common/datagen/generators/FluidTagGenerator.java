@@ -44,6 +44,13 @@ public final class FluidTagGenerator extends TagDataProvider.FluidTagProvider {
 				.addOptionalTag(FluidTags.LAVA);
 		getOrCreateTagBuilder(ConventionalFluidTags.MILK);
 		getOrCreateTagBuilder(ConventionalFluidTags.HONEY);
+		getOrCreateTagBuilder(ConventionalFluidTags.GASEOUS);
+		getOrCreateTagBuilder(ConventionalFluidTags.EXPERIENCE);
+		getOrCreateTagBuilder(ConventionalFluidTags.POTION);
+		getOrCreateTagBuilder(ConventionalFluidTags.SUSPICIOUS_STEW);
+		getOrCreateTagBuilder(ConventionalFluidTags.MUSHROOM_STEW);
+		getOrCreateTagBuilder(ConventionalFluidTags.RABBIT_STEW);
+		getOrCreateTagBuilder(ConventionalFluidTags.BEETROOT_SOUP);
 		getOrCreateTagBuilder(ConventionalFluidTags.HIDDEN_FROM_RECIPE_VIEWERS);
 	}
 }

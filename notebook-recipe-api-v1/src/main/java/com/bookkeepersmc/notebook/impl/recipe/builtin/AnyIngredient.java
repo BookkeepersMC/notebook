@@ -60,11 +60,11 @@ public class AnyIngredient extends CombinedIngredient {
 	}
 
 	@Override
-	public List<Holder<Item>> getMatchingStacks() {
+	public List<Holder<Item>> getItems() {
 		List<Holder<Item>> previewStacks = new ArrayList<>();
 
 		for (Ingredient ingredient : ingredients) {
-			previewStacks.addAll(ingredient.method_8105());
+			previewStacks.addAll(ingredient.getItems());
 		}
 
 		return previewStacks;

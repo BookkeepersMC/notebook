@@ -90,7 +90,7 @@ public interface ItemExtensions {
 	 * @return the leftover item stack
 	 */
 	default ItemStack getRecipeRemainder(ItemStack stack) {
-		return ((Item) this).hasRecipeRemainder() ? ((Item) this).getRecipeRemainder().getDefaultStack() : ItemStack.EMPTY;
+		return ((Item) this).getRecipeRemainder();
 	}
 
 	/**

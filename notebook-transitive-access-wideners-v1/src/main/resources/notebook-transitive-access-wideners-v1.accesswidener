@@ -171,6 +171,7 @@ transitive-accessible field net/minecraft/client/render/RenderPhase CUTOUT_SHADE
 transitive-accessible field net/minecraft/client/render/RenderPhase TRANSLUCENT_SHADER Lnet/minecraft/client/render/RenderPhase$Shader;
 transitive-accessible field net/minecraft/client/render/RenderPhase TRANSLUCENT_MOVING_BLOCK_SHADER Lnet/minecraft/client/render/RenderPhase$Shader;
 transitive-accessible field net/minecraft/client/render/RenderPhase ARMOR_CUTOUT_NO_CULL_SHADER Lnet/minecraft/client/render/RenderPhase$Shader;
+transitive-accessible field net/minecraft/client/render/RenderPhase field_54961 Lnet/minecraft/client/render/RenderPhase$Shader;
 transitive-accessible field net/minecraft/client/render/RenderPhase ENTITY_SOLID_SHADER Lnet/minecraft/client/render/RenderPhase$Shader;
 transitive-accessible field net/minecraft/client/render/RenderPhase ENTITY_CUTOUT_SHADER Lnet/minecraft/client/render/RenderPhase$Shader;
 transitive-accessible field net/minecraft/client/render/RenderPhase ENTITY_CUTOUT_NONNULL_SHADER Lnet/minecraft/client/render/RenderPhase$Shader;

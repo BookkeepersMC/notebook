@@ -36,13 +36,14 @@ import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.screen.ForgingScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.screen.slot.ItemCombinationSlotManager;
 
 import com.bookkeepersmc.notebook.api.item.v1.EnchantingContext;
 
 @Mixin(AnvilScreenHandler.class)
 abstract class AnvilScreenHandlerMixin extends ForgingScreenHandler {
-	public AnvilScreenHandlerMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
-		super(type, syncId, playerInventory, context);
+	public AnvilScreenHandlerMixin(@Nullable ScreenHandlerType<?> type, int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, ItemCombinationSlotManager manager) {
+		super(type, syncId, playerInventory, context, manager);
 	}
 
 	@Redirect(

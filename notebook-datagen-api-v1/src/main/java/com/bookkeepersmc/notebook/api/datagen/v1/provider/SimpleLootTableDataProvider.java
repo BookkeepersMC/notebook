@@ -26,9 +26,9 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import net.minecraft.data.DataWriter;
-import net.minecraft.loot.context.LootContextType;
 import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.registry.HolderLookup;
+import net.minecraft.util.context.ContextKeySet;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 import com.bookkeepersmc.notebook.impl.datagen.loot.NotebookLootTableProviderImpl;
@@ -36,21 +36,21 @@ import com.bookkeepersmc.notebook.impl.datagen.loot.NotebookLootTableProviderImp
 public abstract class SimpleLootTableDataProvider implements LootTableDataProvider {
 	protected final NotebookDataOutput output;
 	private final CompletableFuture<HolderLookup.Provider> registryLookup;
-	protected final LootContextType lootContextType;
+	protected final ContextKeySet contextKeySet;
 
-	public SimpleLootTableDataProvider(NotebookDataOutput output, CompletableFuture<HolderLookup.Provider> registryLookup, LootContextType lootContextType) {
+	public SimpleLootTableDataProvider(NotebookDataOutput output, CompletableFuture<HolderLookup.Provider> registryLookup, ContextKeySet contextKeySet) {
 		this.output = output;
 		this.registryLookup = registryLookup;
-		this.lootContextType = lootContextType;
+		this.contextKeySet = contextKeySet;
 	}
 
 	@Override
 	public CompletableFuture<?> run(DataWriter writer) {
-		return NotebookLootTableProviderImpl.run(writer, this, lootContextType, output, registryLookup);
+		return NotebookLootTableProviderImpl.run(writer, this, contextKeySet, output, registryLookup);
 	}
 
 	@Override
 	public String getDescription() {
-		return Objects.requireNonNull(LootContextTypes.MAP.inverse().get(lootContextType), "Could not get id for loot context type") + " Loot Table";
+		return Objects.requireNonNull(LootContextTypes.MAP.inverse().get(contextKeySet), "Could not get id for loot context type") + " Loot Table";
 	}
 }

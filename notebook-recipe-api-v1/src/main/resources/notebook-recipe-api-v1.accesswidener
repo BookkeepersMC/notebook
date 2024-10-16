@@ -1,6 +1,8 @@
 accessWidener	v2	named
 extendable	class	net/minecraft/recipe/Ingredient
 accessible	method	net/minecraft/recipe/Ingredient	<init>	(Lnet/minecraft/registry/HolderSet;)V
-accessible	field	net/minecraft/recipe/Ingredient	field_9018	Ljava/util/List;
+accessible	field	net/minecraft/recipe/Ingredient	items	Ljava/util/List;
+accessible  method  net/minecraft/recipe/Ingredient createSingleItemDisplay (Lnet/minecraft/registry/Holder;)Lnet/minecraft/recipe/display/SlotDisplay;
+
 accessible	field	net/minecraft/network/ClientConnection	channel	Lio/netty/channel/Channel;
 accessible	field	net/minecraft/server/network/ServerLoginNetworkHandler	connection	Lnet/minecraft/network/ClientConnection;

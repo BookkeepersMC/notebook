@@ -37,11 +37,11 @@ import com.mojang.serialization.JsonOps;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.DataWriter;
 import net.minecraft.loot.LootTable;
-import net.minecraft.loot.context.LootContextType;
 import net.minecraft.registry.HolderLookup;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryOps;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.context.ContextKeySet;
 
 import com.bookkeepersmc.notebook.api.datagen.v1.NotebookDataOutput;
 import com.bookkeepersmc.notebook.api.datagen.v1.provider.LootTableDataProvider;
@@ -52,7 +52,7 @@ public final class NotebookLootTableProviderImpl {
 	public static CompletableFuture<?> run(
 			DataWriter writer,
 			LootTableDataProvider provider,
-			LootContextType lootContextType,
+			ContextKeySet contextKeySet,
 			NotebookDataOutput dataOutput,
 			CompletableFuture<HolderLookup.Provider> registryLookup) {
 		HashMap<Identifier, LootTable> builders = Maps.newHashMap();
@@ -63,7 +63,7 @@ public final class NotebookLootTableProviderImpl {
 				ResourceCondition[] conditions = NotebookDatagenHelper.consumeConditions(builder);
 				conditionMap.put(registryKey.getValue(), conditions);
 
-				if (builders.put(registryKey.getValue(), builder.type(lootContextType).build()) != null) {
+				if (builders.put(registryKey.getValue(), builder.type(contextKeySet).build()) != null) {
 					throw new IllegalStateException("Duplicate loot table " + registryKey.getValue());
 				}
 			});

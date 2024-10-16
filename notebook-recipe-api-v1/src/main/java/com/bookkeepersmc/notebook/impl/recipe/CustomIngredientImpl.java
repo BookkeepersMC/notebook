@@ -36,6 +36,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.display.SlotDisplay;
 import net.minecraft.registry.Holder;
 import net.minecraft.registry.HolderSet;
 import net.minecraft.util.Identifier;
@@ -91,16 +92,21 @@ public class CustomIngredientImpl extends Ingredient {
 	}
 
 	@Override
-	public List<Holder<Item>> method_8105() {
-		if (this.field_9018 == null) {
-			this.field_9018 = customIngredient.getMatchingStacks();
+	public List<Holder<Item>> getItems() {
+		if (this.items == null) {
+			this.items = customIngredient.getItems();
 		}
 
-		return this.field_9018;
+		return this.items;
 	}
 
 	@Override
 	public boolean test(@Nullable ItemStack stack) {
 		return stack != null && customIngredient.test(stack);
+	}
+
+	@Override
+	public SlotDisplay getSlotDisplay() {
+		return customIngredient.getSlotDisplay();
 	}
 }

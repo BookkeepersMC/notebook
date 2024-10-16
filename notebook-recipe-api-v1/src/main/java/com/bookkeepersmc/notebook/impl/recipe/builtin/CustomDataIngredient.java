@@ -37,6 +37,7 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.display.SlotDisplay;
 import net.minecraft.registry.Holder;
 import net.minecraft.util.Identifier;
 
@@ -65,14 +66,21 @@ public class CustomDataIngredient implements CustomIngredient {
 	}
 
 	@Override
-	public List<Holder<Item>> getMatchingStacks() {
-		return base.method_8105().stream()
-				.filter(registryEntry -> {
-					ItemStack itemStack = registryEntry.getValue().getDefaultStack();
-					itemStack.apply(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT, existingNbt -> NbtComponent.of(existingNbt.copy().copyFrom(nbt)));
-					return base.test(itemStack);
-				})
-				.toList();
+	public List<Holder<Item>> getItems() {
+		return base.getItems();
+	}
+
+	@Override
+	public SlotDisplay getSlotDisplay() {
+		return new SlotDisplay.CompositeSlotDisplay(
+				base.getItems().stream().map(this::createEntryDisplay).toList()
+		);
+	}
+
+	private SlotDisplay createEntryDisplay(Holder<Item> entry) {
+		ItemStack stack = entry.getValue().getDefaultStack();
+		stack.apply(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT, existingNbt -> NbtComponent.of(existingNbt.copy().copyFrom(nbt)));
+		return new SlotDisplay.StackSlotDisplay(stack);
 	}
 
 	@Override

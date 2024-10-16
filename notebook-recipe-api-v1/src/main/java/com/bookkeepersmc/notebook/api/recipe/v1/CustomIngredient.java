@@ -29,7 +29,9 @@ import org.jetbrains.annotations.ApiStatus;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.display.SlotDisplay;
 import net.minecraft.registry.Holder;
+import net.minecraft.registry.HolderSet;
 
 import com.bookkeepersmc.notebook.impl.recipe.CustomIngredientImpl;
 
@@ -37,7 +39,7 @@ public interface CustomIngredient {
 
 	boolean test(ItemStack stack);
 
-	List<Holder<Item>> getMatchingStacks();
+	List<Holder<Item>> getItems();
 
 	boolean requiresTesting();
 
@@ -46,5 +48,19 @@ public interface CustomIngredient {
 	@ApiStatus.NonExtendable
 	default Ingredient toVanilla() {
 		return new CustomIngredientImpl(this);
+	}
+
+	/**
+	 * Returns a {@link SlotDisplay} representing this ingredient, this is synced to the client to display in the recipe book.
+	 *
+	 * @return a {@link SlotDisplay} instance.
+	 */
+	default SlotDisplay getSlotDisplay() {
+		return HolderSet.createDirect(getItems()).getTagOrContents().map(
+				SlotDisplay.TagSlotDisplay::new,
+				(itemEntries) -> new SlotDisplay.CompositeSlotDisplay(
+						itemEntries.stream().map(Ingredient::createSingleItemDisplay).toList()
+				)
+		);
 	}
 }

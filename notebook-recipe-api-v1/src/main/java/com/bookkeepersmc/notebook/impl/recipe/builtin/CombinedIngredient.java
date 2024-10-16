@@ -31,6 +31,7 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.display.SlotDisplay;
 import net.minecraft.util.Identifier;
 
 import com.bookkeepersmc.notebook.api.recipe.v1.CustomIngredient;
@@ -63,6 +64,13 @@ abstract class CombinedIngredient implements CustomIngredient {
 
 	List<Ingredient> getIngredients() {
 		return ingredients;
+	}
+
+	@Override
+	public SlotDisplay getSlotDisplay() {
+		return new SlotDisplay.CompositeSlotDisplay(
+				ingredients.stream().map(Ingredient::getSlotDisplay).toList()
+		);
 	}
 
 	static class Serializer<I extends CombinedIngredient> implements CustomIngredientSerializer<I> {

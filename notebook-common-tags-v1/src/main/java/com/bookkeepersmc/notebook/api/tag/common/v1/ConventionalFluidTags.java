@@ -43,6 +43,40 @@ public final class ConventionalFluidTags {
 	public static final TagKey<Fluid> MILK = register("milk");
 	public static final TagKey<Fluid> HONEY = register("honey");
 	/**
+	 * Holds all fluids that are gaseous at room temperature.
+	 */
+	public static final TagKey<Fluid> GASEOUS = register("gaseous");
+	/**
+	 * Holds all fluids related to experience.
+	 *
+	 * <p>(Standard unit for experience is 810 droplet per 1 experience. However, extraction from Bottle o' Enchanting should yield 27000 droplets while smashing yields less)
+	 */
+	public static final TagKey<Fluid> EXPERIENCE = register("experience");
+	/**
+	 * Holds all fluids related to potions. The effects of the potion fluid should be read from Data Components.
+	 * The effects and color of the potion fluid should be read from {@link net.minecraft.component.DataComponentTypes#POTION_CONTENTS}
+	 * component that people should be attaching to the FluidVariant of this fluid.
+	 */
+	public static final TagKey<Fluid> POTION = register("potion");
+	/**
+	 * Holds all fluids related to Suspicious Stew.
+	 * The effects of the suspicious stew fluid should be read from {@link net.minecraft.component.DataComponentTypes#SUSPICIOUS_STEW_EFFECTS}
+	 * component that people should be attaching to the FluidVariant of this fluid.
+	 */
+	public static final TagKey<Fluid> SUSPICIOUS_STEW = register("suspicious_stew");
+	/**
+	 * Holds all fluids related to Mushroom Stew.
+	 */
+	public static final TagKey<Fluid> MUSHROOM_STEW = register("mushroom_stew");
+	/**
+	 * Holds all fluids related to Rabbit Stew.
+	 */
+	public static final TagKey<Fluid> RABBIT_STEW = register("rabbit_stew");
+	/**
+	 * Holds all fluids related to Beetroot Soup.
+	 */
+	public static final TagKey<Fluid> BEETROOT_SOUP = register("beetroot_soup");
+	/**
 	 * Tag that holds all fluids that recipe viewers should not show to users.
 	 */
 	public static final TagKey<Fluid> HIDDEN_FROM_RECIPE_VIEWERS = register("hidden_from_recipe_viewers");
